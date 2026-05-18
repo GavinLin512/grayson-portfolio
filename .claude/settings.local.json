@@ -1,0 +1,9 @@
+{
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "code-review-graph"
+  ],
+  "enabledPlugins": {
+    "andrej-karpathy-skills@karpathy-skills": true
+  }
+}
