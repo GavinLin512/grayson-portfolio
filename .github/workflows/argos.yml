@@ -1,12 +1,8 @@
 name: Argos CI
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
+    types: [labeled]
 
 permissions:
   contents: read
@@ -14,6 +10,7 @@ permissions:
 
 jobs:
   argos:
+    if: contains(github.event.pull_request.labels.*.name, 'run-argos-ci')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
