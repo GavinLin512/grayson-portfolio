@@ -1,0 +1,19 @@
+:root {
+  --bg:    #efe6d4;
+  --paper: #f8f4ec;
+  --ink:   #1f1b17;
+  --ink2:  #7a7068;
+  --line:  #d0c4b0;
+  --cool:  #4a7a94;
+  --warm:  #c06040;
+}
+
+.dark {
+  --bg:    #1a1815;
+  --paper: #24211d;
+  --ink:   #e8ddd0;
+  --ink2:  #9a9088;
+  --line:  #3d3830;
+  --cool:  #6096b0;
+  --warm:  #d06848;
+}
