@@ -1,2 +1,21 @@
+# Nuxt build output
+.nuxt/
+.output/
+dist/
+
+# Cloudflare
+.wrangler/
+
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+
 # Added by code-review-graph
 .code-review-graph/
