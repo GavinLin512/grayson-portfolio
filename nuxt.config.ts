@@ -21,6 +21,9 @@ export default defineNuxtConfig({
     display: 'swap',
     preconnect: true,
   },
+  routeRules: {
+    '/': { prerender: true },
+  },
   nitro: {
     preset: 'cloudflare-pages',
   },
