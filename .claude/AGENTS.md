@@ -36,3 +36,22 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 2. Use `detect_changes` for code review.
 3. Use `get_affected_flows` to understand impact.
 4. Use `query_graph` pattern="tests_for" to check coverage.
+
+## Openspec Change 建立規則
+
+**錯誤原因**：建立新的 `openspec/changes/<name>/` 時，只看了頂層 `openspec/specs/` 的目錄，
+假設 change 只需要 `proposal.md`、`design.md`、`tasks.md` 三個檔案，
+沒有驗證現有 change 目錄的完整結構，導致遺漏了 `specs/` 子目錄。
+
+**解決方式**：建立 openspec change 前，必須先執行以下指令確認既有 change 的完整結構：
+
+```bash
+find openspec/changes/<any-existing-change> -type f | sort
+```
+
+確認所有必要檔案後再動手建立，checklist：
+
+- [ ] `proposal.md`
+- [ ] `design.md`
+- [ ] `tasks.md`
+- [ ] `specs/<affected-feature>/spec.md`（每個受影響的 feature 各一個）
