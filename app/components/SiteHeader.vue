@@ -2,7 +2,7 @@
   <header class="h-14 flex justify-between items-center px-7 border-b border-line bg-bg">
     <div class="flex items-center gap-3">
       <span class="font-mincho text-[18px] leading-none">◇</span>
-      <span class="font-mono text-[10px] opacity-60">grayson / 2026</span>
+      <span class="font-mono text-[14px] opacity-60">grayson / 2026</span>
     </div>
 
     <nav class="flex items-center gap-6">
@@ -10,7 +10,7 @@
         v-for="item in navItems"
         :key="item.path"
         :to="item.path"
-        class="font-mono text-[10px] transition-opacity pb-px"
+        class="font-mono text-[14px] transition-opacity pb-px"
         :class="isActive(item.path) ? 'opacity-100 border-b border-ink' : 'opacity-60'"
       >
         {{ item.label }}

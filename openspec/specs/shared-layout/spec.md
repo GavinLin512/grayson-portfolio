@@ -43,7 +43,7 @@ The system SHALL provide a `default` layout that renders `<SiteHeader>` at the t
 
 ### Requirement: TagChip SHALL render a pill-style tag
 
-`<TagChip>` SHALL render a slotted text element with `border: 1px solid var(--ink)`, `border-radius: 100px`, `padding: 3px 10px`, and `font-mono text-[10px]`. An `active` prop SHALL invert background (`bg-ink text-bg`).
+`<TagChip>` SHALL render a slotted text element with `border: 1px solid var(--ink)`, `border-radius: 100px`, `padding: 3px 10px`, and `font-mono text-[14px]`. An `active` prop SHALL invert background (`bg-ink text-bg`).
 
 #### Scenario: Default chip
 
@@ -63,6 +63,29 @@ The system SHALL provide a `default` layout that renders `<SiteHeader>` at the t
 
 - **WHEN** rendered without explicit size props
 - **THEN** the container is 400px wide and 460px tall, containing geometric tiles in cool and bg colors
+
+### Requirement: SiteHeader navigation text SHALL be at minimum 14px
+
+All text rendered inside `<SiteHeader>` SHALL have a computed `font-size` of 14px or larger. This includes nav links, the date label, and TagChip text. Previous implementation used `text-[10px]` which violated this constraint.
+
+#### Scenario: Nav links at 14px
+
+- **WHEN** any SiteHeader navigation link is rendered
+- **THEN** its computed `font-size` is at least 14px
+
+#### Scenario: Date label at 14px
+
+- **WHEN** the date label inside SiteHeader is rendered
+- **THEN** its computed `font-size` is at least 14px
+
+### Requirement: SiteFooter text SHALL be at minimum 14px
+
+All text rendered inside `<SiteFooter>` SHALL have a computed `font-size` of 14px or larger. Previous implementation used `text-[10px]` which violated this constraint.
+
+#### Scenario: All three footer spans at 14px
+
+- **WHEN** any page using the default layout is rendered
+- **THEN** all three child text spans inside SiteFooter have computed `font-size` of at least 14px
 
 ### Requirement: Playground page SHALL display all shared components for visual reference
 
