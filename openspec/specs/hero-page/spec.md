@@ -45,3 +45,36 @@ The `/` route SHALL be prerendered at build time via Nuxt routeRules.
 
 - **WHEN** `pnpm build` is executed
 - **THEN** `.output/public/index.html` exists with the rendered hero markup
+
+### Requirement: Hero auxiliary text SHALL be at minimum 15px
+
+All non-title text in the Hero SHALL render at 15px or larger. Exempt: the Mincho big title. This applies to the left-side paragraph, the N° date label, and the subtitle/tagline.
+
+#### Scenario: Left-side paragraph at 16px
+
+- **WHEN** the Hero is rendered at any viewport width where the left-side paragraph is visible
+- **THEN** the paragraph's computed `font-size` is 16px
+
+#### Scenario: N° date label at 15px
+
+- **WHEN** inspecting the N° date element in the Hero
+- **THEN** its computed `font-size` is at least 15px
+
+#### Scenario: Subtitle/tagline at 16px or 15px
+
+- **WHEN** the Hero subtitle or tagline is rendered
+- **THEN** its computed `font-size` is at least 15px
+
+### Requirement: Hero SHALL fill the viewport without scroll overflow
+
+The Hero SHALL occupy the space between SiteHeader and SiteFooter such that no scrollbar appears. The previous `min-h-screen` approach caused overflow and SHALL be replaced.
+
+#### Scenario: No scrollbar at 1280×800 desktop
+
+- **WHEN** the viewport is set to 1280×800
+- **THEN** the Hero fills the available height between header and footer with no vertical scrollbar
+
+#### Scenario: No scrollbar at 375×667 mobile
+
+- **WHEN** the viewport is set to 375×667
+- **THEN** the Hero fills the available height between header and footer with no vertical scrollbar
