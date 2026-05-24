@@ -18,7 +18,7 @@
 
 ## 4. Verification
 
-- [ ] 4.1 `pnpm dev`：`/projects` 在桌面寬度下，頁面與 header 背景色一致，無 scrollbar
-- [ ] 4.2 Hover 任一列：背景色從透明平滑過渡至淡色，200ms 動畫可見
-- [ ] 4.3 切換 hover 至另一列：上一列背景平滑消退，新列背景浮現
+- [x] 4.1 `pnpm dev`：`/projects` 在桌面寬度下，頁面與 header 背景色一致，無 scrollbar
+- [x] 4.2 Hover 任一列：背景色從透明平滑過渡至淡色，200ms 動畫可見
+- [x] 4.3 切換 hover 至另一列：上一列背景平滑消退，新列背景浮現
 - [x] 4.4 `pnpm build`：build 成功，無新的 warning 或 error
