@@ -1,6 +1,6 @@
 ---
-title: Field Monitor
-subtitle: Real-time IoT sensor dashboard for agricultural edge devices
+title: Field
+subtitle: "— design system"
 year: 2024
 role: Backend Lead
 team: 3 engineers
@@ -14,6 +14,7 @@ screens:
   - /images/projects/field-screen-1.jpg
   - /images/projects/field-screen-2.jpg
 date: 2024-06-01
+category: system
 ---
 
 ## Brief
