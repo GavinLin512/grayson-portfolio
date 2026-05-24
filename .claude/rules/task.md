@@ -1,6 +1,6 @@
 # Task Order
 
-`setup-project-foundation` 已完成。以下是剩餘 changes 的建議實作順序：
+`setup-project-foundation`、`add-design-tokens`、`add-phi-geometry-system`、`add-shared-layout`、`add-hero-page` 已完成（`adjust-hero-layout` 為額外新增 `[+]`）。以下是剩餘 changes 的建議實作順序：
 
 ## 依賴鏈
 
@@ -8,16 +8,17 @@
 setup-project-foundation ✓
          │
          ▼
-  add-design-tokens          字型、色票、Tailwind config
+  add-design-tokens ✓        字型、色票、Tailwind config
          │
          ▼
-  add-phi-geometry-system    PhiLines 元件、φ composable
+  add-phi-geometry-system ✓  PhiLines 元件、φ composable
          │
          ▼
-  add-shared-layout          SiteHeader / SiteFooter / TickWall
+  add-shared-layout ✓        SiteHeader / SiteFooter / TickWall
          │
          ▼
-  add-hero-page              首頁 Hero A
+  add-hero-page ✓            首頁 Hero A
+         ├── adjust-hero-layout ✓ [+]
          │
     ┌────┴──────────┐
     ▼               ▼

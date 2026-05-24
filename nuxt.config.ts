@@ -5,6 +5,7 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode',
     '@nuxtjs/google-fonts',
+    '@nuxt/content',
   ],
   css: ['~/assets/css/tokens.css'],
   colorMode: {
@@ -23,6 +24,8 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/': { prerender: true },
+    '/projects': { prerender: true },
+    '/projects/**': { prerender: true },
   },
   nitro: {
     preset: 'cloudflare-pages',
