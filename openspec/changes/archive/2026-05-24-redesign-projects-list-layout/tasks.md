@@ -47,9 +47,9 @@
 
 ## 7. Verification
 
-- [ ] 7.1 `pnpm dev`：`/projects` 顯示 6 列、5 欄結構、header 左側顯示 `· 6 selected`
-- [ ] 7.2 Hover 任一列：右側 preview panel 即時切換，mouseleave 後 preview 保留最後 hover
-- [ ] 7.3 切換 filter（如 `product`）：list 只剩對應 category 的項目，header 計數同步更新
-- [ ] 7.4 視口寬度 < lg：preview panel 隱藏，list 滿版單欄
+- [x] 7.1 `pnpm dev`：`/projects` 顯示 6 列、5 欄結構、header 左側顯示 `· 6 selected`
+- [x] 7.2 Hover 任一列：右側 preview panel 即時切換，mouseleave 後 preview 保留最後 hover
+- [x] 7.3 切換 filter（如 `product`）：list 只剩對應 category 的項目，header 計數同步更新
+- [x] 7.4 視口寬度 < lg：preview panel 隱藏，list 滿版單欄
 - [x] 7.5 `pnpm build`：schema 驗證通過（含 `category` enum）；輸出 `/projects/index.html`
 - [x] 7.6 `/projects/01-field` 與 `/projects/02-hina` detail page 仍可正常 render（未受本 change 影響）
