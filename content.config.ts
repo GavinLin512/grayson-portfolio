@@ -15,6 +15,7 @@ export default defineContentConfig({
         cover: z.string(),
         screens: z.array(z.string()),
         date: z.string(),
+        category: z.enum(['product', 'system', 'side', 'identity']),
       }),
     }),
   },

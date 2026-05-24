@@ -1,6 +1,6 @@
 ---
 title: Hina
-subtitle: Multi-tenant SaaS platform for language learning studios
+subtitle: "— payments console"
 year: 2023
 role: Fullstack Engineer
 team: 5 engineers
@@ -14,6 +14,7 @@ screens:
   - /images/projects/hina-screen-1.jpg
   - /images/projects/hina-screen-2.jpg
 date: 2023-09-01
+category: product
 ---
 
 ## Brief
