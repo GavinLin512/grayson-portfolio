@@ -1,3 +1,6 @@
+# Nuxt Content SQLite cache
+.data/
+
 # Nuxt build output
 .nuxt/
 .output/

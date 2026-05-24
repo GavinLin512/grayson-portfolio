@@ -5,7 +5,7 @@
     />
 
     <p class="font-mono text-[15px] opacity-70 mb-[48px]">
-      — 02 / works · {{ projects.length }} projects
+      — 02 / works · {{ projects?.length ?? 0 }} projects
     </p>
 
     <div class="divide-y divide-[var(--line)]">

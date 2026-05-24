@@ -72,11 +72,13 @@
           :alt="`${post.title} screen 1`"
           class="h-[300px] w-full object-cover"
         />
-        <img
-          :src="post.screens[1]"
-          :alt="`${post.title} screen 2`"
-          class="h-[300px] w-full object-cover bg-[var(--cool)]"
-        />
+        <div class="h-[300px] bg-[var(--cool)]">
+          <img
+            :src="post.screens[1]"
+            :alt="`${post.title} screen 2`"
+            class="w-full h-full object-cover"
+          />
+        </div>
       </div>
 
       <!-- 4.8 Full markdown body -->
