@@ -87,18 +87,24 @@
       </div>
 
       <!-- 4.9 Prev / Next nav -->
-      <div class="flex justify-between border-t border-[var(--line)] pt-[32px] font-mono text-[14px]">
+      <div class="flex justify-between items-center border-t border-[var(--line)] pt-[32px] font-mono text-[14px]">
         <NuxtLink
           v-if="prevProject"
-          :to="prevProject._path"
+          :to="prevProject.path"
           class="opacity-70 hover:opacity-100 transition-opacity"
         >
           ← {{ prevProject.title }}
         </NuxtLink>
         <span v-else />
         <NuxtLink
+          to="/projects"
+          class="opacity-50 hover:opacity-100 transition-opacity text-[12px] uppercase tracking-[0.08em]"
+        >
+          all projects
+        </NuxtLink>
+        <NuxtLink
           v-if="nextProject"
-          :to="nextProject._path"
+          :to="nextProject.path"
           class="opacity-70 hover:opacity-100 transition-opacity"
         >
           {{ nextProject.title }} →
@@ -112,6 +118,13 @@
 </template>
 
 <script setup lang="ts">
+import { onBeforeRouteUpdate } from 'vue-router'
+
+// Scroll to top on route update
+onBeforeRouteUpdate(() => {
+  document.querySelector('main')?.scrollTo({ top: 0, behavior: 'instant' })
+})
+
 const route = useRoute()
 const slug = route.params.slug as string
 const path = `/projects/${slug}`
@@ -126,7 +139,7 @@ const { data: allProjects } = await useAsyncData('projects-all', () =>
 
 const index = computed(() => {
   if (!allProjects.value || !post.value) return 0
-  return allProjects.value.findIndex((p) => p._path === post.value!._path)
+  return allProjects.value.findIndex((p) => p.path === post.value!.path)
 })
 
 const prevProject = computed(() => {
