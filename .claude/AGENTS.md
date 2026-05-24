@@ -37,6 +37,14 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 3. Use `get_affected_flows` to understand impact.
 4. Use `query_graph` pattern="tests_for" to check coverage.
 
+## Rules 參考文件
+
+| 檔案 | 說明 |
+|------|------|
+| `.claude/rules/foundation.md` | 技術棧、目錄結構、build 產出、git hygiene |
+| `.claude/rules/task.md` | Change 實作順序與依賴鏈 |
+| `.claude/rules/CI.md` | Argos CI / Playwright 視覺測試流程與重命名規則 |
+
 ## Openspec Change 建立規則
 
 **錯誤原因**：建立新的 `openspec/changes/<name>/` 時，只看了頂層 `openspec/specs/` 的目錄，
