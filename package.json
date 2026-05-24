@@ -10,20 +10,27 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxt/content": "^3.14.0",
     "nuxt": "^4.4.6"
   },
   "packageManager": "pnpm@10.32.1",
   "pnpm": {
     "onlyBuiltDependencies": [
       "@parcel/watcher",
-      "esbuild"
-    ]
+      "esbuild",
+      "better-sqlite3",
+      "sharp"
+    ],
+    "overrides": {
+      "shell-quote": "^1.8.4"
+    }
   },
   "devDependencies": {
     "@argos-ci/playwright": "^7.0.0",
-    "@playwright/test": "^1.60.0",
     "@nuxtjs/color-mode": "^4.0.0",
     "@nuxtjs/google-fonts": "^3.2.0",
-    "@nuxtjs/tailwindcss": "^6.14.0"
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@playwright/test": "^1.60.0",
+    "better-sqlite3": "^12.10.0"
   }
 }
