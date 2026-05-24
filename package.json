@@ -20,7 +20,10 @@
       "esbuild",
       "better-sqlite3",
       "sharp"
-    ]
+    ],
+    "overrides": {
+      "shell-quote": "^1.8.4"
+    }
   },
   "devDependencies": {
     "@argos-ci/playwright": "^7.0.0",
