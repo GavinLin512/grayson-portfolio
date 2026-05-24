@@ -1,50 +1,70 @@
 <template>
-  <div class="relative px-[60px] py-[80px]">
-    <PhiLines
-      :lines="[{ x1: 0, y1: '38.2%', x2: '100%', y2: '18%', width: 0.55, opacity: 0.55 }]"
-    />
+  <div class="relative h-full px-[60px] pt-[40px] pb-[60px] flex flex-col">
+    <!-- Page label + rule -->
+    <div class="shrink-0">
+      <span class="font-mono text-[14px] opacity-60">— 06 / about</span>
+      <div class="border-t border-line mt-[14px]" />
+    </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-20 mt-[30px]">
-      <!-- Left Column -->
-      <div>
-        <GeoPortrait class="hidden lg:block" :width="400" :height="460" />
-        <GeoPortrait class="block lg:hidden" :width="240" :height="280" />
-        <p class="font-hand text-[20px] opacity-90 mt-3">— grayson, somewhere in taipei.</p>
+    <!-- Main grid fills remaining height -->
+    <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-20 mt-[40px] flex-1">
+      <!-- Left Column: portrait pinned top, caveat pushed to bottom -->
+      <div class="flex flex-col h-full">
+        <HatchPortrait class="hidden lg:block" :size="320" />
+        <HatchPortrait class="block lg:hidden" :size="240" />
+        <div class="flex-1" />
+        <p class="font-hand text-[20px] opacity-90">— grayson, somewhere in taipei.</p>
       </div>
 
       <!-- Right Column -->
       <div>
-        <h1 class="font-mincho text-[42px] leading-[1.15] max-w-[580px]">
+        <h1 class="font-mincho text-[42px] leading-[1.15] max-w-[680px]">
           I make interfaces that try to stay out of the way.
         </h1>
-        <div class="mt-[26px] space-y-4">
-          <p class="font-mono text-[12px] leading-[1.55] opacity-85">
-            I'm a frontend engineer who cares about the quiet parts — the spacing, the transitions, the
-            moments where a UI disappears and the work takes over. I've been building interfaces
-            professionally since 2018, mostly in Vue and TypeScript.
-          </p>
-          <p class="font-mono text-[12px] leading-[1.55] opacity-85">
-            My background is in visual communication. Before I wrote code I drew things, and that
-            instinct never left. I think in grids, ratios, and reading rhythm — which probably explains
-            why φ shows up so often in my work.
-          </p>
-          <p class="font-mono text-[12px] leading-[1.55] opacity-85">
-            I'm currently based in Taipei. I work best on small, focused teams where craft still
-            matters — places where you can argue about letter-spacing without it being a joke.
-          </p>
-          <p class="font-mono text-[12px] leading-[1.55] opacity-85">
-            This portfolio is built with Nuxt, deployed on Cloudflare Pages. The geometry is hand-coded.
-            Nothing here is a template.
-          </p>
+
+        <!-- Measure bars decoration -->
+        <div class="mt-[40px] space-y-[10px]">
+          <div class="flex gap-[6px]">
+            <div class="h-[14px] bg-ink opacity-[0.18] w-[40%]" />
+            <div class="h-[14px] bg-ink opacity-[0.18] w-[30%]" />
+            <div class="h-[14px] bg-ink opacity-[0.18] w-[20%]" />
+          </div>
+          <div class="flex gap-[6px]">
+            <div class="h-[14px] bg-ink opacity-[0.18] w-[35%]" />
+            <div class="h-[14px] bg-ink opacity-[0.18] w-[30%]" />
+          </div>
         </div>
 
-        <a
-          href="/resume.pdf"
-          download
-          class="inline-block border border-ink px-4 py-2 font-mono text-[12px] mt-12"
-        >
-          Download CV ↓
-        </a>
+        <!-- 2×2 snapshot grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-[60px] gap-y-[32px] mt-[48px]">
+          <div>
+            <div class="font-mono text-[11px] opacity-60 mb-[6px] lowercase">now</div>
+            <p class="font-mono text-[12px] leading-[1.55] opacity-85">
+              lead frontend at hina · writing a small book on grids
+            </p>
+          </div>
+          <div>
+            <div class="font-mono text-[11px] opacity-60 mb-[6px] lowercase">previously</div>
+            <p class="font-mono text-[12px] leading-[1.55] opacity-85">
+              field llc · hatch · mori · taught a tiny class on css
+            </p>
+          </div>
+          <div>
+            <div class="font-mono text-[11px] opacity-60 mb-[6px] lowercase">elsewhere</div>
+            <p class="font-mono text-[12px] leading-[1.55] opacity-85">
+              github · @grayson<br />
+              read.cv · /grayson<br />
+              email · hi@grayson.cc<br />
+              cv · <a href="/resume.pdf" download class="underline">/resume.pdf</a>
+            </p>
+          </div>
+          <div>
+            <div class="font-mono text-[11px] opacity-60 mb-[6px] lowercase">away from screens</div>
+            <p class="font-mono text-[12px] leading-[1.55] opacity-85">
+              brewing tea, walking long routes, collecting small ceramic things
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
