@@ -29,8 +29,8 @@
       <div class="overflow-y-auto">
         <NuxtLink
           v-for="(project, i) in visibleProjects"
-          :key="project._path"
-          :to="project._path"
+          :key="project.path"
+          :to="project.path"
           class="group block border-b border-[var(--line)] py-5 px-3 cursor-pointer hover:bg-[var(--paper)] transition-[background-color] duration-200 ease-in-out"
           @mouseenter="selectedProject = project"
         >
