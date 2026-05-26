@@ -1,13 +1,9 @@
 <template>
-  <div class="relative h-full px-[60px] pt-[40px] pb-[60px] flex flex-col">
-    <!-- Page label + rule -->
-    <div class="shrink-0">
-      <span class="font-mono text-[14px] opacity-60">— 06 / about</span>
-      <div class="border-t border-line mt-[14px]" />
-    </div>
+  <div class="relative h-full flex flex-col">
+    <PageHeader label="— 06 / about" />
 
     <!-- Main grid fills remaining height -->
-    <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-20 mt-[40px] flex-1">
+    <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-20 flex-1">
       <!-- Left Column: portrait pinned top, caveat pushed to bottom -->
       <div class="flex flex-col h-full">
         <HatchPortrait class="hidden lg:block" :size="320" />
@@ -69,3 +65,7 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+definePageMeta({ layout: 'content' })
+</script>

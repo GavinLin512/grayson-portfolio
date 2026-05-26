@@ -2,7 +2,7 @@
 
 ### Requirement: Projects list route SHALL display all projects
 
-The `/projects` route SHALL render projects authored as Markdown files under `content/projects/` inside a `h-full flex flex-col` container that fills the `<main>` area without triggering an outer scrollbar. The layout SHALL be a two-column split. The LEFT column (≈60%) SHALL be `overflow-y-auto` and list projects; each row SHALL show, in order: zero-padded index number, year, a serif title (`font-mincho`, ≈32px) with a single-line subtitle prefixed by `—` below it, and a single category label. The RIGHT column (≈40%) SHALL be a `preview` panel that mirrors the currently-hovered (or last-hovered) project. The page container SHALL NOT set its own background color, inheriting the layout's `--bg` token. Each row SHALL animate its background color via CSS `transition-[background-color] duration-200` when hovered, using `hover:bg-[var(--paper)]`.
+The `/projects` route SHALL render projects authored as Markdown files under `content/projects/` inside a `h-full flex flex-col` container that fills the `<main>` area without triggering an outer scrollbar. The page SHALL declare `definePageMeta({ layout: 'content' })`; padding is inherited from the `content` layout. The layout SHALL be a two-column split. The LEFT column (≈60%) SHALL be `overflow-y-auto` and list projects; each row SHALL show, in order: zero-padded index number, year, a serif title (`font-mincho`, ≈32px) with a single-line subtitle prefixed by `—` below it, and a single category label. The RIGHT column (≈40%) SHALL be a `preview` panel that mirrors the currently-hovered (or last-hovered) project. The page container SHALL NOT set its own background color, inheriting the layout's `--bg` token. Each row SHALL animate its background color via CSS `transition-[background-color] duration-200` when hovered, using `hover:bg-[var(--paper)]`.
 
 #### Scenario: Page fills viewport without outer scrollbar
 
@@ -89,7 +89,7 @@ The header of `/projects` SHALL show four filter tabs on the right: `all`, `prod
 
 ### Requirement: Projects list header SHALL count selected projects
 
-The header on the LEFT of `/projects` SHALL render `— 02 / projects · N selected` where `N` is the number of projects currently visible after filtering.
+The header of `/projects` SHALL render `<PageHeader :label="\`— 02 / projects · ${N} selected\`">` where `N` is the number of projects currently visible after filtering. Category filter buttons SHALL be placed in the PageHeader default slot (right side).
 
 #### Scenario: Header count reflects active filter
 
@@ -135,7 +135,7 @@ The `subtitle` frontmatter field of every project SHALL be a short phrase (≤ 4
 
 ### Requirement: Project detail route SHALL render the full case study
 
-The `/projects/[slug]` route SHALL render a three-column header (`grid-cols-[70px_1fr_200px]`), full-width cover image (420px tall), a `[1fr_2fr]` role/stack + brief/process section, a `[2fr_1fr]` dual-image section (with the second image's container styled `bg-[var(--cool)]`), a "Tech Decisions" section embedding a Mermaid diagram, and prev/next navigation.
+The `/projects/[slug]` route SHALL declare `definePageMeta({ layout: 'content' })`. It SHALL render a three-column header (`grid-cols-[70px_1fr_200px]`), full-width cover image (420px tall), a `[1fr_2fr]` role/stack + brief/process section, a `[2fr_1fr]` dual-image section (with the second image's container styled `bg-[var(--cool)]`), a "Tech Decisions" section embedding a Mermaid diagram, and prev/next navigation.
 
 #### Scenario: Frontmatter populates structured fields
 

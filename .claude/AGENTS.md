@@ -44,6 +44,7 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 | `.claude/rules/foundation.md` | 技術棧、目錄結構、build 產出、git hygiene |
 | `.claude/rules/task.md` | Change 實作順序與依賴鏈 |
 | `.claude/rules/CI.md` | Argos CI / Playwright 視覺測試流程與重命名規則 |
+| `.claude/rules/frontend.md` | 前端元件規範（PageHeader 等共用元件）|
 
 ## Openspec Change 建立規則
 

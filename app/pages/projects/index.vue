@@ -1,11 +1,8 @@
 <template>
-  <div class="relative h-full flex flex-col px-6 lg:px-[60px] py-[60px] overflow-hidden">
+  <div class="relative h-full flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <div class="flex items-baseline justify-between mb-[48px]">
-      <p class="font-mono text-[15px] opacity-70">
-        — 02 / projects · {{ visibleProjects.length }} selected
-      </p>
+    <PageHeader :label="`— 02 / projects · ${visibleProjects.length} selected`">
       <div class="flex gap-6 font-mono text-[13px]">
         <button
           v-for="cat in categories"
@@ -21,7 +18,7 @@
           {{ cat }}
         </button>
       </div>
-    </div>
+    </PageHeader>
 
     <!-- Two-column layout -->
     <div class="flex-1 overflow-hidden lg:grid lg:grid-cols-[3fr_2fr] lg:gap-12">
@@ -137,4 +134,6 @@ function setCategory(cat: Category) {
     selectedProject.value = visibleProjects.value[0] ?? null
   }
 }
+
+definePageMeta({ layout: 'content' })
 </script>
