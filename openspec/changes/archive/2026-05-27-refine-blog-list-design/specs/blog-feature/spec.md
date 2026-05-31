@@ -1,67 +1,4 @@
-## ADDED Requirements
-
-### Requirement: Blog list route SHALL display posts from content/blog
-
-The `/blog` route SHALL list posts authored as Markdown files under `content/blog/`, displayed in a two-column layout (`grid-cols-[1.4fr_1fr]`): main column with the post list, side column with a **single featured pinned card** and an **inline yearly archive**.
-
-#### Scenario: Posts are listed by date descending
-
-- **WHEN** the page is rendered with multiple posts in `content/blog/`
-- **THEN** posts appear sorted by frontmatter `date` field in descending order
-
-#### Scenario: Each post entry shows required metadata
-
-- **WHEN** a post entry is rendered
-- **THEN** the entry displays:
-  - a top metadata row with date formatted `YYYY · MM · DD` on the left and `{N} min` reading time on the right (mono, opacity-55)
-  - title (`font-mincho text-[24px]`)
-  - tag chip(s) and a decorative gray meter bar (`h-[6px] bg-ink/15`) in a single row, where the meter width = `min(readingTime × 30, 240)` px
-
-#### Scenario: Meter bar is decorative only
-
-- **WHEN** the meter bar is rendered
-- **THEN** it has `aria-hidden="true"` and conveys no semantic information beyond visual density
-
-### Requirement: Blog detail route SHALL render post content with TOC
-
-The `/blog/[slug]` route SHALL render a three-column layout: TOC sidebar (180px), article body (flex), also-reading sidebar (180px). The article lede SHALL use `font-mincho text-[20px] leading-[1.5]`.
-
-#### Scenario: TOC is generated from headings
-
-- **WHEN** the post body contains H2 / H3 headings
-- **THEN** the TOC sidebar lists those headings as clickable anchor links
-
-#### Scenario: TOC highlights active heading on scroll
-
-- **WHEN** the user scrolls past a section heading
-- **THEN** the corresponding TOC item gains opacity 1 while others have opacity 0.5
-
-### Requirement: Mermaid code blocks SHALL render as diagrams
-
-A fenced code block with language `mermaid` SHALL be rendered as a Mermaid diagram, not as a syntax-highlighted code listing.
-
-#### Scenario: Mermaid block becomes a diagram
-
-- **WHEN** a Markdown file contains ` ```mermaid\ngraph LR; A --> B\n``` `
-- **THEN** the rendered HTML contains an SVG diagram with two nodes connected by an arrow
-
-### Requirement: Reading time SHALL be estimated from word count
-
-The system SHALL compute reading time in minutes by dividing the post's word count by 200, rounded up to the nearest integer.
-
-#### Scenario: 6-minute post
-
-- **WHEN** a post body contains approximately 1100 words
-- **THEN** the displayed reading time is "6 min"
-
-### Requirement: RSS feed SHALL be available at /rss.xml
-
-The system SHALL serve a valid RSS 2.0 feed at `/rss.xml` containing all blog posts with title, link, pub date, and description.
-
-#### Scenario: Feed validates as RSS 2.0
-
-- **WHEN** a feed validator fetches `/rss.xml`
-- **THEN** the response is valid RSS 2.0 XML containing one `<item>` per post
+## MODIFIED Requirements
 
 ### Requirement: Tag filter SHALL be available in blog list
 
@@ -85,6 +22,30 @@ The active filter SHALL be visually distinguished by an **inverted fill** (`bg-i
 
 - **WHEN** the page first renders
 - **THEN** the "all" chip is active (inverted fill) and all posts are visible
+
+### Requirement: Blog list route SHALL display posts from content/blog
+
+The `/blog` route SHALL list posts authored as Markdown files under `content/blog/`, displayed in a two-column layout (`grid-cols-[1.4fr_1fr]`): main column with the post list, side column with a **single featured pinned card** and an **inline yearly archive**.
+
+#### Scenario: Posts are listed by date descending
+
+- **WHEN** the page is rendered with multiple posts in `content/blog/`
+- **THEN** posts appear sorted by frontmatter `date` field in descending order
+
+#### Scenario: Each post entry shows required metadata
+
+- **WHEN** a post entry is rendered
+- **THEN** the entry displays:
+  - a top metadata row with date formatted `YYYY · MM · DD` on the left and `{N} min` reading time on the right (mono, opacity-55)
+  - title (`font-mincho text-[24px]`)
+  - tag chip(s) and a decorative gray meter bar (`h-[6px] bg-ink/15`) in a single row, where the meter width = `min(readingTime × 30, 240)` px
+
+#### Scenario: Meter bar is decorative only
+
+- **WHEN** the meter bar is rendered
+- **THEN** it has `aria-hidden="true"` and conveys no semantic information beyond visual density
+
+## ADDED Requirements
 
 ### Requirement: Pinned card SHALL feature a single latest post
 
