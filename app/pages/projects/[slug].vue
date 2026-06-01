@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6 lg:px-[60px] py-[60px]">
+  <div>
     <template v-if="post">
       <!-- 4.3 Header grid -->
       <div class="grid grid-cols-[70px_1fr_200px] gap-6 items-baseline mb-[24px]">
@@ -171,4 +171,6 @@ const bodyExcerpts = computed(() => {
   }
   return excerpts
 })
+
+definePageMeta({ layout: 'content' })
 </script>

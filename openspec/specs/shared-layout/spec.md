@@ -1,5 +1,30 @@
 ## ADDED Requirements
 
+### Requirement: Content layout SHALL provide standard page padding
+
+The system SHALL provide a `content` layout (`app/layouts/content.vue`) that wraps pages with `<SiteHeader>`, a `<main>` with `px-6 lg:px-[60px] py-[60px]`, and `<SiteFooter>`. Content pages SHALL declare `definePageMeta({ layout: 'content' })` and SHALL NOT set their own padding.
+
+Full-bleed pages (e.g., Hero) SHALL continue using the `default` layout.
+
+#### Scenario: Content page inherits padding from layout
+
+- **WHEN** a page declares `definePageMeta({ layout: 'content' })`
+- **THEN** the `<main>` element provides `px-6 lg:px-[60px] py-[60px]` and the page's root div contains no padding classes
+
+### Requirement: PageHeader component SHALL be used for page labels
+
+The system SHALL provide a `<PageHeader>` component (`app/components/PageHeader.vue`) for rendering the top-of-page label and horizontal rule. Pages SHALL use this component instead of hand-coding the structure.
+
+- **label** prop: `font-mono text-[15px] opacity-70`, format `— XX / name`
+- Rule: `border-t border-line mt-[14px]`
+- Wrapper: `shrink-0 mb-[48px]`
+- Default slot: optional right-side content (e.g., filter buttons)
+
+#### Scenario: All content pages share consistent header style
+
+- **WHEN** any content page renders
+- **THEN** the top label and rule match the `PageHeader` component spec
+
 ### Requirement: Default layout SHALL wrap pages with SiteHeader and SiteFooter
 
 The system SHALL provide a `default` layout that renders `<SiteHeader>` at the top, `<slot />` in the middle, and `<SiteFooter>` at the bottom of every page using it.

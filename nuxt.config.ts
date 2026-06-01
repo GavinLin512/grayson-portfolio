@@ -24,8 +24,12 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/': { prerender: true },
+    '/about': { prerender: true },
     '/projects': { prerender: true },
     '/projects/**': { prerender: true },
+    '/blog': { prerender: true },
+    '/blog/**': { prerender: true },
+    '/skills': { prerender: true },
   },
   nitro: {
     preset: 'cloudflare-pages',
