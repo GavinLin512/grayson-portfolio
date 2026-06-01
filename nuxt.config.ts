@@ -29,6 +29,7 @@ export default defineNuxtConfig({
     '/projects/**': { prerender: true },
     '/blog': { prerender: true },
     '/blog/**': { prerender: true },
+    '/skills': { prerender: true },
   },
   nitro: {
     preset: 'cloudflare-pages',

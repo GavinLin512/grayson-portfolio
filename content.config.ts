@@ -18,6 +18,16 @@ export default defineContentConfig({
         category: z.enum(['product', 'system', 'side', 'identity']),
       }),
     }),
+    skills: defineCollection({
+      type: 'data',
+      source: 'skills.yml',
+      schema: z.object({
+        backend:  z.array(z.string()),
+        frontend: z.array(z.string()),
+        devops:   z.array(z.string()),
+        database: z.array(z.string()),
+      }),
+    }),
     blog: defineCollection({
       type: 'page',
       source: 'blog/**/*.md',

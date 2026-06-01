@@ -1,0 +1,24 @@
+backend:
+  - Go
+  - Python
+  - Node.js
+  - PostgreSQL
+  - Redis
+
+frontend:
+  - Vue 3
+  - Nuxt 3
+  - TypeScript
+  - Tailwind CSS
+
+devops:
+  - Docker
+  - GitHub Actions
+  - Cloudflare
+  - Terraform
+
+database:
+  - PostgreSQL
+  - D1
+  - Redis
+  - MongoDB
