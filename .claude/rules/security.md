@@ -2,6 +2,8 @@
 
 本文件涵蓋此專案所有資安相關規範。技術棧：Nuxt 4、Cloudflare Pages、D1（規劃中）。
 
+**自動化掃描**：CI 已整合 Bearer CLI（`.github/workflows/bearer.yml`），所有 PR 自動執行 diff 掃描，push 到 `dev`/`main` 執行完整掃描，涵蓋 critical / high / medium 層級。
+
 ---
 
 ## 1. XSS（Cross-Site Scripting）

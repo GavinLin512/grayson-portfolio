@@ -20,5 +20,8 @@ node_modules/
 # OS
 .DS_Store
 
+# Bearer CLI binary (installed locally via `bearer install`, not committed)
+bin/
+
 # Added by code-review-graph
 .code-review-graph/

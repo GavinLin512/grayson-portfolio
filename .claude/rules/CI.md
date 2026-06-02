@@ -1,4 +1,17 @@
-# CI / Argos Visual Testing
+# CI
+
+## Workflows 總覽
+
+| 檔案 | 用途 | 觸發策略 |
+|------|------|---------|
+| `.github/workflows/argos.yml` | 視覺回歸測試（Argos + Playwright） | push dev/main、或 PR 帶 `run-argos-ci` label（opt-in） |
+| `.github/workflows/bearer.yml` | 靜態安全掃描（Bearer CLI SAST） | push dev/main（完整掃描）、所有 PR（diff 掃描） |
+
+Bearer 掃描 PR 時使用 `diff: true` 只掃變更檔案；push 到 `dev`/`main` 時完整掃描。阻擋層級依 `bearer.yml` 的 `fail-on-severity`：`critical`、`high`、`medium`、`low`。
+
+---
+
+# Argos Visual Testing
 
 ## 執行流程
 
