@@ -22,10 +22,17 @@ export default defineContentConfig({
       type: 'data',
       source: 'skills.yml',
       schema: z.object({
-        backend:  z.array(z.string()),
-        frontend: z.array(z.string()),
-        devops:   z.array(z.string()),
-        database: z.array(z.string()),
+        header: z.string(),
+        categories: z.array(z.object({
+          index: z.string(),
+          label: z.string(),
+          skills: z.array(z.object({
+            name: z.string(),
+            level: z.number().min(0).max(5),
+          })),
+        })),
+        currentlyLearning: z.string(),
+        notInterested: z.string(),
       }),
     }),
     blog: defineCollection({
