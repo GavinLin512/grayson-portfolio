@@ -21,12 +21,15 @@ Argos CI 本身不指定測試檔案，由 Playwright 負責掃描並執行：
 
 git flow 是 `feature → dev → main`，全部走 PR。`argos.yml` 觸發規則：
 
+設計目標：**opt-in（只有畫面相關的 PR 才手動加 `run-argos-ci` label 才跑），且剛好跑一次。**
+
 ```yaml
 on:
   push:
     branches: [dev, main]              # 合併進整合/正式分支 → 更新 baseline
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    # 不含 opened：避免「開 PR 帶 label」時 opened 與 labeled 重疊成兩個 run
+    types: [synchronize, reopened, labeled]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -36,14 +39,31 @@ jobs:
   argos:
     if: >-
       github.event_name == 'push' ||
-      contains(github.event.pull_request.labels.*.name, 'run-argos-ci')
+      (github.event.action == 'labeled' && github.event.label.name == 'run-argos-ci') ||
+      (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run-argos-ci'))
 ```
 
 | 事件 | 行為 |
 |------|------|
 | push 到 `dev` / `main` | 一律跑，產生新 baseline build |
-| PR（任意 base）帶 `run-argos-ci` label | 跑視覺比對 |
-| PR 無 label | job skipped |
+| 開 PR 時就掛 `run-argos-ci` | `labeled:run-argos-ci` 跑一次（`opened` 不觸發） |
+| 事後才補 `run-argos-ci` | 補 label 當下跑一次 |
+| 加其他 label（如 `enhancement`） | skip |
+| 已 label 的 PR 再 push commit | `synchronize` 跑一次 |
+| 沒掛 label 的 PR | 不跑（opt-in） |
+
+### 為什麼「剛好一次」而非靠 concurrency 取消
+
+`labeled` 觸發類型會「每加一個 label 觸發一次」。若同時保留 `opened` + 多個 label，
+開 PR 當下會產生 `opened` + `labeled`×N 個 run，再靠 concurrency 取消多餘的——
+症狀就是「Canceling since a higher priority waiting request ... exists」。
+
+根本解法：**拿掉 `opened`**（帶 label 開 PR 時 GitHub 必發 `labeled`，故以它當啟動點），
+並用 `github.event.action == 'labeled' && github.event.label.name == 'run-argos-ci'`
+讓 labeled 事件**只認指定 label**。如此正常流程不會再產生需要被取消的重複 run。
+
+> 另一種大公司常見做法是用 `paths:` 過濾（只有 `app/**`、`*.vue`、`*.css` 等 UI 檔案變動才跑），
+> 自動判斷是否畫面相關、免人工掛 label。本專案採人工 label 以保留每個 PR 的明確控制權。
 
 ### 為什麼三分支內容必須一致
 

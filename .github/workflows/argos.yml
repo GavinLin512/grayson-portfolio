@@ -6,7 +6,9 @@ on:
       - dev
       - main
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    # 不含 opened：避免「開 PR 帶 label」時 opened 與 labeled 重疊成兩個 run。
+    # 帶 label 開 PR 時 GitHub 必發 labeled 事件，故以 labeled 當啟動點即可。
+    types: [synchronize, reopened, labeled]
 
 permissions:
   contents: read
@@ -20,10 +22,13 @@ concurrency:
 
 jobs:
   argos:
-    # push 到 dev/main 一律跑（更新 baseline）；PR 只有帶 run-argos-ci label 才跑
+    # push 到 dev/main 一律跑（更新 baseline）。
+    # PR：labeled 事件只認 run-argos-ci（加其他 label 不觸發）；
+    #     synchronize/reopened 則看 PR 當下是否已有 run-argos-ci label。
     if: >-
       github.event_name == 'push' ||
-      contains(github.event.pull_request.labels.*.name, 'run-argos-ci')
+      (github.event.action == 'labeled' && github.event.label.name == 'run-argos-ci') ||
+      (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run-argos-ci'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
