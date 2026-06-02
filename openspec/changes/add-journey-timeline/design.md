@@ -17,7 +17,11 @@ The journey page narrates career history on its own URL, separated from About. V
 ## Decisions
 
 - **YAML data source over Markdown**: Same rationale as `add-skills-page` — typed shape, easy edits
-- **Sidebar year list shows year + count**: e.g., "2024 (3 events)". Helps the visitor gauge depth at each year
+- **`content` layout (not `default`)**: Screenshot reference shows PageHeader + standard padding, consistent with about / skills pages
+- **Inline year per entry (not 180px sidebar)**: Screenshot shows year label inline with each timeline entry; no separate sidebar navigation panel
+- **`yearEnd` optional field**: Year ranges like `2024 → 25` are stored as `year: 2024, yearEnd: 25`; display formatted as `{year} → {2-digit end}`
+- **Right column: résumé CV card**: Screenshot shows a static PDF card on the right half; not in original spec but added for visual completeness
+- **φ spine at left edge of timeline column**: Positioned at `left: 8px` of the timeline div (not `38.2%` of page width as originally spec'd); matches screenshot
 - **`scroll-behavior: smooth` CSS**: Native browser API, no JS library
 
 ## Risks / Trade-offs

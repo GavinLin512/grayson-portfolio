@@ -4,12 +4,12 @@ Career Journey 獨立路由承擔職涯時序（與 About 頁的個人介紹分�
 
 ## What Changes
 
-- 建立 `content/timeline.yml`：陣列每筆含 `year / company / role / description / tags`
-- 新增 `app/pages/journey.vue` 使用 `default` layout
-- 左 sidebar（`w-[180px]`）：年份索引列表 + 總數
-- 中央垂直 φ 主軸：`x=38.2%`、`height:100%`、`border-l 1px ink`
-- 右主欄：v-for 事件，每筆 year label → `<h3 class="font-mincho">{company} · {role}</h3>` → `<p class="font-mono">{description}</p>` → chips
-- sidebar 年份點擊滾動到對應事件（`scroll-behavior: smooth`）
+- 建立 `content/timeline.yml`：每筆含 `year / yearEnd? / company / role / description / tags`
+- 新增 `app/pages/journey.vue` 使用 `content` layout（同 about / skills）
+- 左欄：垂直時間軸，年份 inline 顯示於各 entry（格式 `2024 → 25`），左側 φ spine（`border-l`）
+- 右欄：résumé · cv 卡片（靜態，含 PDF 下載與 preview 按鈕）
+- `scroll-behavior: smooth` 加入全域 `html` CSS
+- 各 entry 有 `id="year-{year}"` 供 anchor 連結
 
 ## Capabilities
 
