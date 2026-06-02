@@ -1,24 +1,38 @@
-backend:
-  - Go
-  - Python
-  - Node.js
-  - PostgreSQL
-  - Redis
+header: what i carry in the toolbox
 
-frontend:
-  - Vue 3
-  - Nuxt 3
-  - TypeScript
-  - Tailwind CSS
+categories:
+  - index: "01"
+    label: languages
+    skills:
+      - { name: typescript, level: 5 }
+      - { name: go,         level: 4 }
+      - { name: python,     level: 5 }
+      - { name: css,        level: 4 }
+      - { name: sql,        level: 5 }
+  - index: "02"
+    label: frameworks
+    skills:
+      - { name: react,    level: 5 }
+      - { name: next.js,  level: 4 }
+      - { name: svelte,   level: 5 }
+      - { name: fastify,  level: 4 }
+      - { name: tailwind, level: 5 }
+  - index: "03"
+    label: craft
+    skills:
+      - { name: design systems, level: 5 }
+      - { name: motion,         level: 4 }
+      - { name: a11y,           level: 5 }
+      - { name: data viz,       level: 4 }
+      - { name: type,           level: 5 }
+  - index: "04"
+    label: tools
+    skills:
+      - { name: figma,     level: 5 }
+      - { name: linear,    level: 4 }
+      - { name: vercel,    level: 5 }
+      - { name: sentry,    level: 4 }
+      - { name: plausible, level: 5 }
 
-devops:
-  - Docker
-  - GitHub Actions
-  - Cloudflare
-  - Terraform
-
-database:
-  - PostgreSQL
-  - D1
-  - Redis
-  - MongoDB
+currentlyLearning: "rust · webgpu · WAI-ARIA practices '26"
+notInterested: "moving fast and breaking things."

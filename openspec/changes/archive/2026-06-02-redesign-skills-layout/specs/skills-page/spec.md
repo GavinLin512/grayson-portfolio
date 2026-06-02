@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Skills route SHALL render a 4-column grid
 
@@ -56,6 +56,8 @@ The page SHALL read its data from `content/skills.yml` via `queryCollection('ski
 - **WHEN** a skill declares `level: 7`
 - **THEN** `pnpm build` SHALL fail with a schema validation error
 
+## ADDED Requirements
+
 ### Requirement: Each skill SHALL display a 5-cell proficiency meter
 
 Each skill row SHALL render a meter of 5 fixed cells via a `SkillMeter` component. The first `level` cells SHALL be filled (`bg-ink`) and the remaining cells SHALL be empty/outlined (`border border-ink`). The meter SHALL carry an accessible label describing the level.
@@ -78,3 +80,11 @@ Below the category grid the page SHALL render two annotation blocks in handwriti
 
 - **WHEN** `currentlyLearning` is `rust · webgpu · WAI-ARIA practices '26` and `notInterested` is `moving fast and breaking things.`
 - **THEN** the page shows a `currently learning` note with the first string and a `not interested in` note with the second, both in handwriting font
+
+## REMOVED Requirements
+
+### Requirement: Each category column SHALL show category label, chip cluster, and Caveat note
+
+**Reason**: Replaced by numbered-label + skill-row-list (with proficiency meters) and the two shared annotation blocks. Per-column chip clusters and per-column Caveat notes no longer match the design.
+
+**Migration**: `content/skills.yml` migrates from 4 string arrays to the `categories` shape; `app/pages/skills.vue` stops using `<TagChip>` and per-column `caveat` strings.
