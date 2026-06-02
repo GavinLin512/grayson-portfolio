@@ -6,29 +6,49 @@ on:
       - dev
       - main
   pull_request:
-    # 不含 opened：避免「開 PR 帶 label」時 opened 與 labeled 重疊成兩個 run。
-    # 帶 label 開 PR 時 GitHub 必發 labeled 事件，故以 labeled 當啟動點即可。
-    types: [synchronize, reopened, labeled]
+    types: [opened, synchronize, reopened, labeled]
 
 permissions:
   contents: read
   id-token: write # Required for Argos CI GitHub OIDC authentication
 
-# 同一條來源分支（含同一 commit 同時掛在 dev/main 兩個 PR 的情況）只保留最新一個 run，
-# 解決同秒重複觸發。head_ref 在 PR 事件為來源分支名；push 事件為空時 fallback 到 ref。
+# 單純以來源分支去重即可。是否要跑由 decide job 依「PR 當下完整狀態」判斷，
+# 與觸發事件無關，故多 label 同時掛上也不會有順序問題。
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # 混合式 gate：push / UI 檔變動 / run-argos-ci label 任一成立才跑 Argos
+  decide:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # diff 需要 base/head 歷史
+      - id: gate
+        run: |
+          # push 到 dev/main，或 PR 帶 run-argos-ci label → 直接跑
+          if [ "${{ github.event_name }}" = "push" ] \
+             || [ "${{ contains(github.event.pull_request.labels.*.name, 'run-argos-ci') }}" = "true" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # 否則看是否有 UI 相關檔案變動
+          changed=$(git diff --name-only \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}")
+          if echo "$changed" | grep -qE \
+             '^(app/|content/|public/|tests/)|\.(vue|css)$|^(content|nuxt|tailwind|playwright)\.config\.ts$'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
   argos:
-    # push 到 dev/main 一律跑（更新 baseline）。
-    # PR：labeled 事件只認 run-argos-ci（加其他 label 不觸發）；
-    #     synchronize/reopened 則看 PR 當下是否已有 run-argos-ci label。
-    if: >-
-      github.event_name == 'push' ||
-      (github.event.action == 'labeled' && github.event.label.name == 'run-argos-ci') ||
-      (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run-argos-ci'))
+    needs: decide
+    if: needs.decide.outputs.run == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

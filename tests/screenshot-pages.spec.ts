@@ -11,7 +11,8 @@ const pages = [
   { name: "project-detail", path: "/projects/01-field" },
   { name: "blog", path: "/blog" },
   { name: "blog-detail", path: "/blog/2026-04-12-on-grids-that-fail-gracefully" },
-  { name: "skills", path: "/skills" }
+  { name: "skills", path: "/skills" },
+  { name: "journey", path: "/journey" }
 ];
 
 for (const { name, path } of pages) {
