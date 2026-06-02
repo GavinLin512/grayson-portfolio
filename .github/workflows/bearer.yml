@@ -1,0 +1,28 @@
+name: Bearer Security Scan
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run Bearer security scan
+        uses: bearer/bearer-action@v2
+        with:
+          config-file: bearer.yml
+          diff: ${{ github.event_name == 'pull_request' }}
+          # bearer.yml 的 exit-code: -1（本地不 crash）在此覆蓋為 1，
+          # 確保發現 low 以上問題時 step 失敗並阻擋 PR（依 bearer.yml fail-on-severity）。
+          exit-code: "1"

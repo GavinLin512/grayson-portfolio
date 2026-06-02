@@ -1,14 +1,6 @@
 import { queryCollection } from '@nuxt/content/server'
 import { defineEventHandler, setHeader } from 'h3'
-
-function escapeXml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;')
-}
+import { encodeXML } from 'entities'
 
 export default defineEventHandler(async (event) => {
   setHeader(event, 'Content-Type', 'application/xml; charset=utf-8')
@@ -21,11 +13,11 @@ export default defineEventHandler(async (event) => {
     .map((post) => {
       const slug = post.path.split('/').pop() ?? ''
       return `    <item>
-      <title>${escapeXml(post.title)}</title>
-      <link>${siteUrl}/blog/${escapeXml(slug)}</link>
-      <guid>${siteUrl}/blog/${escapeXml(slug)}</guid>
+      <title>${encodeXML(post.title)}</title>
+      <link>${siteUrl}/blog/${encodeXML(slug)}</link>
+      <guid>${siteUrl}/blog/${encodeXML(slug)}</guid>
       <pubDate>${new Date(post.date).toUTCString()}</pubDate>
-      <description>${escapeXml(post.description ?? '')}</description>
+      <description>${encodeXML(post.description ?? '')}</description>
     </item>`
     })
     .join('\n')
