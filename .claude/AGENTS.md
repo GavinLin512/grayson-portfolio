@@ -45,6 +45,7 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 | `.claude/rules/task.md` | Change 實作順序與依賴鏈 |
 | `.claude/rules/CI.md` | Argos CI / Playwright 視覺測試流程與重命名規則 |
 | `.claude/rules/frontend.md` | 前端元件規範（PageHeader 等共用元件）|
+| `.claude/rules/security.md` | 資安規範總覽（XSS、SQL Injection、表單驗證、環境變數、HTTP Headers、依賴套件）|
 
 ## 編輯規則：最小化 diff
 
