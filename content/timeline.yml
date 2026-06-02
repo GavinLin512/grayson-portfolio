@@ -1,0 +1,39 @@
+entries:
+  - year: 2026
+    company: "next chapter?"
+    role: "open to chats"
+    description: "open to new opportunities"
+    tags: []
+  - year: 2024
+    yearEnd: 25
+    company: Hina
+    role: Lead Frontend Engineer
+    description: "team of 4 · payments"
+    tags: [vue, typescript, payments]
+  - year: 2022
+    yearEnd: 24
+    company: Field LLC.
+    role: Senior Frontend Engineer
+    description: "design system · 3 products"
+    tags: [react, design-system]
+  - year: 2021
+    company: "side / Kata"
+    role: Open Source
+    description: open source type tools
+    tags: [open-source]
+  - year: 2020
+    yearEnd: 21
+    company: Hatch Co.
+    role: Frontend Engineer
+    description: "#2 engineer · seed → A"
+    tags: [vue, startup]
+  - year: 2019
+    company: Studio Mori
+    role: Intern
+    description: "ui dev · 6 months"
+    tags: [internship]
+  - year: 2018
+    company: first stripe of html
+    role: school project
+    description: the beginning
+    tags: [learning]

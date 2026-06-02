@@ -46,6 +46,14 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 | `.claude/rules/CI.md` | Argos CI / Playwright 視覺測試流程與重命名規則 |
 | `.claude/rules/frontend.md` | 前端元件規範（PageHeader 等共用元件）|
 
+## 編輯規則：最小化 diff
+
+編輯檔案時，只針對真正新增或缺少的內容做變更，不移除再重加既有項目。
+
+- `old_string` 縮到最小，不包含不需要改動的既有行
+- 新增陣列項目前，確認既有最後項目是否有 trailing comma；若語言允許（TS / JS / Python），優先讓既有行保持不變，直接插入新行
+- 若不得不同時修改既有行（例如補逗號），說明原因，並讓 `old_string` 只包含該行，不多帶其他內容
+
 ## Openspec Change 建立規則
 
 **錯誤原因**：建立新的 `openspec/changes/<name>/` 時，只看了頂層 `openspec/specs/` 的目錄，

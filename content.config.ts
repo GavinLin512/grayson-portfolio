@@ -35,6 +35,20 @@ export default defineContentConfig({
         notInterested: z.string(),
       }),
     }),
+    timeline: defineCollection({
+      type: 'data',
+      source: 'timeline.yml',
+      schema: z.object({
+        entries: z.array(z.object({
+          year: z.number(),
+          yearEnd: z.number().optional(),
+          company: z.string(),
+          role: z.string(),
+          description: z.string(),
+          tags: z.array(z.string()),
+        })),
+      }),
+    }),
     blog: defineCollection({
       type: 'page',
       source: 'blog/**/*.md',

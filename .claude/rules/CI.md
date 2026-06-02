@@ -21,49 +21,78 @@ Argos CI 本身不指定測試檔案，由 Playwright 負責掃描並執行：
 
 git flow 是 `feature → dev → main`，全部走 PR。`argos.yml` 觸發規則：
 
-設計目標：**opt-in（只有畫面相關的 PR 才手動加 `run-argos-ci` label 才跑），且剛好跑一次。**
+設計目標：**paths 混合式** —— UI 檔案變動自動跑，或手動加 `run-argos-ci` label 強制跑（接住 paths 沒涵蓋的情況）。
+
+判斷邏輯由 `decide` gate job 負責：
+
+```
+跑 Argos = push 到 dev/main  OR  UI 檔有變動  OR  PR 帶 run-argos-ci label
+```
 
 ```yaml
 on:
   push:
     branches: [dev, main]              # 合併進整合/正式分支 → 更新 baseline
   pull_request:
-    # 不含 opened：避免「開 PR 帶 label」時 opened 與 labeled 重疊成兩個 run
-    types: [synchronize, reopened, labeled]
+    types: [opened, synchronize, reopened, labeled]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  decide:                              # 輕量 gate，輸出 run=true/false
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+    steps:
+      - uses: actions/checkout@v6
+        with: { fetch-depth: 0 }       # diff 需要 base/head 歷史
+      - id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] \
+             || [ "${{ contains(github.event.pull_request.labels.*.name, 'run-argos-ci') }}" = "true" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          changed=$(git diff --name-only \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}")
+          if echo "$changed" | grep -qE \
+             '^(app/|content/|public/|tests/)|\.(vue|css)$|^(content|nuxt|tailwind|playwright)\.config\.ts$'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
   argos:
-    if: >-
-      github.event_name == 'push' ||
-      (github.event.action == 'labeled' && github.event.label.name == 'run-argos-ci') ||
-      (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'run-argos-ci'))
+    needs: decide
+    if: needs.decide.outputs.run == 'true'
+    # ... playwright + argos steps
 ```
 
 | 事件 | 行為 |
 |------|------|
 | push 到 `dev` / `main` | 一律跑，產生新 baseline build |
-| 開 PR 時就掛 `run-argos-ci` | `labeled:run-argos-ci` 跑一次（`opened` 不觸發） |
-| 事後才補 `run-argos-ci` | 補 label 當下跑一次 |
-| 加其他 label（如 `enhancement`） | skip |
-| 已 label 的 PR 再 push commit | `synchronize` 跑一次 |
-| 沒掛 label 的 PR | 不跑（opt-in） |
+| PR 改了 UI 檔（`app/**`、`*.vue`、`*.css`…）| 自動跑，免 label |
+| PR 只改 README / 後端邏輯 | 不跑 |
+| 想強制跑（paths 沒接到）| 手動加 `run-argos-ci` |
+| 同時掛多個 label | gate 看完整狀態 → 結果永遠正確，**與順序無關** |
 
-### 為什麼「剛好一次」而非靠 concurrency 取消
+### 監看的 UI 路徑
 
-`labeled` 觸發類型會「每加一個 label 觸發一次」。若同時保留 `opened` + 多個 label，
-開 PR 當下會產生 `opened` + `labeled`×N 個 run，再靠 concurrency 取消多餘的——
-症狀就是「Canceling since a higher priority waiting request ... exists」。
+`app/**`、`content/**`、`public/**`、`tests/**`、`*.vue`、`*.css`、
+`content.config.ts`、`nuxt.config.ts`、`tailwind.config.ts`、`playwright.config.ts`。
 
-根本解法：**拿掉 `opened`**（帶 label 開 PR 時 GitHub 必發 `labeled`，故以它當啟動點），
-並用 `github.event.action == 'labeled' && github.event.label.name == 'run-argos-ci'`
-讓 labeled 事件**只認指定 label**。如此正常流程不會再產生需要被取消的重複 run。
+**維護提醒**：日後新增會影響畫面的目錄（如新的 `assets/`）要記得加進 `decide` 的 grep。
 
-> 另一種大公司常見做法是用 `paths:` 過濾（只有 `app/**`、`*.vue`、`*.css` 等 UI 檔案變動才跑），
-> 自動判斷是否畫面相關、免人工掛 label。本專案採人工 label 以保留每個 PR 的明確控制權。
+### 為什麼用 gate job 而非 `on.paths`
+
+`on.paths` 是「硬過濾」——沒命中就整個 workflow 不跑，無法和 label 做 OR。
+改用 gate job 後，判斷依「PR 當下完整的 label 集合與 diff」，與哪個事件觸發無關，
+所以多 label 同時掛上也**沒有順序問題**，concurrency 可維持單純的 `head_ref`。
+
+> 若改用現成 action（如 `dorny/paths-filter`）取代手刻 grep，務必 **pin 到 commit SHA**
+> （2025 年 `tj-actions/changed-files` 曾遭供應鏈攻擊）。native git diff 版無此風險。
 
 ### 為什麼三分支內容必須一致
 
@@ -81,8 +110,17 @@ for b in feature dev main; do echo "$b $(git rev-parse $b:.github/workflows/argo
 
 ### concurrency 去重
 
-`group` 以 `github.head_ref`（PR 來源分支名）為 key，搭配 `cancel-in-progress: true`：
-同一來源分支即使同時掛在 `dev` 與 `main` 兩個 PR 上，也只保留最新一個 run。
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+```
+
+以來源分支為 key，搭配 `cancel-in-progress: true`，同分支連續觸發只留最新一個 run。
+
+因為「要不要跑」改由 `decide` job 依 PR 完整狀態判斷（非靠觸發事件），
+即使多 label 同時掛上、存活的 run 也一定算對，故不需要早期的 label-name key hack。
+副作用：多 label 同時掛時仍會看到 `Cancelling ...` 訊息（純視覺雜訊，結果正確）。
 
 ## Baseline 與 reference branch
 
