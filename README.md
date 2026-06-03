@@ -18,6 +18,8 @@ Personal portfolio site built with Nuxt 4, deployed on Cloudflare Pages.
 | `/about` | About me |
 | `/projects` | Projects list & detail |
 | `/blog` | Blog posts |
+| `/skills` | Skills overview |
+| `/journey` | Career timeline |
 
 ## Development
 
@@ -38,9 +40,14 @@ Visual regression screenshots are uploaded to Argos CI only in CI environments.
 
 ## Roadmap
 
-- Skills page
-- Journey timeline
-- Contact form
-- Site search
-- Guestbook (Cloudflare D1)
-- Deployment pipeline
+- [x] Project foundation & design tokens — 2026-05-19
+- [x] Hero landing page — 2026-05-19
+- [x] About page — 2026-05-24
+- [x] Projects list & detail — 2026-05-24
+- [x] Blog posts — 2026-05-25
+- [x] Skills page — 2026-06-01
+- [x] Journey timeline — 2026-06-02
+- [ ] Contact form
+- [ ] Site search
+- [ ] Guestbook (Cloudflare D1)
+- [ ] Deployment pipeline
