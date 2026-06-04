@@ -44,10 +44,11 @@ export default defineEventHandler(async (event) => {
   try {
     await sendContactEmail({ name, email, message }, config.resendApiKey, config.public.contactEmail)
   }
-  catch (err) {
-    // Log the real cause server-side; return a generic message to the client
-    // so internal details (Resend response, stack) aren't leaked. (security.md §3)
-    console.error('[contact] sendContactEmail failed:', err)
+  catch {
+    // Static log only — no variables, so no request/response data can leak
+    // into logs (CWE-532). Detailed cause lives in the Resend dashboard.
+    // Client gets a generic message. (security.md §3)
+    console.error('[contact] email send failed')
     throw createError({ statusCode: 502, message: 'Failed to send message' })
   }
 

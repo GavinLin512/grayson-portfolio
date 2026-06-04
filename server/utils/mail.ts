@@ -25,7 +25,10 @@ export async function sendContactEmail(
   })
 
   if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`Resend API error ${res.status}: ${body}`)
+    // Carry only the HTTP status (a number) — never the response body, which
+    // could echo request data and end up in logs. (security.md §3)
+    const err = new Error(`Resend request failed (${res.status})`) as Error & { status: number }
+    err.status = res.status
+    throw err
   }
 }
