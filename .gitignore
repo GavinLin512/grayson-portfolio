@@ -10,6 +10,9 @@ dist/
 .wrangler/
 .dev.vars
 
+# Argos CI local tests
+test-results/
+
 # Dependencies
 node_modules/
 

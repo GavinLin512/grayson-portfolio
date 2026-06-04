@@ -159,6 +159,16 @@ test("screenshot about", async ({ page }) => {
 });
 ```
 
+## 遮罩非確定性區塊（mask）
+
+含動態內容（如 Turnstile iframe）的頁面，須遮罩該區塊避免每次截圖都假性 diff：
+
+```ts
+await argosScreenshot(page, "contact", { mask: [page.locator(".cf-turnstile-box")] })
+```
+
+給目標元素一個穩定 class，並加 `min-h` 佔固定空間（避免載入時 layout shift）。
+
 ## 重新命名規則
 
 | 操作 | 影響 |

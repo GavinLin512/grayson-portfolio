@@ -73,7 +73,7 @@
           </div>
 
           <!-- Cloudflare Turnstile widget (explicit render) -->
-          <div ref="turnstileEl" />
+          <div ref="turnstileEl" class="cf-turnstile-box min-h-[65px]" />
 
           <!-- Honeypot: bots fill this, humans don't -->
           <input
