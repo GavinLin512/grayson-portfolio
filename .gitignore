@@ -8,6 +8,10 @@ dist/
 
 # Cloudflare
 .wrangler/
+.dev.vars
+
+# Argos CI local tests(Playwright default output dir)
+test-results/
 
 # Dependencies
 node_modules/

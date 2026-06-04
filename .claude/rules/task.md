@@ -1,6 +1,6 @@
 # Task Order
 
-`setup-project-foundation`、`add-design-tokens`、`add-phi-geometry-system`、`add-shared-layout`、`add-hero-page`、`add-about-page`、`add-projects-feature`、`add-blog-feature`、`add-skills-page` 已完成（`adjust-hero-layout`、`fix-projects-list-ux`、`fix-projects-review-issues`、`redesign-projects-list-layout`、`refine-about-design`、`refine-blog-list-design`、`redesign-skills-layout` 為額外新增 `[+]`）。以下是剩餘 changes 的建議實作順序：
+`setup-project-foundation`、`add-design-tokens`、`add-phi-geometry-system`、`add-shared-layout`、`add-hero-page`、`add-about-page`、`add-projects-feature`、`add-blog-feature`、`add-skills-page`、`add-journey-timeline` 已完成（`adjust-hero-layout`、`fix-projects-list-ux`、`fix-projects-review-issues`、`redesign-projects-list-layout`、`refine-about-design`、`refine-blog-list-design`、`redesign-skills-layout` 為額外新增 `[+]`）。以下是剩餘 changes 的建議實作順序：
 
 ## 依賴鏈
 
@@ -32,7 +32,7 @@ setup-project-foundation ✓
     ├── refine-blog-list-design ✓ [+]
   add-skills-page ✓
     ├── redesign-skills-layout ✓ [+]
-  add-journey-timeline
+  add-journey-timeline ✓
     │
     ▼
   add-contact-form
