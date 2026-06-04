@@ -1,6 +1,14 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-19',
   devtools: { enabled: true },
+  runtimeConfig: {
+    turnstileSecretKey: '',
+    resendApiKey: '',
+    public: {
+      turnstileSiteKey: '',
+      contactEmail: '',
+    },
+  },
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode',
@@ -31,6 +39,7 @@ export default defineNuxtConfig({
     '/blog/**': { prerender: true },
     '/skills': { prerender: true },
     '/journey': { prerender: true },
+    '/contact': { ssr: true },
   },
   nitro: {
     preset: 'cloudflare-pages',

@@ -1,0 +1,8 @@
+name = "grayson-portfolio"
+compatibility_date = "2025-05-19"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "f9f97ace66f4442497b710bddea2de6f"
+# Create via: npx wrangler kv namespace create RATE_LIMIT
+# Then replace the id above with the returned namespace ID
