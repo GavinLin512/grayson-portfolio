@@ -58,3 +58,33 @@ route 端：`throw createError({ statusCode: 502, message: 'Failed to send messa
 
 目前只有 `contact.post.ts` 一個 API route，靠 Resend dashboard 足夠。
 **等 API route 變多**（如 guestbook、search）再實作上述中央 hook，避免每個 route 各寫一套錯誤處理。
+
+---
+
+## 隱私權政策（Turnstile Invisible 的前置條件）
+
+### 背景
+
+`refine-contact-design` 把 contact 表單的 Turnstile 改為 **invisible** 模式（畫面只剩
+「· protected by friendliness, not captcha」caption，無可見 widget）。
+
+可見模式時，使用者看得到 Cloudflare 方塊＝已隱含告知正在驗證；**切到隱形後使用者無感**，
+Cloudflare 因此要求：啟用 invisible 即代表你同意「在自己的隱私權政策中引用 Cloudflare 的
+Turnstile Privacy Addendum」。這是**啟用隱形模式的合規交換條件**，非技術設定。
+
+> Cloudflare 後台切換到 Invisible 時下方那行提示：
+> *"As a condition of enabling invisible mode, you must reference Cloudflare's
+> Turnstile Privacy Addendum in your own privacy policy."*
+
+### 建議做法
+
+- 建一頁隱私權政策（如 `/privacy`，頁尾連結），內含一段：本站使用 Cloudflare Turnstile
+  進行機器人防護，相關資料處理依 Cloudflare 的 Turnstile Privacy Addendum。
+- **連結用 Cloudflare 後台提示文字裡帶的那個官方條款連結**，不要自己編網址。
+- 走隱形模式才有此義務；若改回可見 widget（使用者看得到方塊＝已揭露）則無此要求——
+  這是「畫面留白 vs 多一份合規揭露」的取捨。
+
+### 觸發時機
+
+正式環境把 Turnstile sitekey 設為 Invisible 型別（見 `deploy.md`）**之前**，
+先備妥這頁隱私權政策。本機測試 key 是 visible，不受此限。

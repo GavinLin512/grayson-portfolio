@@ -23,6 +23,7 @@
 - [ ] **Cloudflare Pages → Settings → Environment Variables** 設定正式 secrets（變數名須與 `.env` 一致）：
   - `NUXT_PUBLIC_TURNSTILE_SITE_KEY`、`NUXT_TURNSTILE_SECRET_KEY`、`NUXT_RESEND_API_KEY`、`NUXT_PUBLIC_CONTACT_EMAIL`
   - 正式 Turnstile key 在 Cloudflare Turnstile 後台建立，網域設 `grayson.cc`
+  - **Widget Mode 設「Invisible」**：`refine-contact-design` 後設計為隱形驗證（畫面只留「· protected by friendliness, not captcha」caption，無可見方塊）。render 用 `execution:'execute'`，挑戰延到**送出時**才跑——故載入畫面不會有 widget（即使本機測試 key 也一樣）；本機**按下送出後**才會看到測試 key 的「Verifying…」方塊，屬正常。
   - 不寫進 repo（依 `security.md` §4）
 - [ ] **KV namespace**：`npx wrangler kv namespace create RATE_LIMIT`，把回傳 id 填入 `wrangler.toml`（注意是 `kv namespace`，不是舊語法 `kv:namespace`）
 

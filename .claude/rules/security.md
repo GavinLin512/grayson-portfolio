@@ -50,9 +50,10 @@ db.exec(`SELECT * FROM posts WHERE id = ${id}`)
 
 **規則：所有使用者輸入在 server 端必須驗證型別與長度，不依賴 client 端驗證。**
 
-- 使用 `zod` schema 驗證 request body
+- 使用 `zod` schema 驗證 request body（列舉欄位用 `z.enum`，如 contact 的 `topic`）
 - 驗證失敗回傳 `400`，不洩漏 stack trace
 - 敏感欄位（email、訊息內容）在存入 DB 前先 sanitize
+- **Bot 防護**：公開表單須過 Turnstile，server 端以 secret 呼叫 siteverify 並帶 `remoteip`（`cf-connecting-ip`）交叉比對；token 單次有效、僅 300s。驗證失敗回 `403`，不寄信／不寫 DB
 
 ```ts
 // ✓ 正確：server route 驗證
