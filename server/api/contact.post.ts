@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody, createError } from 'h3'
+import { defineEventHandler, readBody, createError, getRequestHeader } from 'h3'
 import { z } from 'zod'
 import { checkRateLimit } from '../utils/ratelimit'
 import { sendContactEmail } from '../utils/mail'
@@ -6,6 +6,7 @@ import { sendContactEmail } from '../utils/mail'
 const bodySchema = z.object({
   name: z.string().min(1).max(100),
   email: z.string().email().max(254),
+  topic: z.enum(['work', 'hello', 'speaking', 'other']),
   message: z.string().min(1).max(2000),
   turnstileToken: z.string().min(1),
 })
@@ -20,15 +21,17 @@ export default defineEventHandler(async (event) => {
   if (!parsed.success) {
     throw createError({ statusCode: 400, message: 'Invalid request body' })
   }
-  const { name, email, message, turnstileToken } = parsed.data
+  const { name, email, topic, message, turnstileToken } = parsed.data
 
   const config = useRuntimeConfig(event)
 
-  // Verify Turnstile token
+  // Verify Turnstile token. Passing the visitor IP (remoteip) lets Cloudflare
+  // cross-check the token against the client that solved it.
+  const remoteip = getRequestHeader(event, 'cf-connecting-ip')
   const tsRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ secret: config.turnstileSecretKey, response: turnstileToken }),
+    body: JSON.stringify({ secret: config.turnstileSecretKey, response: turnstileToken, remoteip }),
   })
   const tsData = (await tsRes.json()) as TurnstileResponse
   if (!tsData.success) {
@@ -42,7 +45,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    await sendContactEmail({ name, email, message }, config.resendApiKey, config.public.contactEmail)
+    await sendContactEmail({ name, email, topic, message }, config.resendApiKey, config.public.contactEmail)
   }
   catch {
     // Static log only — no variables, so no request/response data can leak
