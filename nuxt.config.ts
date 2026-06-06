@@ -43,5 +43,18 @@ export default defineNuxtConfig({
   },
   nitro: {
     preset: 'cloudflare-pages',
+    // Follow links from prerendered list pages so blog/project detail pages
+    // become static HTML — required for Pagefind to index their content.
+    prerender: { crawlLinks: true },
+    // Pagefind writes /pagefind/* after `nuxt build`, so Nitro can't auto-detect
+    // them. This exclude is MERGED with Nitro's auto-generated excludes, so the
+    // platform serves /pagefind/* as static assets instead of routing to the worker.
+    cloudflare: {
+      pages: {
+        routes: {
+          exclude: ['/pagefind/*'],
+        },
+      },
+    },
   },
 })

@@ -60,3 +60,16 @@ npx wrangler pages dev dist --kv RATE_LIMIT --port 8788 --compatibility-date 202
 本地 env 由 `.dev.vars`（gitignored，格式同 `.env`）提供。測 rate limit 時可把 `NUXT_RESEND_API_KEY`
 設成無效值，前 10 次會在寄信步驟回 502（rate limit 已先放行並計數），第 11 次回 429，即可零寄信驗證。
 - Turnstile widget 用 `onMounted` 顯式 `render()`（非 auto-scan），避免 SPA hydration 時機錯過渲染。
+
+---
+
+## Site Search（add-site-search）
+
+### 上線前必做
+
+- [ ] **Cloudflare Pages → Settings → Build command** 設為 `pnpm build`（`build` script 已串 `nuxt build && pagefind --site dist`，**不要**另外加 pagefind 步驟）。
+- 搜尋索引需要 blog/project 詳細頁是靜態 HTML：`nuxt.config.ts` 已設 `nitro.prerender.crawlLinks: true` 讓 prerender 跟著列表頁連結爬出所有詳細頁；少了這行只會索引到 6 個列表頁。
+- **`/pagefind/*` 必須在 `dist/_routes.json` 的 exclude**：pagefind 在 `nuxt build` 之後才產生這些檔 → 不在 exclude 內 → Cloudflare Pages（與本機 `wrangler pages dev`）會把 `/pagefind/*` 路由給 Nitro worker → 404 → 搜尋載入失敗。已在 `nuxt.config.ts` 設 `nitro.cloudflare.pages.routes.exclude: ['/pagefind/*']` 解決（此設定會與 Nitro 自動產生的 exclude **合併**，不必手動維護其餘項目）。
+- 驗證：`pnpm build` 後 `dist/pagefind/pagefind.js` 應存在，`dist/_routes.json` 的 exclude 應含 `/pagefind/*`，pagefind log 顯示已索引 16 頁。
+- 本機要看效果用 `npx wrangler pages dev dist`（**改 `_routes.json` 後需重啟** wrangler 才生效）；純靜態 server（如 `python -m http.server`）不讀 `_routes.json`，所以本來就能載入 pagefind。
+- 本機 `pnpm dev` 無索引（`/pagefind/pagefind.js` 404），SearchModal 顯示「Search index not built」屬正常。
