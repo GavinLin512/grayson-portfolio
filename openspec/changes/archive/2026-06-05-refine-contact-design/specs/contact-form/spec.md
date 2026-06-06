@@ -1,9 +1,5 @@
-# contact-form Specification
+## MODIFIED Requirements
 
-## Purpose
-Defines the `/contact` page and its message-sending pipeline: a two-column layout (hero + contact info / form), a message-topic selector, invisible Turnstile bot protection with progressive submit feedback, and a server route that verifies the token, rate-limits by IP, and sends mail via Resend.
-
-## Requirements
 ### Requirement: Contact route SHALL render a two-column form
 
 The `/contact` route SHALL render a split layout. The left column SHALL contain a hero block (a `font-mincho` headline, a `font-mono` introductory line, a divider) followed by contact info as label-left / value-right aligned rows (`email` / `github` / `read.cv` / `location`). The right column SHALL contain the message form (name / email / topic selector / message / submit), fill the remaining viewport height, and the page root SHALL follow the full-bleed convention (`relative h-full flex flex-col` with the main content area using `flex-1`).
@@ -47,6 +43,8 @@ The form SHALL submit a JSON POST to `/api/contact` with `{ name, email, topic, 
 - **WHEN** the request body is validated by the zod schema on `server/api/contact.post.ts`
 - **THEN** `topic` MUST be one of `work | hello | speaking | other`, otherwise the API responds with 400, and the selected topic is included in the email sent via Resend
 
+## ADDED Requirements
+
 ### Requirement: Contact form SHALL offer a message-topic selector
 
 The form SHALL render a "what kind of message?" selector as a group of pill buttons (`work` / `hello` / `speaking` / `other`). Exactly one topic SHALL be selected at a time, defaulting to `work` on load. The selected pill SHALL render filled (`bg-ink text-bg`); unselected pills SHALL render outlined (`border border-ink`).
@@ -79,39 +77,3 @@ The form SHALL render Turnstile with `execution: 'execute'` so the challenge run
 
 - **WHEN** the server verifies the token at Cloudflare's siteverify endpoint
 - **THEN** the request includes `remoteip` read from the `cf-connecting-ip` header
-
-### Requirement: Server SHALL verify Turnstile token before sending mail
-
-`server/api/contact.post.ts` SHALL verify the Turnstile token by POSTing to Cloudflare's siteverify endpoint with `NUXT_TURNSTILE_SECRET_KEY`. Only if the verification succeeds SHALL the mail be sent.
-
-#### Scenario: Invalid token rejects request
-
-- **WHEN** the submitted `turnstileToken` fails verification
-- **THEN** the API responds with 403 and does NOT call the Resend API
-
-### Requirement: Server SHALL rate-limit submissions by IP
-
-The server SHALL allow at most 10 submissions per hour per IP, using Cloudflare KV as the counter store. IP is read from the `cf-connecting-ip` request header.
-
-#### Scenario: 11th submission within an hour is rejected
-
-- **WHEN** the same IP submits 11 requests within 60 minutes
-- **THEN** the 11th request receives a 429 response
-
-### Requirement: Server SHALL send mail via Resend API
-
-After Turnstile + rate-limit checks pass, the server SHALL POST to Resend's `/emails` endpoint with `NUXT_RESEND_API_KEY`, sending the message to `NUXT_PUBLIC_CONTACT_EMAIL`.
-
-#### Scenario: Email arrives at configured address
-
-- **WHEN** a valid submission passes all checks
-- **THEN** an email arrives at the address configured in `NUXT_PUBLIC_CONTACT_EMAIL` within 60 seconds
-
-### Requirement: Contact route SHALL be server-rendered
-
-`routeRules` SHALL set `/contact: { ssr: true }` so each request gets a fresh CSRF token in the Turnstile widget.
-
-#### Scenario: SSR is active
-
-- **WHEN** the page is requested
-- **THEN** the response is dynamically rendered (not statically prerendered)
