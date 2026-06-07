@@ -1,4 +1,9 @@
-## ADDED Requirements
+# skills-page Specification
+
+## Purpose
+Defines the `/skills` page — a responsive 4-column category grid sourced from `content/skills.yml`, with numbered labels, per-skill 5-cell proficiency meters, and currently-learning / not-interested notes.
+
+## Requirements
 
 ### Requirement: Skills route SHALL render a 4-column grid
 

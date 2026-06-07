@@ -1,4 +1,9 @@
-## ADDED Requirements
+# project-foundation Specification
+
+## Purpose
+Defines the Nuxt 4 project foundation — a clean-starting dev server, the Cloudflare Pages (`cloudflare-pages`) preset, and git ignoring of secrets and build artifacts.
+
+## Requirements
 
 ### Requirement: Nuxt 4 dev server SHALL start without errors
 

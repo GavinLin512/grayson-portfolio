@@ -159,6 +159,18 @@ test("screenshot about", async ({ page }) => {
 });
 ```
 
+## 遮罩非確定性區塊（mask）
+
+含動態內容（如 Turnstile iframe）的頁面，須遮罩該區塊避免每次截圖都假性 diff：
+
+```ts
+await argosScreenshot(page, "contact", { mask: [page.locator(".cf-turnstile-box")] })
+```
+
+給目標元素一個穩定 class 供 mask 鎖定。
+
+> **contact 的 mask 現況（保險用，非必要）**：表單的 Turnstile 用 `execution:'execute'`，挑戰延到送出才跑，**截圖（page load、不按送出）當下 `.cf-turnstile-box` 是 0 高度、無 iframe**，所以畫面上沒有可 diff 的非確定性內容——mask 目前是 no-op。**仍保留**作為保險：萬一日後有人把 `execution:'execute'` 改回 managed/auto，widget 會在載入時出現，mask 還能擋住假性 diff。真正的防線是那個 render 選項，mask 只是備援；因隱形不佔版面，無需再加 `min-h`。
+
 ## 重新命名規則
 
 | 操作 | 影響 |

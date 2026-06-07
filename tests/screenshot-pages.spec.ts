@@ -12,12 +12,19 @@ const pages = [
   { name: "blog", path: "/blog" },
   { name: "blog-detail", path: "/blog/2026-04-12-on-grids-that-fail-gracefully" },
   { name: "skills", path: "/skills" },
-  { name: "journey", path: "/journey" }
+  { name: "journey", path: "/journey" },
+  // Turnstile widget renders a non-deterministic iframe — mask it so Argos
+  // doesn't flag false diffs on every run.
+  { name: "contact", path: "/contact", mask: [".cf-turnstile-box"] }
 ];
 
-for (const { name, path } of pages) {
+for (const { name, path, mask } of pages) {
   test(`Run Argos on ${name} (${baseUrl}${path})`, async ({ page }) => {
     await page.goto(`${baseUrl}${path}`);
-    await argosScreenshot(page, name);
+    await argosScreenshot(
+      page,
+      name,
+      mask ? { mask: mask.map((selector) => page.locator(selector)) } : undefined
+    );
   });
 }

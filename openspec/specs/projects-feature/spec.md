@@ -1,4 +1,9 @@
-## ADDED Requirements
+# projects-feature Specification
+
+## Purpose
+Defines the `/projects` list and `/projects/[slug]` detail — a statically prerendered portfolio showcase with category filter tabs, a hover preview panel, a selected-count header, and structured project frontmatter.
+
+## Requirements
 
 ### Requirement: Projects list route SHALL display all projects
 
