@@ -1,4 +1,9 @@
-## ADDED Requirements
+# hero-page Specification
+
+## Purpose
+Defines the `/` home route — a statically prerendered, full-viewport Hero A layout that is responsive across mobile/tablet/desktop and fills the viewport without scroll overflow.
+
+## Requirements
 
 ### Requirement: Home route SHALL render Hero A layout
 

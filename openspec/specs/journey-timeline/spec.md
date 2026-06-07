@@ -1,8 +1,13 @@
-## ADDED Requirements
+# journey-timeline Specification
+
+## Purpose
+Defines the `/journey` page — a vertical career timeline with a central φ-line spine, per-event details (year, company/role, description, tags), smooth-scroll anchor navigation, and a static resume card.
+
+## Requirements
 
 ### Requirement: Journey route SHALL render a vertical timeline
 
-The `/journey` route SHALL render a two-column layout: a left column containing a vertical timeline with inline year labels, and a right column containing a static résumé/CV card. Uses `content` layout with `PageHeader`.
+The `/journey` route SHALL render a two-column layout: a left column containing a vertical timeline with inline year labels, and a right column containing a static resume/CV card. Uses `content` layout with `PageHeader`.
 
 #### Scenario: Timeline renders all entries
 
@@ -45,6 +50,11 @@ Each entry SHALL have `id="year-{year}"` for anchor-based navigation. `scroll-be
 - **WHEN** the user navigates to `#year-2024`
 - **THEN** the viewport smoothly scrolls to the 2024 entry
 
-### Requirement: Right column SHALL display a static résumé card
+### Requirement: Right column SHALL display a static resume card
 
-The right column SHALL show a `résumé · cv` label, a bordered card with filename, PDF preview bars, download and preview buttons, and a handwritten note about alternative formats.
+The right column SHALL show a `resume · cv` label, a bordered card with filename, PDF preview bars, download and preview buttons, and a handwritten note about alternative formats.
+
+#### Scenario: Resume card renders all elements
+
+- **WHEN** the `/journey` page is rendered
+- **THEN** the right column shows the `resume · cv` label, a bordered card with the filename, PDF preview bars, download and preview buttons, and a handwritten note about alternative formats

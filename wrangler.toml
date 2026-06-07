@@ -1,8 +1,14 @@
 name = "grayson-portfolio"
 compatibility_date = "2025-05-19"
+pages_build_output_dir = "dist"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
 id = "f9f97ace66f4442497b710bddea2de6f"
 # Create via: npx wrangler kv namespace create RATE_LIMIT
 # Then replace the id above with the returned namespace ID
+
+[[d1_databases]]
+binding = "DB"
+database_name = "grayson-portfolio-db"
+database_id = "88dfcde3-f872-4d1c-bc5c-cc000ec4cc92"

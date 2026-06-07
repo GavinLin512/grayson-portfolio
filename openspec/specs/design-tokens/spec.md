@@ -1,4 +1,9 @@
-## ADDED Requirements
+# design-tokens Specification
+
+## Purpose
+Defines the site's design-token foundation — light/dark CSS color variables exposed through Tailwind, the three loaded font families (Shippori Mincho / Space Mono / Caveat), and class-strategy dark-mode toggling.
+
+## Requirements
 
 ### Requirement: CSS Variables SHALL define color tokens for light and dark themes
 

@@ -1,4 +1,9 @@
-## ADDED Requirements
+# phi-geometry Specification
+
+## Purpose
+Defines the golden-ratio geometry system — the PHI constants composable and the PhiLines decorative-line component with its fixed-viewBox, non-uniform scaling.
+
+## Requirements
 
 ### Requirement: PHI constants SHALL be available as a composable
 
