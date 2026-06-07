@@ -14,6 +14,7 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
     '@nuxtjs/google-fonts',
     '@nuxt/content',
+    'nuxt-auth-utils',
   ],
   css: ['~/assets/css/tokens.css'],
   colorMode: {
@@ -39,13 +40,15 @@ export default defineNuxtConfig({
     '/blog/**': { prerender: true },
     '/skills': { prerender: true },
     '/journey': { prerender: true },
+    '/auth/**': { ssr: true },
     '/contact': { ssr: true },
+    '/guestbook': { ssr: true },
   },
   nitro: {
     preset: 'cloudflare-pages',
     // Follow links from prerendered list pages so blog/project detail pages
     // become static HTML — required for Pagefind to index their content.
-    prerender: { crawlLinks: true },
+    prerender: { crawlLinks: true, ignore: [/^\/auth\//, /^\/guestbook/] },
     // Pagefind writes /pagefind/* after `nuxt build`, so Nitro can't auto-detect
     // them. This exclude is MERGED with Nitro's auto-generated excludes, so the
     // platform serves /pagefind/* as static assets instead of routing to the worker.
