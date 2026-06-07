@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-full flex flex-col">
+  <div class="relative min-h-full flex flex-col">
     <PageHeader :label="`— 03 / journal · ${visiblePosts.length} notes`">
       <div class="flex gap-[8px] flex-wrap">
         <button

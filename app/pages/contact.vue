@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-full flex flex-col">
+  <div class="relative min-h-full flex flex-col">
     <PageHeader label="— 07 / contact" />
 
     <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-[80px]">

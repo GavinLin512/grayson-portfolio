@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-full flex flex-col">
+  <div class="relative min-h-full flex flex-col">
     <PageHeader label="— 06 / about" />
 
     <!-- Main grid fills remaining height -->
