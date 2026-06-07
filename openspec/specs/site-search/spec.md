@@ -1,4 +1,9 @@
-## ADDED Requirements
+# site-search Specification
+
+## Purpose
+Defines Pagefind-powered static search — a Cmd+K SearchModal querying the build-time index, graceful local-dev fallback when no index exists, and the build command that produces the index.
+
+## Requirements
 
 ### Requirement: Cmd+K keyboard shortcut SHALL toggle SearchModal
 

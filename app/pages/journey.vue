@@ -41,9 +41,9 @@
         </div>
       </div>
 
-      <!-- Right: Résumé card -->
+      <!-- Right: Resume card -->
       <div class="hidden lg:flex flex-col">
-        <p class="font-mono text-[11px] opacity-60">résumé · cv</p>
+        <p class="font-mono text-[11px] opacity-60">resume · cv</p>
 
         <div class="border border-ink mt-3 p-5">
           <div class="flex justify-between items-center font-mono text-[12px]">
@@ -77,7 +77,7 @@
         </div>
 
         <p class="font-hand text-[17px] mt-5 opacity-80 leading-relaxed">
-          also available — JSON résumé ↗<br />
+          also available — JSON resume ↗<br />
           &amp; a one-page edition.
         </p>
       </div>

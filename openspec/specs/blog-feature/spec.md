@@ -1,4 +1,9 @@
-## ADDED Requirements
+# blog-feature Specification
+
+## Purpose
+Defines the `/blog` list and `/blog/[slug]` detail pages — markdown-driven journal posts via @nuxt/content, with tag filtering, a pinned latest post, inline year-archive counts, a table of contents, Mermaid diagram rendering, word-count reading time, and an RSS feed.
+
+## Requirements
 
 ### Requirement: Blog list route SHALL display posts from content/blog
 

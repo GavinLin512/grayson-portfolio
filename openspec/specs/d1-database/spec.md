@@ -1,4 +1,9 @@
-## ADDED Requirements
+# d1-database Specification
+
+## Purpose
+Defines the Cloudflare D1 (edge SQLite) setup: the `wrangler.toml` database binding, the guestbook table migration, and the `useDb` server utility that exposes prepared-statement helpers to server routes.
+
+## Requirements
 
 ### Requirement: Cloudflare D1 database SHALL be configured via wrangler.toml
 
