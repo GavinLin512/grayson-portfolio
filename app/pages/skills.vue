@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-full flex flex-col">
+  <div class="relative min-h-full flex flex-col">
     <PageHeader :label="`— 05 / ${skills?.header ?? 'skills'}`" />
 
     <div class="flex-1 flex flex-col">

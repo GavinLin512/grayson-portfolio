@@ -1,5 +1,5 @@
 <template>
-  <div v-if="post" class="relative h-full flex flex-col">
+  <div v-if="post" class="relative min-h-full flex flex-col">
     <!-- Header -->
     <div class="shrink-0 mb-[48px]">
       <div class="flex items-center justify-between">
@@ -27,7 +27,7 @@
       <aside class="hidden lg:block">
         <div
           v-if="toc.length"
-          class="sticky top-[60px] space-y-[6px]"
+          class="sticky top-[115px] space-y-[6px]"
         >
           <div class="font-mono text-[11px] opacity-40 mb-[12px] uppercase tracking-wider">contents</div>
           <a
@@ -52,7 +52,7 @@
 
       <!-- Right: also reading -->
       <aside class="hidden lg:block">
-        <div v-if="relatedPosts.length" class="sticky top-[60px]">
+        <div v-if="relatedPosts.length" class="sticky top-[115px]">
           <div class="font-mono text-[11px] opacity-40 mb-[16px] uppercase tracking-wider">also reading</div>
           <div class="space-y-[20px]">
             <NuxtLink
@@ -69,6 +69,13 @@
           </div>
         </div>
       </aside>
+    </div>
+
+    <div class="mt-[80px]">
+      <div class="border-t border-line mb-[48px]">
+        <span class="font-mono text-[15px] opacity-70">— comments</span>
+      </div>
+      <Comments :slug="slug" />
     </div>
   </div>
 

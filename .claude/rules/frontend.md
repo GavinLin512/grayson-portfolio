@@ -52,11 +52,21 @@ default slot 放右側內容（如 category filter buttons）。無右側內容�
 
 ### 內容 layout 規格
 
-`app/layouts/content.vue` 在 `<main>` 套用統一 padding：
+`app/layouts/content.vue` 結構：
 
+```html
+<div class="bg-bg text-ink min-h-screen flex flex-col">
+  <SiteHeader class="sticky top-0 z-10" />
+  <main class="flex-1 px-6 lg:px-[60px] py-[60px]">
+    <slot />
+  </main>
+  <SiteFooter />
+</div>
 ```
-px-6 lg:px-[60px] py-[60px]
-```
+
+- **`min-h-screen`**：頁面高度隨內容增長，scrollbar 只在真正需要時出現（視窗捲動，非 main 內部捲動）
+- **`SiteHeader sticky`**：捲動時 header 保持可見
+- **`py-[60px]`**：標準 padding，在自然流中 `padding-bottom` 正常作用，無需額外 spacer
 
 頁面本身的最外層 `<div>` **不再**加 padding class。
 
@@ -85,25 +95,25 @@ definePageMeta({ layout: 'content' })
 
 ### 為什麼
 
-`content` layout 已將 `<main>` 設為 `h-screen` 內的 `flex-1 overflow-y-auto`。頁面若沒有 `h-full`，內容只會自然高度展開，視覺上會在 SiteFooter 之上出現一大塊空白，與 hero / about / projects 等既有頁面的「滿版排版」不一致。
+`content` layout 的 `<main>` 是 `flex-1`，在短內容頁面下 main 會撐滿 header 與 footer 之間的空間。頁面 root `<div>` 若沒有 `min-h-full`，內容只會自然高度展開，視覺上會在 SiteFooter 之上出現一大塊空白。
 
 ### 規則
 
 1. **`layout: 'content'` 的頁面** root `<div>` 必須是：
    ```html
-   <div class="relative h-full flex flex-col">
+   <div class="relative min-h-full flex flex-col">
    ```
    並用 `flex-1` 讓主要內容區塊吃掉剩餘高度（例如 `<div class="flex-1 grid ...">`）。
 
 2. **`layout: 'default'` 的全出血頁面**（如 Hero）使用絕對定位或自帶 `h-screen` 撐滿，不依賴 layout 的 main padding。
 
-3. **避免**在頁面 root 直接使用 `min-h-screen` 或省略高度宣告 — 會破壞 layout 既定的 flex chain。
+3. **避免**在頁面 root 直接使用 `h-full` 或省略高度宣告 — 前者固定高度為 main 高度（短頁面 OK，長頁面內容被截斷），後者讓頁面底部出現大片空白。
 
 ### 自我檢查清單
 
 新增頁面 / 調整視覺時務必確認：
 
-- [ ] root `<div>` 是否有 `h-full flex flex-col`（content layout）
+- [ ] root `<div>` 是否有 `min-h-full flex flex-col`（content layout）
 - [ ] 主內容容器是否有 `flex-1` 吃掉剩餘高度
 - [ ] 1280×800 viewport 下底部與 SiteFooter 之間不應有空白
 - [ ] 與設計稿 / 既有頁面（about、projects、blog）並排比對「視覺密度」一致
