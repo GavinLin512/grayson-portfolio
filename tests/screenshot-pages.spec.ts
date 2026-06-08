@@ -33,7 +33,9 @@ for (const { name, path, mask } of pages) {
 // screenshotting so the Sign in button is visible, not a blank auth section.
 test(`Run Argos on guestbook (${baseUrl}/guestbook)`, async ({ page }) => {
   await page.goto(`${baseUrl}/guestbook`);
-  // Wait for the sign-in link (ClientOnly hydrated) or the "No messages" fallback
-  await page.waitForSelector('a[href*="/auth/login"], p:has-text("No messages")', { timeout: 5000 }).catch(() => {});
+  // The Sign in button lives inside <ClientOnly>, so it only appears after
+  // hydration. Wait for the button specifically — NOT an OR with the always-SSR'd
+  // "No messages" fallback, which would resolve instantly and screenshot too early.
+  await page.waitForSelector('a[href*="/auth/login"]', { timeout: 10000 });
   await argosScreenshot(page, "guestbook");
 });
