@@ -28,3 +28,12 @@ for (const { name, path, mask } of pages) {
     );
   });
 }
+
+// Guestbook: auth UI is inside <ClientOnly> — wait for hydration before
+// screenshotting so the Sign in button is visible, not a blank auth section.
+test(`Run Argos on guestbook (${baseUrl}/guestbook)`, async ({ page }) => {
+  await page.goto(`${baseUrl}/guestbook`);
+  // Wait for the sign-in link (ClientOnly hydrated) or the "No messages" fallback
+  await page.waitForSelector('a[href*="/auth/login"], p:has-text("No messages")', { timeout: 5000 }).catch(() => {});
+  await argosScreenshot(page, "guestbook");
+});
