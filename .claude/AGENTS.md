@@ -47,7 +47,15 @@ Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
 | `.claude/rules/frontend.md` | 前端元件規範（PageHeader 等共用元件）|
 | `.claude/rules/security.md` | 資安規範總覽（XSS、SQL Injection、表單驗證、環境變數、HTTP Headers、依賴套件）|
 | `.claude/rules/deploy.md` | 上線前「本機暫時設定 → 正式設定」切換清單（contact form Resend/Turnstile/KV）|
-| `.claude/rules/recommendation.md` | 尚未實作的建議做法（統一錯誤管理：Nitro error hook + requestId + Sentry）|
+
+## Docs 參考文件
+
+| 檔案 | 說明 |
+|------|------|
+| `.claude/docs/decisions.md` | 技術決策紀錄（「為什麼這樣做」的推理），如 Comments.vue 的 `<ClientOnly>` 與 prerender hydration |
+| `.claude/docs/recommendation.md` | 尚未實作的建議做法（統一錯誤管理：Nitro error hook + requestId + Sentry；隱私權政策）|
+
+> `rules/` 是「規範／怎麼做」，`docs/` 是「決策／為什麼這樣做」。新增重大技術取捨時，補一條到 `decisions.md`。
 
 ## 編輯規則：最小化 diff
 

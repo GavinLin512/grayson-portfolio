@@ -1,6 +1,6 @@
 # Task Order
 
-`setup-project-foundation`、`add-design-tokens`、`add-phi-geometry-system`、`add-shared-layout`、`add-hero-page`、`add-about-page`、`add-projects-feature`、`add-blog-feature`、`add-skills-page`、`add-journey-timeline`、`add-contact-form`、`add-site-search`、`add-d1-database`、`add-guestbook-feature` 已完成（`adjust-hero-layout`、`fix-projects-list-ux`、`fix-projects-review-issues`、`redesign-projects-list-layout`、`refine-about-design`、`refine-blog-list-design`、`redesign-skills-layout`、`refine-contact-design` 為額外新增 `[+]`）。以下是剩餘 changes 的建議實作順序：
+`setup-project-foundation`、`add-design-tokens`、`add-phi-geometry-system`、`add-shared-layout`、`add-hero-page`、`add-about-page`、`add-projects-feature`、`add-blog-feature`、`add-skills-page`、`add-journey-timeline`、`add-contact-form`、`add-site-search`、`add-d1-database`、`add-guestbook-feature` 已完成（`adjust-hero-layout`、`fix-projects-list-ux`、`fix-projects-review-issues`、`redesign-projects-list-layout`、`refine-about-design`、`refine-blog-list-design`、`redesign-skills-layout`、`refine-contact-design`、`add-blog-comments` 為額外新增 `[+]`）。以下是剩餘 changes 的建議實作順序：
 
 ## 依賴鏈
 
@@ -44,7 +44,7 @@ setup-project-foundation ✓
     │
     ▼
   add-guestbook-feature ✓
-    ├── add-blog-comments [+]  重用 D1+OAuth，抽共用 <Comments> 元件
+    ├── add-blog-comments ✓ [+]  重用 D1+OAuth，抽共用 <Comments> 元件
     │
     ▼
   add-deployment-pipeline    最後執行
