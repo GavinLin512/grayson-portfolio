@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-full flex flex-col overflow-hidden">
+  <div class="relative min-h-full flex flex-col overflow-hidden">
 
     <!-- Header -->
     <PageHeader :label="`— 02 / projects · ${visibleProjects.length} selected`">

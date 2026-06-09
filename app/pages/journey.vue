@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-full flex flex-col">
+  <div class="relative min-h-full flex flex-col">
     <PageHeader label="— 06 / journey" />
 
     <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-x-20 gap-y-12">

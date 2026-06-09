@@ -37,7 +37,7 @@ pnpm build      # build to dist/（含 pagefind index）
 pnpm preview    # preview production build
 ```
 
-### D1 / KV features（guestbook、rate limit）
+### D1 / KV features（guestbook、blog comments、rate limit）
 
 ```bash
 pnpm build
@@ -48,6 +48,7 @@ npx wrangler pages dev dist   # localhost:8788，讀取 wrangler.toml bindings
 
 ```bash
 npx wrangler d1 execute grayson-portfolio-db --local --file=migrations/0001_init.sql
+npx wrangler d1 execute grayson-portfolio-db --local --file=migrations/0002_comments.sql
 ```
 
 Guestbook 本地測試需要 GitHub OAuth App + `.dev.vars`（非 `.env`，wrangler 只讀前者）：
@@ -76,5 +77,5 @@ Visual regression screenshots are uploaded to Argos CI only in CI environments.
 - [x] Site search (Pagefind, Cmd+K) — 2026-06-06
 - [x] D1 database setup (guestbook schema) — 2026-06-06
 - [x] Guestbook (GitHub OAuth + D1) — 2026-06-07
-- [ ] Blog comments (reuse D1 + OAuth, shared component)
+- [x] Blog comments (shared Comments component, per-post D1) — 2026-06-07
 - [ ] Deployment pipeline

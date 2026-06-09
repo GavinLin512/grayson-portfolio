@@ -28,3 +28,14 @@ for (const { name, path, mask } of pages) {
     );
   });
 }
+
+// Guestbook: auth UI is inside <ClientOnly> — wait for hydration before
+// screenshotting so the Sign in button is visible, not a blank auth section.
+test(`Run Argos on guestbook (${baseUrl}/guestbook)`, async ({ page }) => {
+  await page.goto(`${baseUrl}/guestbook`);
+  // The Sign in button lives inside <ClientOnly>, so it only appears after
+  // hydration. Wait for the button specifically — NOT an OR with the always-SSR'd
+  // "No messages" fallback, which would resolve instantly and screenshot too early.
+  await page.waitForSelector('a[href*="/auth/login"]', { timeout: 10000 });
+  await argosScreenshot(page, "guestbook");
+});
