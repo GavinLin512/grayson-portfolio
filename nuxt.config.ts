@@ -9,12 +9,20 @@ export default defineNuxtConfig({
       contactEmail: '',
     },
   },
+  site: {
+    url: process.env.NUXT_SITE_URL,
+    name: process.env.NUXT_SITE_NAME,
+  },
+  sitemap: {
+    sources: ['/api/__sitemap__/urls'],
+  },
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode',
     '@nuxtjs/google-fonts',
     '@nuxt/content',
     'nuxt-auth-utils',
+    '@nuxtjs/sitemap',
   ],
   css: ['~/assets/css/tokens.css'],
   colorMode: {
