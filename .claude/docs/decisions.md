@@ -81,3 +81,64 @@ await page.waitForSelector('a[href*="/auth/login"]', { timeout: 10000 })
 ### 附帶影響
 
 截圖內容變了但 Argos baseline key 仍是 `"guestbook"`，下次 CI 會有視覺 diff，需到後台核准一次作為新 baseline（屬預期）。
+
+---
+
+## Sitemap：為何用 `@nuxtjs/sitemap` + dynamic source（add-deployment-pipeline）
+
+### 套件選擇
+
+tasks.md 原寫 `nuxt-simple-sitemap`，但它鎖 Nuxt `^3.9.0`，本專案 Nuxt 4.4.6 啟動時會印
+`Module ... is disabled due to incompatibility` 而**靜默不產生** `/sitemap.xml`。
+改用同作者、改名後支援 Nuxt 4 的 **`@nuxtjs/sitemap` v8**。設定只需 `site.url`。
+
+### 動態內容（blog / projects）的正解
+
+只設 `site.url` 時 sitemap 只有 8 個頂層靜態頁，**blog/project 詳細頁不會自動出現**
+（@nuxt/content v3 + CF Pages 組合下 auto-discovery 不生效）。依官方文件用 **dynamic source**：
+
+```ts
+// nuxt.config.ts
+sitemap: { sources: ['/api/__sitemap__/urls'] }
+```
+
+```ts
+// server/api/__sitemap__/urls.ts
+export default defineSitemapEventHandler(async (event) => {
+  const [posts, projects] = await Promise.all([
+    queryCollection(event, 'blog').all(),
+    queryCollection(event, 'projects').all(),
+  ])
+  return [...posts, ...projects].map(p => ({ loc: p.path }))
+})
+```
+
+**關鍵陷阱**：不可 `import { serverQueryContent } from '#content/server'`（content v2 API），
+CF Pages bundle 會報 `Cannot resolve "#content/server" ... externals are not allowed`。
+content v3 改用 **auto-import 的 `queryCollection(event, 'collection')`**（連同 `defineSitemapEventHandler`
+都是 auto-import，零 `import` 行 → 不觸發 externals 解析）。
+
+> 試過的死路：在 `nuxt.config.ts` 用 `fs.readdirSync` 直接讀 `content/` 目錄塞 `sitemap.urls`。
+> 能動但繞過官方機制、與 content schema 脫鉤，已棄用。
+
+### XSL 預覽標題顯示 `undefined`
+
+瀏覽器開 `/sitemap.xml` 會套 `@nuxtjs/sitemap` 的 XSL 樣式表，`<h1>` 標題由
+`sitemap.xsl.js` 動態讀 **Nuxt Site Config 的 `site.name`**。只設 `site.url`、沒設 `name`
+→ `${siteName}` 字串化成 `"undefined"`。補 `site.name` 即可（此 key 也供 OG / 其他 SEO 共用）。
+
+- 此 XSL 由 worker **執行時**產生（dist 無預渲染檔）→ 改 `site.name` **必須重新 build**，worker bundle 才更新。
+- XSL 帶 `Cache-Control: max-age`，**瀏覽器會快取**：worker 已更新仍可能看到舊的 undefined。
+  驗證用 `curl -s .../__sitemap__/style.xsl | grep '<h1>'`（繞過快取）；瀏覽器端用無痕／`Cmd+Shift+R`。
+- 此標題純預覽裝飾，不影響 XML 內容與 Google 解析。
+
+---
+
+## Contact form 為何用 Resend send 而非 inbound/receive
+
+訪客是用 **HTTP 表單**送出，不是寄 email——資料 POST 進來時 server 早就拿到了，**沒有任何 email 需要被「接收」**。
+`mail.ts` 的 Resend **send** 只是把已到手的資料主動推一封通知信到站長信箱，方便用現成 inbox 讀 + `reply_to` 回覆。
+
+- **Resend inbound** 解決的是「別人真的寄 email 到某地址、要讓程式處理」：需設網域 MX、收到是 webhook（非可讀信箱），還得自己存/轉寄。用在 contact form 上 = 把自己的資料寄出去再收回來，繞圈且無意義。
+- 若需求是「想要 `xxx@grayson512portfolio.dpdns.org` 收件地址」→ 那是 **Cloudflare Email Routing**（免費轉寄到真信箱），與 contact form 無關。
+- 替代設計：表單不寄信、直接存 D1 再做後台頁。可行但要多寫 UI，不如推到現成 inbox 簡單——當初的取捨。

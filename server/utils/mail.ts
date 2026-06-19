@@ -17,7 +17,7 @@ export async function sendContactEmail(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'onboarding@resend.dev', // Resend shared test domain; swap to contact@grayson.cc once the domain is verified
+      from: 'onboarding@resend.dev', // Resend shared test domain; swap to contact@grayson512portfolio.dpdns.org once the domain is verified
       to: toEmail,
       reply_to: payload.email,
       subject: `[Contact] ${payload.topic} — message from ${payload.name}`,

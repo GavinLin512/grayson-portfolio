@@ -73,6 +73,13 @@
 
     <div class="mt-[80px]">
       <div class="border-t border-line mb-[48px]">
+        <span class="font-mono text-[15px] opacity-70">— webmentions</span>
+      </div>
+      <Webmentions :target="`https://grayson512portfolio.dpdns.org${route.path}`" />
+    </div>
+
+    <div class="mt-[80px]">
+      <div class="border-t border-line mb-[48px]">
         <span class="font-mono text-[15px] opacity-70">— comments</span>
       </div>
       <Comments :slug="slug" />

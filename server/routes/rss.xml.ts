@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
 
   const posts = await queryCollection(event, 'blog').order('date', 'DESC').all()
 
-  const siteUrl = 'https://grayson.cc'
+  const siteUrl = 'https://grayson512portfolio.dpdns.org'
 
   const items = posts
     .map((post) => {
