@@ -13,16 +13,16 @@
 |------|--------|------|
 | `server/utils/mail.ts` 的 `from` | `onboarding@resend.dev` | Resend 共用測試網域，免驗證即可寄信 |
 | `.env` `NUXT_PUBLIC_CONTACT_EMAIL` | `gallerialin512@icloud.com` | `onboarding@resend.dev` 測試模式**只能寄到註冊 Resend 帳號的信箱** |
-| `.env` Turnstile key | **Cloudflare 官方測試 key**（site `1x0000…AA`、secret `1x0000…AA`） | 正式 key 綁定 `grayson.cc` 網域，在 localhost 會「unable to connect」；測試 key 不限網域且永遠通過 |
+| `.env` Turnstile key | **Cloudflare 官方測試 key**（site `1x0000…AA`、secret `1x0000…AA`） | 正式 key 綁定 `grayson512portfolio.dpdns.org` 網域，在 localhost 會「unable to connect」；測試 key 不限網域且永遠通過 |
 
 ### 上線前必做切換
 
-- [ ] **驗證 `grayson.cc` 網域**：Resend → Domains → 加 `grayson.cc` → 把 Resend 給的 DNS records（TXT/MX）加進該網域的 DNS 提供商 → Verify
-- [ ] **`mail.ts` 的 `from`** 換回 `contact@grayson.cc`（網域驗證通過後才可用）
+- [ ] **驗證 `grayson512portfolio.dpdns.org` 網域**：Resend → Domains → 加 `grayson512portfolio.dpdns.org` → 把 Resend 給的 DNS records（TXT/MX）加進該網域的 DNS 提供商 → Verify
+- [ ] **`mail.ts` 的 `from`** 換回 `contact@grayson512portfolio.dpdns.org`（網域驗證通過後才可用）
 - [ ] **`NUXT_PUBLIC_CONTACT_EMAIL`** 換成正式收件信箱（驗證網域後 Resend 才允許寄給任意收件人）
 - [ ] **Cloudflare Pages → Settings → Environment Variables** 設定正式 secrets（變數名須與 `.env` 一致）：
   - `NUXT_PUBLIC_TURNSTILE_SITE_KEY`、`NUXT_TURNSTILE_SECRET_KEY`、`NUXT_RESEND_API_KEY`、`NUXT_PUBLIC_CONTACT_EMAIL`
-  - 正式 Turnstile key 在 Cloudflare Turnstile 後台建立，網域設 `grayson.cc`
+  - 正式 Turnstile key 在 Cloudflare Turnstile 後台建立，網域設 `grayson512portfolio.dpdns.org`
   - **Widget Mode 設「Invisible」**：`refine-contact-design` 後設計為隱形驗證（畫面只留「· protected by friendliness, not captcha」caption，無可見方塊）。render 用 `execution:'execute'`，挑戰延到**送出時**才跑——故載入畫面不會有 widget（即使本機測試 key 也一樣）；本機**按下送出後**才會看到測試 key 的「Verifying…」方塊，屬正常。
   - 不寫進 repo（依 `security.md` §4）
 - [ ] **KV namespace**：`npx wrangler kv namespace create RATE_LIMIT`，把回傳 id 填入 `wrangler.toml`（注意是 `kv namespace`，不是舊語法 `kv:namespace`）
@@ -44,7 +44,7 @@
 ### 觀念備忘
 
 - Resend 是**寄信服務**，不是收件匣；信最終寄到 `NUXT_PUBLIC_CONTACT_EMAIL`。
-- 收件地址想用 `xxx@grayson.cc` 時，可另設 Cloudflare Email Routing 轉寄到實際信箱（非必要）。
+- 收件地址想用 `xxx@grayson512portfolio.dpdns.org` 時，可另設 Cloudflare Email Routing 轉寄到實際信箱（非必要）。
 - 本機 KV 不可用時 `checkRateLimit` 直接放行（rate limit 只在 Cloudflare 環境生效）。
 
 ### 驗證 rate limit（task 9.2）
@@ -73,3 +73,30 @@ npx wrangler pages dev dist --kv RATE_LIMIT --port 8788 --compatibility-date 202
 - 驗證：`pnpm build` 後 `dist/pagefind/pagefind.js` 應存在，`dist/_routes.json` 的 exclude 應含 `/pagefind/*`，pagefind log 顯示已索引 16 頁。
 - 本機要看效果用 `npx wrangler pages dev dist`（**改 `_routes.json` 後需重啟** wrangler 才生效）；純靜態 server（如 `python -m http.server`）不讀 `_routes.json`，所以本來就能載入 pagefind。
 - 本機 `pnpm dev` 無索引（`/pagefind/pagefind.js` 404），SearchModal 顯示「Search index not built」屬正常。
+
+---
+
+## Node 版本（Cloudflare Pages build）
+
+**不需要設 `NODE_VERSION`。** Cloudflare Pages 目前的 v3 build system 預設就是 **Node 22**（依官方文件），與本專案需求相符。
+
+- 所以 task 4.6 的 `NODE_VERSION=22` 可略過，也**不需** `.node-version` / `.nvmrc` 檔。
+- 僅在「想鎖更高版本」或「未來預設變動想固定」時，才於 repo 根目錄放 `.node-version`（內容如 `22`）顯式指定——此檔是 build-time 設定，須進 git 才會被讀到。
+
+---
+
+## Secret vs Vars（環境變數設定）
+
+Cloudflare Pages 的設定值分兩類，處理方式不同：
+
+| 類型 | 範例 | 放哪裡 | 進 git？ | 生效方式 |
+|------|------|--------|----------|----------|
+| **Secret（機密）** | `NUXT_RESEND_API_KEY`、`NUXT_TURNSTILE_SECRET_KEY`、`NUXT_OAUTH_GITHUB_CLIENT_SECRET`、`NUXT_SESSION_PASSWORD` | Dashboard → Settings → Environment Variables（值設為 encrypt、**設定後不可見**），或 CLI `wrangler pages secret put` | **否** | **需重新 deploy 才生效**（不會套用到既有 deployment）|
+| **Vars（公開、非機密）** | `NUXT_PUBLIC_CONTACT_EMAIL`、`NUXT_PUBLIC_TURNSTILE_SITE_KEY`、`NUXT_SITE_URL`、`NUXT_SITE_NAME` | `wrangler.toml` 的 `[vars]` | **是** | deploy 時自動帶入 |
+
+重點：
+
+- **Secret 絕不寫進 `wrangler.toml` / 任何進 git 的檔**（明文外洩，違反 security.md §4）。
+- Secret 在 Dashboard 設定值後就**看不到原值**，只能覆寫；要改值就重設一次。
+- 設 / 改 secret 後**一定要重新 deploy**（push 觸發 build，或 `wrangler pages deploy dist`），舊 deployment 不會自動吃到新值。
+- 程式讀取見 `.claude/docs/decisions.md`：CF runtime 沒有 `process.env`，server 端須 `useRuntimeConfig(event)`（**帶 event**）才讀得到。

@@ -50,7 +50,7 @@
             <p class="font-mono text-[12px] leading-[1.55] opacity-85">
               github · @grayson<br />
               read.cv · /grayson<br />
-              email · hi@grayson.cc<br />
+              email · graysonlin512@gmail.com<br />
               cv · <a href="/resume.pdf" download class="underline">/resume.pdf</a>
             </p>
           </div>
