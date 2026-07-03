@@ -10,6 +10,20 @@ html {
   --line:  #d0c4b0;
   --cool:  #4a7a94;
   --warm:  #c06040;
+
+  /* Type scale — single source of truth (rem, master base = html 16px).
+     Change a value here to update it everywhere; change html font-size to
+     scale the whole site proportionally. Tailwind fontSize + prose both
+     reference these. */
+  --text-12:  0.75rem;
+  --text-14:  0.875rem;
+  --text-16:  1rem;
+  --text-20:  1.25rem;
+  --text-28:  1.75rem;
+  --text-40:  2.5rem;
+  --text-64:  4rem;
+  --text-96:  6rem;
+  --text-144: 9rem;
 }
 
 .dark {

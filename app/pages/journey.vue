@@ -19,17 +19,17 @@
             <div class="absolute bg-ink w-[8px] h-[8px]" style="left: -31px; top: 4px;" />
 
             <!-- Year label -->
-            <p class="font-mono text-[11px] tracking-wider opacity-60 uppercase">
+            <p class="font-mono text-12 tracking-wider opacity-60 uppercase">
               {{ yearLabel(entry) }}
             </p>
 
             <!-- Company · Role -->
-            <h3 class="font-mincho text-[28px] leading-tight mt-1">
+            <h3 class="font-mincho text-28 leading-tight mt-1">
               {{ entry.company }} · {{ entry.role }}
             </h3>
 
             <!-- Description -->
-            <p class="font-mono text-[12px] opacity-70 mt-1">
+            <p class="font-mono text-12 opacity-70 mt-1">
               {{ entry.description }}
             </p>
 
@@ -43,10 +43,10 @@
 
       <!-- Right: Resume card -->
       <div class="hidden lg:flex flex-col">
-        <p class="font-mono text-[11px] opacity-60">resume · cv</p>
+        <p class="font-mono text-12 opacity-60">resume · cv</p>
 
         <div class="border border-ink mt-3 p-5">
-          <div class="flex justify-between items-center font-mono text-[12px]">
+          <div class="flex justify-between items-center font-mono text-12">
             <span>grayson_lin · cv · 2026.pdf</span>
             <span class="opacity-50">178 kb</span>
           </div>
@@ -62,21 +62,21 @@
             <a
               href="/resume.pdf"
               download
-              class="font-mono text-[12px] bg-ink text-bg px-5 py-2 hover:opacity-80 transition-opacity"
+              class="font-mono text-12 bg-ink text-bg px-5 py-2 hover:opacity-80 transition-opacity"
             >
               ↓ download pdf
             </a>
             <a
               href="/resume.pdf"
               target="_blank"
-              class="font-mono text-[12px] border border-ink px-5 py-2 hover:bg-ink hover:text-bg transition-colors"
+              class="font-mono text-12 border border-ink px-5 py-2 hover:bg-ink hover:text-bg transition-colors"
             >
               preview
             </a>
           </div>
         </div>
 
-        <p class="font-hand text-[17px] mt-5 opacity-80 leading-relaxed">
+        <p class="font-hand text-16 mt-5 opacity-80 leading-relaxed">
           also available — JSON resume ↗<br />
           &amp; a one-page edition.
         </p>

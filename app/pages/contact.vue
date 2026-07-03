@@ -5,17 +5,17 @@
     <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-[80px]">
       <!-- Left column: hero + contact info -->
       <div class="flex flex-col">
-        <h1 class="font-mincho text-[40px] leading-[1.1]">
+        <h1 class="font-mincho text-40 leading-[1.1]">
           say hello,<br />or send a postcard.
         </h1>
 
-        <p class="font-mono text-[12px] leading-[1.6] opacity-70 mt-[22px]">
+        <p class="font-mono text-12 leading-[1.6] opacity-70 mt-[22px]">
           i answer within a few days. for work,<br />
           tell me the shape of the problem.
         </p>
 
         <div class="border-t border-line mt-[40px] pt-[28px] space-y-[14px]">
-          <div class="flex justify-between font-mono text-[12px]">
+          <div class="flex justify-between font-mono text-12">
             <span class="opacity-60 lowercase">email</span>
             <a
               :href="`mailto:${config.public.contactEmail}`"
@@ -24,7 +24,7 @@
               {{ config.public.contactEmail }}
             </a>
           </div>
-          <div class="flex justify-between font-mono text-[12px]">
+          <div class="flex justify-between font-mono text-12">
             <span class="opacity-60 lowercase">github</span>
             <a
               href="https://github.com/grayson"
@@ -35,7 +35,7 @@
               @grayson
             </a>
           </div>
-          <div class="flex justify-between font-mono text-[12px]">
+          <div class="flex justify-between font-mono text-12">
             <span class="opacity-60 lowercase">read.cv</span>
             <a
               href="https://read.cv/grayson"
@@ -46,7 +46,7 @@
               /grayson
             </a>
           </div>
-          <div class="flex justify-between font-mono text-[12px]">
+          <div class="flex justify-between font-mono text-12">
             <span class="opacity-60 lowercase">location</span>
             <span class="opacity-85">taipei · GMT+8</span>
           </div>
@@ -55,36 +55,36 @@
 
       <!-- Right column: form or success -->
       <div class="flex flex-col h-full">
-        <p v-if="submitted" class="font-hand text-[20px] opacity-90">
+        <p v-if="submitted" class="font-hand text-20 opacity-90">
           — thanks. i'll write back soon.
         </p>
 
         <form v-else @submit.prevent="handleSubmit" class="flex flex-col h-full gap-[20px]">
           <div>
-            <label class="font-mono text-[11px] opacity-60 lowercase block">name</label>
+            <label class="font-mono text-12 opacity-60 lowercase block">name</label>
             <input
               v-model="form.name"
               name="name"
               required
               autocomplete="name"
-              class="w-full h-[38px] border border-ink bg-paper mt-[6px] px-3 font-mono text-[12px] outline-none focus:opacity-100"
+              class="w-full h-[38px] border border-ink bg-paper mt-[6px] px-3 font-mono text-12 outline-none focus:opacity-100"
             />
           </div>
 
           <div>
-            <label class="font-mono text-[11px] opacity-60 lowercase block">email</label>
+            <label class="font-mono text-12 opacity-60 lowercase block">email</label>
             <input
               v-model="form.email"
               name="email"
               type="email"
               required
               autocomplete="email"
-              class="w-full h-[38px] border border-ink bg-paper mt-[6px] px-3 font-mono text-[12px] outline-none focus:opacity-100"
+              class="w-full h-[38px] border border-ink bg-paper mt-[6px] px-3 font-mono text-12 outline-none focus:opacity-100"
             />
           </div>
 
           <div>
-            <label class="font-mono text-[11px] opacity-60 lowercase block">what kind of message?</label>
+            <label class="font-mono text-12 opacity-60 lowercase block">what kind of message?</label>
             <div class="flex gap-[8px] mt-[10px]">
               <button
                 v-for="t in topics"
@@ -92,7 +92,7 @@
                 type="button"
                 @click="form.topic = t"
                 :class="form.topic === t ? 'bg-ink text-bg' : 'border border-ink'"
-                class="font-mono text-[12px] px-[14px] py-[5px] rounded-full transition-colors"
+                class="font-mono text-12 px-[14px] py-[5px] rounded-full transition-colors"
               >
                 {{ t }}
               </button>
@@ -100,12 +100,12 @@
           </div>
 
           <div class="flex-1 flex flex-col min-h-0">
-            <label class="font-mono text-[11px] opacity-60 lowercase block">message</label>
+            <label class="font-mono text-12 opacity-60 lowercase block">message</label>
             <textarea
               v-model="form.message"
               name="message"
               required
-              class="flex-1 w-full min-h-[120px] border border-ink bg-paper mt-[6px] px-3 py-2 font-mono text-[12px] resize-none outline-none focus:opacity-100"
+              class="flex-1 w-full min-h-[120px] border border-ink bg-paper mt-[6px] px-3 py-2 font-mono text-12 resize-none outline-none focus:opacity-100"
             />
           </div>
 
@@ -125,14 +125,14 @@
             aria-hidden="true"
           />
 
-          <p v-if="errorMsg" class="font-mono text-[12px] opacity-80">{{ errorMsg }}</p>
+          <p v-if="errorMsg" class="font-mono text-12 opacity-80">{{ errorMsg }}</p>
 
           <div class="flex items-center justify-between">
-            <span class="font-mono text-[12px] opacity-50">· protected by friendliness, not captcha</span>
+            <span class="font-mono text-12 opacity-50">· protected by friendliness, not captcha</span>
             <button
               type="submit"
               :disabled="loading"
-              class="font-mono text-[12px] bg-ink text-bg px-5 py-2 hover:opacity-85 transition-opacity disabled:opacity-40"
+              class="font-mono text-12 bg-ink text-bg px-5 py-2 hover:opacity-85 transition-opacity disabled:opacity-40"
             >
               {{ loading ? (turnstileToken ? 'sending...' : 'verifying...') : 'send →' }}
             </button>

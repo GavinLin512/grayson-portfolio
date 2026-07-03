@@ -37,25 +37,25 @@ const { data: mentions } = useFetch<Mention[]>('/api/webmentions', {
       />
       <div
         v-else
-        class="w-8 h-8 rounded-full shrink-0 mt-0.5 bg-ink/10 flex items-center justify-center font-mono text-[11px] opacity-60"
+        class="w-8 h-8 rounded-full shrink-0 mt-0.5 bg-ink/10 flex items-center justify-center font-mono text-12 opacity-60"
       >
         ?
       </div>
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-3 flex-wrap">
-          <span class="font-mono text-[11px]">{{ mention.author?.name ?? 'anonymous' }}</span>
+          <span class="font-mono text-12">{{ mention.author?.name ?? 'anonymous' }}</span>
           <a
             :href="mention.source"
             target="_blank"
             rel="noopener noreferrer"
-            class="font-mono text-[11px] opacity-40 hover:opacity-70 transition-opacity truncate max-w-[240px]"
+            class="font-mono text-12 opacity-40 hover:opacity-70 transition-opacity truncate max-w-[240px]"
           >
             {{ mention.source }}
           </a>
         </div>
         <p
           v-if="mention.text"
-          class="font-mono text-[12px] opacity-70 line-clamp-3"
+          class="font-mono text-12 opacity-70 line-clamp-3"
         >
           {{ mention.text }}
         </p>

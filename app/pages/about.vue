@@ -9,12 +9,12 @@
         <HatchPortrait class="hidden lg:block" :size="320" />
         <HatchPortrait class="block lg:hidden" :size="240" />
         <div class="flex-1" />
-        <p class="font-hand text-[20px] opacity-90">— grayson, somewhere in taipei.</p>
+        <p class="font-hand text-20 opacity-90">— grayson, somewhere in taipei.</p>
       </div>
 
       <!-- Right Column -->
       <div>
-        <h1 class="font-mincho text-[42px] leading-[1.15] max-w-[680px]">
+        <h1 class="font-mincho text-40 leading-[1.15] max-w-[680px]">
           I make interfaces that try to stay out of the way.
         </h1>
 
@@ -34,20 +34,20 @@
         <!-- 2×2 snapshot grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-[60px] gap-y-[32px] mt-[48px]">
           <div>
-            <div class="font-mono text-[11px] opacity-60 mb-[6px] lowercase">now</div>
-            <p class="font-mono text-[12px] leading-[1.55] opacity-85">
+            <div class="font-mono text-12 opacity-60 mb-[6px] lowercase">now</div>
+            <p class="font-mono text-12 leading-[1.55] opacity-85">
               lead frontend at hina · writing a small book on grids
             </p>
           </div>
           <div>
-            <div class="font-mono text-[11px] opacity-60 mb-[6px] lowercase">previously</div>
-            <p class="font-mono text-[12px] leading-[1.55] opacity-85">
+            <div class="font-mono text-12 opacity-60 mb-[6px] lowercase">previously</div>
+            <p class="font-mono text-12 leading-[1.55] opacity-85">
               field llc · hatch · mori · taught a tiny class on css
             </p>
           </div>
           <div>
-            <div class="font-mono text-[11px] opacity-60 mb-[6px] lowercase">elsewhere</div>
-            <p class="font-mono text-[12px] leading-[1.55] opacity-85">
+            <div class="font-mono text-12 opacity-60 mb-[6px] lowercase">elsewhere</div>
+            <p class="font-mono text-12 leading-[1.55] opacity-85">
               github · @grayson<br />
               read.cv · /grayson<br />
               email · graysonlin512@gmail.com<br />
@@ -55,8 +55,8 @@
             </p>
           </div>
           <div>
-            <div class="font-mono text-[11px] opacity-60 mb-[6px] lowercase">away from screens</div>
-            <p class="font-mono text-[12px] leading-[1.55] opacity-85">
+            <div class="font-mono text-12 opacity-60 mb-[6px] lowercase">away from screens</div>
+            <p class="font-mono text-12 leading-[1.55] opacity-85">
               brewing tea, walking long routes, collecting small ceramic things
             </p>
           </div>

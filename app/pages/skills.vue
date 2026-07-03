@@ -11,7 +11,7 @@
           class="flex flex-col"
           :class="offsets[i]"
         >
-          <p class="font-mono text-[11px] tracking-wider opacity-50">
+          <p class="font-mono text-12 tracking-wider opacity-50">
             {{ cat.index }} / {{ cat.label }}
           </p>
           <div class="border-t border-line mt-[12px]" />
@@ -21,7 +21,7 @@
             :key="skill.name"
             class="flex items-center justify-between py-[11px] border-b border-dotted border-line"
           >
-            <span class="font-mincho text-[18px] leading-none">{{ skill.name }}</span>
+            <span class="font-mincho text-20 leading-none">{{ skill.name }}</span>
             <SkillMeter :level="skill.level" />
           </div>
         </div>
@@ -30,12 +30,12 @@
       <!-- bottom annotations -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mt-auto pt-[48px]">
         <div class="lg:col-span-2">
-          <p class="font-mono text-[11px] tracking-wider opacity-50 mb-2">currently learning</p>
-          <p class="font-hand text-[19px] opacity-80">{{ skills?.currentlyLearning }}</p>
+          <p class="font-mono text-12 tracking-wider opacity-50 mb-2">currently learning</p>
+          <p class="font-hand text-20 opacity-80">{{ skills?.currentlyLearning }}</p>
         </div>
         <div class="lg:col-span-2">
-          <p class="font-mono text-[11px] tracking-wider opacity-50 mb-2">not interested in</p>
-          <p class="font-hand text-[19px] opacity-80">{{ skills?.notInterested }}</p>
+          <p class="font-mono text-12 tracking-wider opacity-50 mb-2">not interested in</p>
+          <p class="font-hand text-20 opacity-80">{{ skills?.notInterested }}</p>
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@
     }"
   >
     <div
-      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-ink bg-bg px-[14px] py-[8px] font-mono text-[11px]"
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-ink bg-bg px-[14px] py-[8px] font-mono text-12"
     >
       {{ label }}
     </div>

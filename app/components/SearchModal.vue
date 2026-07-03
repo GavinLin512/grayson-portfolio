@@ -14,10 +14,10 @@
           v-model="query"
           type="text"
           placeholder="search posts & projects…"
-          class="w-full h-[38px] bg-paper border border-ink px-3 font-mono text-[13px] outline-none"
+          class="w-full h-[38px] bg-paper border border-ink px-3 font-mono text-12 outline-none"
         />
 
-        <p v-if="unavailable" class="font-mono text-[12px] opacity-60 mt-5 leading-[1.6]">
+        <p v-if="unavailable" class="font-mono text-12 opacity-60 mt-5 leading-[1.6]">
           Search index not built. Run <code class="border border-line px-1">pnpm build</code> to enable search.
         </p>
 
@@ -28,14 +28,14 @@
               class="group block w-full text-left border-b border-line py-[18px] hover:opacity-80 transition-opacity"
               @click="go(r.url)"
             >
-              <h3 class="font-mincho text-[18px] leading-[1.25] mb-[6px]">{{ r.title }}</h3>
+              <h3 class="font-mincho text-20 leading-[1.25] mb-[6px]">{{ r.title }}</h3>
               <!-- excerpt is Pagefind-generated from our own indexed pages (contains <mark> highlights) -->
-              <p class="font-mono text-[12px] opacity-55 leading-[1.5]" v-html="r.excerpt" />
+              <p class="font-mono text-12 opacity-55 leading-[1.5]" v-html="r.excerpt" />
             </button>
           </li>
           <li
             v-if="query.trim() && !results.length && !loading"
-            class="font-mono text-[12px] opacity-50 py-[20px]"
+            class="font-mono text-12 opacity-50 py-[20px]"
           >
             no matches for "{{ query }}"
           </li>
