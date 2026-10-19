@@ -142,3 +142,113 @@ content v3 改用 **auto-import 的 `queryCollection(event, 'collection')`**（�
 - **Resend inbound** 解決的是「別人真的寄 email 到某地址、要讓程式處理」：需設網域 MX、收到是 webhook（非可讀信箱），還得自己存/轉寄。用在 contact form 上 = 把自己的資料寄出去再收回來，繞圈且無意義。
 - 若需求是「想要 `xxx@grayson512portfolio.dpdns.org` 收件地址」→ 那是 **Cloudflare Email Routing**（免費轉寄到真信箱），與 contact form 無關。
 - 替代設計：表單不寄信、直接存 D1 再做後台頁。可行但要多寫 UI，不如推到現成 inbox 簡單——當初的取捨。
+
+---
+
+## 首頁時針與星座為何在自動化（Argos）下要凍結
+
+### 問題
+
+首頁星盤的時針指向**真實時刻**、星座線由 canvas 逐段畫出再淡去。這兩者都依賴時間 / 計時器：
+CSS 動畫可被 Playwright 的 `animations: 'disabled'` 快轉到終態，但 **JS 驅動的內容不會**。
+不處理的話，Argos 每次截圖時針角度不同、星座畫到不同進度 → 首頁每次都假性 diff。
+
+### 做法
+
+與光塵 / 流星 / 開場一致，以 `navigator.webdriver` 偵測自動化並走確定性路徑：
+
+- 時針：不呼叫 `setHand()`，停在 `rotate(0deg)`（XII）。
+- 星座：不跑 rAF 狀態機，改單次以 0.18 alpha 靜態畫出三組（reduced-motion 同此路徑）。
+- 光塵、流星、開場：既有行為，同樣略過。
+
+一般使用者（含 `prefers-reduced-motion`）仍看到**真實時刻**的時針——reduced-motion 只關掉緩動，不該連資訊一起關。
+
+### 驗證
+
+模擬 Argos 條件（`navigator.webdriver = true`、`page.screenshot({ animations: 'disabled' })`）
+於 `.qc-play` 之後分三個時間點連拍，三張 SHA-1 相同。
+
+> 注意：驗證**一般使用者體驗**時，Playwright 預設啟動會讓 `navigator.webdriver = true`，JS 特效全被略過、看不到動態。
+> 需 `ignoreDefaultArgs: ['--enable-automation']` + `--disable-blink-features=AutomationControlled`。
+
+---
+
+## 手機版 nav / footer 為何收成 footer 抽屜
+
+### 問題
+
+- 原本 header 的 7 個連結加控制區約 950px，完全沒有 RWD：390px 被截斷，768px 也會。
+- guestbook 只在 footer 有入口，不在 `navItems`。
+- 首頁用 `default` layout（`h-screen overflow-hidden`），多一列或多一條底部列都會直接吃掉 hero 高度。
+
+### 做法
+
+- 斷點用 `lg`（1024px）。`lg` 以上桌機 markup 完全不動（Argos 只截桌機 viewport，基準圖不受影響）。
+- 手機版 header 只留 logo 與搜尋；footer 變成 sticky 底欄（目前頁名稱 + 實心 `menu` 膠囊），點開向上展開目錄：8 頁（含 guestbook）、EN、深淺色。
+- 評估後放棄的：全螢幕覆蓋層（換頁要點兩次）、橫向捲動第二列（首頁多吃約 76px）、當前頁選擇器（頁碼與 PageHeader 對不上，about / journey 原本就重複為 06）、底部 5 欄導覽（像 app，不像文件）。
+- 此方案最大風險是入口藏在一次點擊後，所以底欄用 paper 底色、實心膠囊、並讓箭頭在載入後上浮三次（用 `translate`，可與開啟時的 `rotate` 疊加）。
+- `default.vue` 的 `h-screen` 改 `h-dvh`，避免 iOS 網址列蓋住底欄。
+
+### 陷阱
+
+- Teleport 到 `body` 的內容**不繼承** layout 根節點的 `text-ink`，暗色下文字會變黑。傳送出去的容器要自己加 `text-ink`。
+- `bg-ink/30`、`border-ink/60` 這類透明度修飾詞對 `var(--x)` 色票**不會產生 class**（`tailwind.config.ts` 的色票是裸 `var()`，沒有 `<alpha-value>`）。遮罩改用 `bg-black opacity-30`。既有的 `SearchModal` 遮罩與 header 的 `kbd` 邊框有同樣問題，尚未修。
+- 範本裡直接使用自動匯入的函式／常數不可靠（新增 composable 後曾出現 `_ctx.padNum is not a function`），要在 `<script setup>` 明確 import。
+- 選單開啟時鎖背景捲動；換頁、按 Esc、視窗放大到桌機寬度都要關閉（`useDisclosure`）。點到目前所在頁的連結不會換頁，所以連結要自己 `@click="close"`。
+
+### 尚未處理
+
+開啟時的焦點鎖定、關閉後還原焦點。
+
+---
+
+## 桌機版調色盤：可拖曳 chip，預設在右下角
+
+### 問題
+
+- 原本 `fixed right-[60px] bottom-[112px]`：首頁壓到右下角的頁框角飾（角飾是 84px，註解還寫 72px），內容頁則浮在文字上，沒有對齊任何東西。
+- 後來的 hover 扇形（放在 header 右側）要 hover 才出現，不直覺，所以改成常駐的 chip。
+
+### 做法
+
+- `ink/Chip.vue`：一顆小膠囊顯示目前墨水名稱，點開橫向展開墨色與清除；可拖曳，吸附左右邊，位置記在 `localStorage['ink-chip']`。`InkPen` 仍是全域 `fixed`（畫布與筆跡要跨頁保留）。
+- 預設位置（`.is-home`，`y == null`，由 CSS 決定）：所有寬度都是 `right:40px; bottom:156px`。`right:40px` 是為了讓開首頁頁框的右緣線與刻度（24px 加刻度），`bottom:156px` 讓開 footer 與頁框底部的裝飾。
+- 曾試過兩個預設位置，都被放棄：
+  - header 右端（與 Search 同高，`SiteHeader` 留空位）：1024px 時 header 只剩約 69px 餘裕放不下 chip，要加寬度門檻與「被拖走就釋放空位」的邏輯。
+  - 右側、與首頁小字「portfolio of grayson」同高（`top:200px`）：1280 寬的 `/about` 會壓到標題尾端。
+- 橡皮擦（`useInk` 的 `eraser`，chip 的 `eraser` 按鈕與墨色同屬一個 radiogroup，選墨色即關掉橡皮擦）：固定 24px 直徑，擦過的任何位置都清掉。每一道擦痕都記進 `strokes`（`erase: true`）並依序重播，不能只在畫布上用 `destination-out` 擦掉就算。原因：`onDown` / `endStroke` 會加減 `<html>` 的 `ink-noselect` class，`MutationObserver` 因此在每次按下、放開都 `redrawPerm()`，再加上換主題與縮放，只擦像素的話下一次點擊就會把墨跡重畫回來。
+  - 每次擦都包在 `save()` / `restore()`，`destination-out` 不能漏到後面的畫筆，否則之後的筆會變成橡皮擦。
+  - 橡皮擦沒有懸停拖尾與墨點：游標移動不留軌跡，單擊擦一個圓點（也記成一道擦痕）。
+  - 頁面沒有可見游標，所以橡皮擦用一個同寬的圓環當游標、隱藏筆的圖示；chip 的主按鈕顯示橡皮擦圖示與名稱。
+  - 橡皮擦可以從連結、按鈕上開始擦（`/projects`、`/journal` 整列都是連結，規格是「任意位置」），只擋 chip 本身與表單欄位；畫筆仍然不能從連結、按鈕上開始。
+    - 從連結上開始的擦除一旦拖過 4px 就算拖曳：在 window 捕獲階段吞掉接著的 click（`preventDefault` + `stopPropagation`），不會跳頁。沒拖動的單純點擊仍然是正常點擊，也不會擦出圓點。
+    - 吞 click 的旗標在下一次 `pointerdown` 與 `pointerup` 後的 `setTimeout(0)` 清掉：從連結拖到別處放開時瀏覽器可能不會產生 click，否則旗標會吃掉使用者下一次真正的點擊。
+  - 圓環按下時不縮小（曾縮到 0.88，但實際擦除寬度不變，圓環會比實際擦的範圍小），只加深邊線。游標在 chip 上時改顯示筆的圖示、隱藏圓環，免得 24px 圓環壓在 18px 色點上不好選色。
+  - `InkPen` 的監聽器是在 `onMounted` 的 `await` 之後才掛，`onBeforeUnmount` 在那裡註冊不上（就是一直出現的警告），HMR 重新掛載會留下舊的監聽器與 `requestAnimationFrame` 迴圈。改成在 setup 同步註冊 `onBeforeUnmount`，由它呼叫 `onMounted` 內設定的 `cleanup`。
+- 曾做過四檔固定寬度的筆粗細選項（寬度改成每筆固定、收尖改依路徑距離），使用者決定不要，已撤回，維持原本由速度決定的寬度（慢則粗、快則細）。
+
+### 陷阱
+
+- 選墨色後自動收合；Esc 與任何一次在別處按下（同時也是開始畫線）也收合。
+- `.chip-more` 的 `overflow: hidden` 會裁掉選中色點的外框，所以要有垂直 padding。
+- 拖曳：在抓手上單純點一下（移動 < 4px）不算移動，否則會把預設位置改成「已移動」並存起來。雙擊抓手回預設位置。拖曳範圍夾在 header 之下（`TOP = 64`）與 footer 之上。
+- 位置在 `onMounted` 才從 `localStorage` 還原，所以移動過的人重新整理時 chip 會從預設位置跳到記住的位置一次；SSR 與預設位置不受影響。
+- 桌機截圖會變：`InkPen` 在 Playwright 下也會出現（`pointer: fine`），chip 會出現在所有桌機基準圖，Argos 需重新核准。
+- 評估過五案（邊緣墨軌、書籤緞帶、點擊色卡、筆尖輪盤、可拖曳小盤），選可拖曳小盤；`?pal=` 預覽切換與其餘四案已移除。輪盤靠右鍵與熱鍵，沒有可見入口；緞帶與色卡只在 `lg` 以上才有。
+
+---
+
+## 手機版背景：光與空氣
+
+### 做法
+
+- 評估過三案：頁框（首頁加縮小的頁框）、光與空氣、觸碰與時辰。選「光與空氣」，因為它是全站、純 CSS、沒有 JS 與事件監聽，其餘兩案只作用在首頁。
+- `BgLayer`（`app/components/bg/Layer.vue`）掛在 `default` 與 `content` 兩個 layout 的第一個子節點，`lg:hidden fixed inset-0 z-[-1]`，由紙到金的色調漸層、底部暖色燭光（7 秒呼吸）、紙紋三層組成。
+- 首頁在手機另外讓半露的星盤（`max-lg:left-[100%] max-lg:top-[27%] max-lg:scale-[.66]`）與五顆星芒（`MOBILE_STARS`）顯示，並關掉首頁自己的紙紋（`max-lg:hidden`）避免與 `BgLayer` 的紙紋疊加。這些全是 `max-lg:` 修飾，桌機輸出不變。
+
+### 陷阱
+
+- 負 z-index 的背景層要靠兩個 layout 根節點的 `isolate` 才會畫在 `bg-bg` 之上；目前沒有任何頁面用負 z-index，加 `isolate` 是安全的。之後若新增負 z-index 要留意。
+- 不用 `filter: blur`、`mix-blend-mode`、`background-attachment: fixed`（iOS 效能與相容性），只用 transform / opacity。
+- 手機上唯一持續重繪的是星盤內環（160 秒轉一圈）。若實機發熱，改成靜止即可，其餘都是 opacity。
+- 本案原本做過 `?bg=1~3` 的預覽切換，已移除；選定後不再保留切換機制。

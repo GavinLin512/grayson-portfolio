@@ -1,11 +1,11 @@
 <template>
-  <header class="h-14 flex justify-between items-center px-7 border-b border-line bg-bg">
-    <div class="flex items-center gap-3">
+  <header class="lg:h-14 lg:flex lg:justify-between lg:items-center lg:px-7 border-b border-line bg-bg">
+    <div class="hidden lg:flex items-center gap-3">
       <span class="font-mincho text-20 leading-none">◇</span>
       <span class="font-mono text-14 opacity-60">grayson / 2026</span>
     </div>
 
-    <nav class="flex items-center gap-6">
+    <nav class="hidden lg:flex items-center gap-6">
       <NuxtLink
         v-for="item in navItems"
         :key="item.path"
@@ -17,11 +17,16 @@
       </NuxtLink>
     </nav>
 
-    <div class="flex items-center gap-2">
+    <div class="hidden lg:flex items-center gap-2">
       <TagChip>EN</TagChip>
-      <TagChip :active="isDark" @click="toggleDark">
-        {{ isDark ? '◑' : '◯' }}
-      </TagChip>
+      <ClientOnly>
+        <TagChip active @click="toggleDark">
+          {{ isDark ? '◑' : '◯' }}
+        </TagChip>
+        <template #fallback>
+          <TagChip active>◯</TagChip>
+        </template>
+      </ClientOnly>
       <button
         type="button"
         aria-label="Search"
@@ -42,11 +47,14 @@
         </span>
       </button>
     </div>
+
+    <MobileNav part="header" />
   </header>
 </template>
 
 <script setup lang="ts">
 import { Search } from '@lucide/vue'
+import { navItems } from '~/composables/useMobileNav'
 
 const route = useRoute()
 const colorMode = useColorMode()
@@ -62,21 +70,11 @@ onMounted(() => {
   isMac.value = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
 })
 
-const isDark = computed(() => colorMode.preference === 'dark')
+const isDark = computed(() => colorMode.value === 'dark')
 
 function toggleDark() {
   colorMode.preference = isDark.value ? 'light' : 'dark'
 }
-
-const navItems = [
-  { label: 'index',    path: '/' },
-  { label: 'projects', path: '/projects' },
-  { label: 'journal',  path: '/blog' },
-  { label: 'about',    path: '/about' },
-  { label: 'skills',   path: '/skills' },
-  { label: 'journey',  path: '/journey' },
-  { label: 'contact',  path: '/contact' },
-]
 
 function isActive(path: string) {
   return path === '/' ? route.path === '/' : route.path.startsWith(path)

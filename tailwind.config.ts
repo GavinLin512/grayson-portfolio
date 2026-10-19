@@ -12,6 +12,8 @@ export default {
         line:  'var(--line)',
         cool:  'var(--cool)',
         warm:  'var(--warm)',
+        gold:  'var(--gold)',
+        herb:  'var(--herb)',
       },
       fontFamily: {
         mincho: ['"Shippori Mincho"', 'serif'],

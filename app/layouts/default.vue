@@ -1,5 +1,6 @@
 <template>
-  <div class="bg-bg text-ink h-screen overflow-hidden flex flex-col">
+  <div class="bg-bg text-ink h-dvh overflow-hidden flex flex-col isolate">
+    <BgLayer />
     <SiteHeader />
     <main class="flex-1 overflow-y-auto">
       <slot />
