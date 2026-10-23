@@ -5,31 +5,31 @@
     viewBox="0 0 100 100"
     fill="none"
     stroke="var(--ink)"
-    stroke-width="1.1"
+    stroke-width="1.5"
     stroke-linejoin="round"
     stroke-linecap="round"
   >
-    <!-- dark cigar barrel with rounded tail (pen leans 45°, tip at 6,94) -->
-    <path
-      d="M30.6 61.4 L61.3 31.9 Q66 27.4 69.3 30.6 Q72.5 33.9 68.1 38.7 L38.6 69.4 Z"
-      fill="var(--ink)"
-      fill-opacity="0.9"
-    />
-    <!-- pocket clip -->
-    <path d="M62.8 27.9 Q60 28.7 58.6 31.2 L44.5 45.4" stroke="var(--paper)" stroke-width="1.4" />
-    <!-- cap band -->
-    <path d="M30.9 61.7 L38.4 69.2" stroke-width="0.9" />
-    <!-- grip section -->
-    <path d="M23.7 69.3 L30.7 76.3 L36.6 70.8 L29.2 63.4 Z" fill="var(--paper)" />
-    <!-- large leaf-shaped nib with curved shoulders, tinted with the selected ink -->
-    <path
-      d="M6 94 Q7.5 83 14.4 74.2 Q18.3 70.7 23.7 69.3 L30.7 76.3 Q29.4 81.7 25.8 85.6 Q16.9 92.4 6 94 Z"
-      :fill="nib"
-      fill-opacity="0.95"
-    />
-    <!-- slit + breather hole -->
-    <path d="M6 94 L13.4 86.6" stroke-width="1.1" />
-    <circle cx="15.2" cy="84.8" r="2.6" fill="var(--paper)" />
+    <!-- a quill in pen line, drawn along +x from the nib tip and leaned 45°
+         so the tip lands on (6, 94) with the feather up to the right; only
+         the nib is filled, with the selected ink -->
+    <g transform="translate(6 94) rotate(-45)">
+      <!-- vane outline, wider above the shaft, with a split in it -->
+      <path d="M42 -2.4 C 52 -10 64 -15.5 76 -17 L80 -12.5 L84 -18.2 C 98 -19.5 114 -15 122 -8 Q 126 -4 127 -1 C 124 4 110 9.5 94 10.5 C 76 11.5 56 8 44 2.6 Z" />
+      <!-- rachis and sparse barb hatching -->
+      <path d="M44 0 C 70 -0.4 100 -1 125 -1.4" stroke-width="1.1" />
+      <path
+        d="M50 -0.1 L58 -7.7 M58 -0.2 L66 -9.5 M66 -0.4 L74 -10.8 M74 -0.5 L82 -9.8 M88 -0.8 L96 -13.3 M96 -0.9 L104 -13.3 M104 -1 L112 -11.5 M112 -1.2 L120 -8 M52 -0.1 L59 6 M60 -0.3 L67 7.2 M68 -0.4 L75 8 M76 -0.6 L83 7.9 M84 -0.7 L91 7.6 M92 -0.8 L99 7.2 M100 -1 L107 6.8 M108 -1.1 L115 5.3"
+        stroke-width="0.75"
+        stroke-opacity="0.6"
+      />
+      <!-- loose down at the foot of the vane -->
+      <path d="M42 -2 C 38 -5 35 -6 31 -6.6 M43 2 C 39 4.6 36 5.6 32 6" stroke-width="0.9" />
+      <!-- bare barrel -->
+      <path d="M20 -3.8 L44 -2.8 L44 2.8 L20 3.8 Z" stroke-width="1.2" />
+      <!-- cut nib, tinted with the selected ink, and its slit -->
+      <path d="M0 0 C 4 -1.6 11 -3.6 20 -3.8 L20 3.8 C 11 3.6 4 1.6 0 0 Z" :fill="nib" fill-opacity="0.95" stroke-width="1.2" />
+      <path d="M1.5 0 L12 0" stroke="var(--paper)" stroke-width="0.9" />
+    </g>
   </svg>
 </template>
 

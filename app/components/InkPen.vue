@@ -68,20 +68,39 @@ function blocksErase(t: EventTarget | null) {
     && !!t.closest('.ink-palette, input, textarea, select, [contenteditable]')
 }
 
-// the listeners are attached after an await in onMounted, where
-// onBeforeUnmount cannot be registered: hand the teardown to this one
+// The pen needs a fine pointer (mouse / trackpad) and follows it live: a
+// touch screen can't draw, and DevTools device mode flips it without a
+// reload, so the canvases, cursor and palette come and go with it. `strokes`
+// survives a stop and is replayed on the next start.
+// The listeners are attached after an await, where onBeforeUnmount cannot be
+// registered: hand the teardown to this one
 let cleanup: (() => void) | null = null
-let alive = true
-onBeforeUnmount(() => {
-  alive = false
+let run = 0 // bumped by every start / stop: a start still awaiting is dropped
+function stop() {
+  run++
   cleanup?.()
+  cleanup = null
+  enabled.value = false
+}
+let fine: MediaQueryList | null = null
+const onPointerChange = () => (fine?.matches ? start() : stop())
+onBeforeUnmount(() => {
+  fine?.removeEventListener('change', onPointerChange)
+  stop()
 })
 
-onMounted(async () => {
-  if (!window.matchMedia('(pointer: fine)').matches) return
+onMounted(() => {
+  fine = window.matchMedia('(pointer: fine)')
+  fine.addEventListener('change', onPointerChange)
+  if (fine.matches) start()
+})
+
+async function start() {
+  if (cleanup) return
+  const id = ++run
   enabled.value = true
   await nextTick()
-  if (!alive) return
+  if (id !== run) return
 
   const perm = permEl.value
   const trail = trailEl.value
@@ -156,14 +175,70 @@ onMounted(async () => {
     ctx.globalAlpha = 1
   }
 
+  // pointer events land ~16 ms apart, so a quick curve is only a few samples:
+  // joined straight, the ribbon shows the polygon's corners (and the nib width
+  // jumps at each one). Run a centripetal Catmull-Rom spline through them — no
+  // overshoot, no cusps — and resample it every couple of px, carrying width
+  // and alpha along
+  const SMOOTH_STEP = 2
+  const smooth = (pts: RibbonPt[]): RibbonPt[] => {
+    const n = pts.length
+    if (n < 3) return pts
+    // centripetal knot spacing; the floor keeps repeated samples from dividing by zero
+    const knot = (p: RibbonPt, q: RibbonPt) => Math.max(Math.sqrt(Math.hypot(q.x - p.x, q.y - p.y)), 1e-4)
+    const out: RibbonPt[] = [pts[0]!]
+    for (let i = 0; i < n - 1; i++) {
+      const p1 = pts[i]!
+      const p2 = pts[i + 1]!
+      const cx = p2.x - p1.x
+      const cy = p2.y - p1.y
+      const d2 = knot(p1, p2)
+      // Hermite tangents scaled to this segment; the end segments have no
+      // outer neighbour and keep the chord
+      let m1x = cx
+      let m1y = cy
+      let m2x = cx
+      let m2y = cy
+      if (i > 0) {
+        const p0 = pts[i - 1]!
+        const d1 = knot(p0, p1)
+        m1x += d2 * ((p1.x - p0.x) / d1 - (p2.x - p0.x) / (d1 + d2))
+        m1y += d2 * ((p1.y - p0.y) / d1 - (p2.y - p0.y) / (d1 + d2))
+      }
+      if (i < n - 2) {
+        const p3 = pts[i + 2]!
+        const d3 = knot(p2, p3)
+        m2x += d2 * ((p3.x - p2.x) / d3 - (p3.x - p1.x) / (d2 + d3))
+        m2y += d2 * ((p3.y - p2.y) / d3 - (p3.y - p1.y) / (d2 + d3))
+      }
+      const steps = Math.max(1, Math.ceil(Math.hypot(cx, cy) / SMOOTH_STEP))
+      for (let s = 1; s <= steps; s++) {
+        const t = s / steps
+        const t2 = t * t
+        const t3 = t2 * t
+        const h00 = 2 * t3 - 3 * t2 + 1
+        const h10 = t3 - 2 * t2 + t
+        const h01 = 3 * t2 - 2 * t3
+        const h11 = t3 - t2
+        out.push({
+          x: h00 * p1.x + h10 * m1x + h01 * p2.x + h11 * m2x,
+          y: h00 * p1.y + h10 * m1y + h01 * p2.y + h11 * m2y,
+          hw: p1.hw + (p2.hw - p1.hw) * t,
+          a: p1.a + (p2.a - p1.a) * t,
+        })
+      }
+    }
+    return out
+  }
+
   // a stroke as ribbon points: both ends sharpen to a point over the last
   // few samples — the nib touching down and lifting off
   const strokeRibbon = (s: Stroke): RibbonPt[] => {
     const n = s.pts.length
-    return s.pts.map((p, i) => {
+    return smooth(s.pts.map((p, i) => {
       const edge = Math.min(i, n - 1 - i)
       return { x: p.x, y: p.y, hw: (p.w / 2) * Math.min(1, (edge + 0.2) / 3.5), a: 0.92 }
-    })
+    }))
   }
 
   // erasing paints destination-out onto the persistent layer. Every pass is
@@ -446,7 +521,7 @@ onMounted(async () => {
     window.removeEventListener('click', onClickCapture, true)
     document.documentElement.removeEventListener('pointerleave', onLeaveWindow)
   }
-})
+}
 </script>
 
 <style scoped>

@@ -7,18 +7,19 @@
     <div class="qc-candle hidden lg:block absolute inset-0 z-0 pointer-events-none" aria-hidden="true" />
 
     <!-- astrolabe behind the reading column: the outer ring holds still, the
-         rete turns once every 160s, and a hairline hand points at the real
-         hour (client only; SSR and automation keep it at XII) -->
+         rete turns once every 32s, and a hairline hand sets off from the real
+         hour and sweeps the other way at the same pace (client only; SSR and
+         automation keep it at XII) -->
     <svg
-      class="qc-astro hidden lg:block max-lg:block max-lg:left-[100%] max-lg:top-[27%] max-lg:scale-[.66] max-lg:opacity-60 absolute left-1/2 top-1/2 w-[640px] h-[640px] -translate-x-1/2 -translate-y-1/2 z-0 text-ink opacity-75 pointer-events-none overflow-visible"
+      class="qc-astro hidden lg:block max-lg:block max-lg:left-[100%] max-lg:top-[27%] max-lg:scale-[.66] max-lg:opacity-60 absolute left-1/2 top-1/2 w-[640px] h-[640px] -translate-x-1/2 -translate-y-1/2 z-0 text-ink pointer-events-none overflow-visible"
       viewBox="-320 -320 640 640"
       fill="none"
       stroke="currentColor"
       aria-hidden="true"
     >
       <g>
-        <circle r="300" stroke-width="0.7" stroke-dasharray="2 6" opacity="0.35" />
-        <circle r="290" stroke-width="0.6" opacity="0.28" />
+        <circle r="300" stroke-width="0.7" stroke-dasharray="2 6" opacity="0.45" />
+        <circle r="290" stroke-width="0.6" opacity="0.36" />
         <line
           v-for="(t, i) in astroTicks"
           :key="i"
@@ -27,7 +28,7 @@
           :x2="t.x2"
           :y2="t.y2"
           :stroke-width="t.big ? 0.8 : 0.5"
-          :opacity="t.big ? 0.4 : 0.25"
+          :opacity="t.big ? 0.45 : 0.32"
         />
         <text
           v-for="n in astroNumerals"
@@ -41,18 +42,22 @@
           text-anchor="middle"
           dominant-baseline="middle"
           stroke="none"
-          opacity="0.55"
+          opacity="0.7"
         >{{ n.label }}</text>
       </g>
       <g class="qc-astro-rete">
-        <circle r="206" stroke-width="0.6" stroke-dasharray="1 5" opacity="0.3" />
-        <circle r="150" cx="38" cy="-26" stroke-width="0.6" opacity="0.22" />
-        <circle r="144" cx="38" cy="-26" stroke-width="0.5" stroke-dasharray="3 9" opacity="0.2" />
-        <path d="M33 -176 h10 M38 -181 v10 M183 -26 h10 M188 -31 v10 M-117 -26 h10 M-112 -31 v10" stroke-width="0.7" opacity="0.4" />
+        <circle r="206" stroke-width="0.6" stroke-dasharray="1 5" opacity="0.4" />
+        <circle r="150" cx="38" cy="-26" stroke-width="0.6" opacity="0.32" />
+        <circle r="144" cx="38" cy="-26" stroke-width="0.5" stroke-dasharray="3 9" opacity="0.3" />
+        <path d="M33 -176 h10 M38 -181 v10 M183 -26 h10 M188 -31 v10 M-117 -26 h10 M-112 -31 v10" stroke-width="0.7" opacity="0.5" />
       </g>
       <g class="qc-hand" :style="{ transform: `rotate(${handDeg}deg)` }">
-        <line x1="0" y1="-34" x2="0" y2="-244" stroke-width="0.8" opacity="0.5" />
-        <path d="M0 -258 L3.4 -251 L0 -244 L-3.4 -251 Z" fill="var(--gold)" stroke="none" opacity="0.9" />
+        <!-- the sweep rides its own group: an animated transform would
+             override the hour angle set inline on the parent -->
+        <g class="qc-hand-sweep">
+          <line x1="0" y1="-34" x2="0" y2="-244" stroke-width="0.8" opacity="0.5" />
+          <path d="M0 -258 L3.4 -251 L0 -244 L-3.4 -251 Z" fill="var(--gold)" stroke="none" opacity="0.9" />
+        </g>
       </g>
     </svg>
 
@@ -60,16 +65,35 @@
     <canvas ref="conEl" class="hidden lg:block absolute inset-0 z-0 w-full h-full pointer-events-none" aria-hidden="true" />
 
     <!-- manuscript page frame: the rules grow from the corners toward the
-         midpoint diamonds; each corner is a quarter of the astrolabe limb;
-         degree scales hang inward from the rules; folio cartouche rides the
-         top rule -->
+         midpoint diamonds; each corner is a quarter of a magic circle, a
+         ring of glyphs between two arcs; a spell band of glyphs runs inward
+         of the rules; folio cartouche rides the top rule -->
     <div class="hidden lg:block absolute inset-[24px] z-0 pointer-events-none" aria-hidden="true">
       <i v-for="r in rules" :key="r.id" class="qc-rule" :class="r.h ? 'qc-rule-h' : 'qc-rule-v'" :style="r.style" />
 
-      <div class="qc-scale qc-scale-top" />
-      <div class="qc-scale qc-scale-bottom" />
-      <div class="qc-scale qc-scale-left" />
-      <div class="qc-scale qc-scale-right" />
+      <!-- spell band tiles: a hairline with a glyph every 48px; the bottom
+           and right bands are mirrored in CSS so the glyphs face inward -->
+      <svg class="absolute w-0 h-0">
+        <defs>
+          <pattern id="qc-band-x" width="288" height="9" patternUnits="userSpaceOnUse">
+            <g fill="none" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M0 6.5 H288" stroke-width="0.5" stroke-opacity="0.3" />
+              <path v-for="(d, i) in BAND" :key="i" :d="d" :transform="`translate(${24 + i * 48} 3.1) scale(0.8)`" stroke-width="0.75" stroke-opacity="0.5" />
+            </g>
+          </pattern>
+          <pattern id="qc-band-y" width="9" height="288" patternUnits="userSpaceOnUse">
+            <g fill="none" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6.5 0 V288" stroke-width="0.5" stroke-opacity="0.3" />
+              <path v-for="(d, i) in BAND" :key="i" :d="d" :transform="`translate(3.1 ${24 + i * 48}) rotate(-90) scale(0.8)`" stroke-width="0.75" stroke-opacity="0.5" />
+            </g>
+          </pattern>
+        </defs>
+      </svg>
+      <div v-for="s in ['top', 'bottom', 'left', 'right']" :key="s" class="qc-scale" :class="`qc-scale-${s}`">
+        <svg class="block w-full h-full">
+          <rect width="100%" height="100%" :fill="`url(#qc-band-${s === 'top' || s === 'bottom' ? 'x' : 'y'})`" />
+        </svg>
+      </div>
 
       <svg
         v-for="pos in ['top-0 left-0', 'top-0 right-0 rotate-90', 'bottom-0 right-0 rotate-180', 'bottom-0 left-0 -rotate-90']"
@@ -80,22 +104,25 @@
         fill="none"
         stroke="currentColor"
         stroke-linecap="round"
+        stroke-linejoin="round"
       >
-        <path d="M70 0 A70 70 0 0 1 0 70" pathLength="1" class="qc-draw-in" stroke-width="0.9" style="--i: 0; --o: 0.5" />
+        <path d="M72 0 A72 72 0 0 1 0 72" pathLength="1" class="qc-draw-in" stroke-width="0.9" style="--i: 0; --o: 0.5" />
         <path d="M61 0 A61 61 0 0 1 0 61" pathLength="1" class="qc-draw-in" stroke-width="0.6" style="--i: 1; --o: 0.35" />
-        <line
-          v-for="(t, i) in limb"
+        <path
+          v-for="(g, i) in cornerGlyphs"
           :key="i"
           pathLength="1"
           class="qc-draw-in"
-          :x1="t.x1"
-          :y1="t.y1"
-          :x2="t.x2"
-          :y2="t.y2"
-          :stroke-width="t.big ? 0.8 : 0.5"
-          :style="{ '--i': 2 + i * 0.35, '--o': t.big ? 0.5 : 0.32 }"
+          :d="g.d"
+          :transform="g.transform"
+          stroke-width="0.6"
+          :style="{ '--i': 2 + i * 0.5, '--o': 0.55 }"
         />
-        <path d="M49.5 45.5 L53.5 49.5 L49.5 53.5 L45.5 49.5 Z" fill="var(--gold)" stroke="none" class="qc-fill-in" style="--o: 0.7" />
+        <circle cx="25.3" cy="25.3" r="14" pathLength="1" class="qc-draw-in" stroke-width="0.7" style="--i: 3; --o: 0.45" />
+        <circle cx="25.3" cy="25.3" r="10" stroke-width="0.5" stroke-dasharray="1.2 2" class="qc-fill-in" style="--o: 0.4" />
+        <path :d="CORNER_TRI" pathLength="1" class="qc-draw-in" stroke-width="0.6" style="--i: 4; --o: 0.45" />
+        <circle cx="47" cy="47" r="2.1" fill="var(--gold)" stroke="none" class="qc-fill-in" style="--o: 0.85" />
+        <circle cx="25.3" cy="25.3" r="2.6" fill="var(--gold)" stroke="none" class="qc-fill-in" style="--o: 0.8" />
       </svg>
 
       <span class="qc-diamond qc-fill-in absolute top-[calc(50%-5px)] -left-[5px]" style="--o: .7" />
@@ -109,8 +136,9 @@
     </div>
 
     <!-- botanical sprig growing out of the lower-left corner along the bottom
-         rule; leaves unfurl in growth order, two gold berries at the tip.
-         Sits below TickWall (bottom 110) and short of the mid-rule diamond. -->
+         rule; hatched leaves unfurl and tendrils curl off in growth order,
+         three gold berries ripen at the tip. Sits below TickWall (bottom 110)
+         and short of the mid-rule diamond. -->
     <svg
       class="qc-vine hidden lg:block absolute left-[74px] bottom-[26px] w-[420px] h-[80px] z-0 text-herb pointer-events-none overflow-visible"
       viewBox="0 0 420 80"
@@ -124,8 +152,15 @@
       <g v-for="(leaf, i) in vine.leaves" :key="i" :transform="leaf.transform" :style="{ '--d': leaf.delay }">
         <path class="qc-leaf" d="M0 0 C 7 -10 18 -13 27 -6 C 19 -1 9 2 0 0 Z" pathLength="1" stroke-width="0.9" fill="currentColor" fill-opacity="0.1" />
         <path class="qc-vein" d="M2 -0.5 C 10 -5 18 -7 25 -6" pathLength="1" stroke-width="0.6" opacity="0.7" />
+        <path class="qc-vein" d="M8 -4 L10 -7.4 M12.4 -5.2 L14.4 -9 M16.8 -6.1 L18.6 -9.4 M21 -6.3 L22.4 -8.3" pathLength="1" stroke-width="0.45" opacity="0.55" />
       </g>
-      <circle v-for="(b, i) in vine.berries" :key="`b${i}`" class="qc-berry" :cx="b.cx" :cy="b.cy" :r="b.r" fill="var(--gold)" stroke="none" :style="{ '--d': vine.end }" />
+      <path v-for="(t, i) in vine.tendrils" :key="`t${i}`" class="qc-vein" :d="t.d" pathLength="1" stroke-width="0.65" opacity="0.7" :style="{ '--d': t.delay }" />
+      <path class="qc-vein" :d="vine.stalks" pathLength="1" stroke-width="0.7" opacity="0.8" :style="{ '--d': vine.stalkDelay }" />
+      <g v-for="(b, i) in vine.berries" :key="`b${i}`" class="qc-berry" :style="{ '--d': b.delay }">
+        <circle :cx="b.cx" :cy="b.cy" :r="b.r" fill="var(--gold)" fill-opacity="0.9" stroke="var(--ink)" stroke-width="0.5" stroke-opacity="0.45" />
+        <!-- white, not --paper: dark paper is darker than the gold -->
+        <circle :cx="b.hx" :cy="b.hy" :r="b.hr" fill="#fff" stroke="none" opacity="0.6" />
+      </g>
     </svg>
 
     <!-- folio number, plain top-right on small screens -->
@@ -173,7 +208,24 @@
         </h1>
         <div class="qc-fade mt-[34px] flex items-center gap-[14px]" style="--d: .3s" aria-hidden="true">
           <span class="w-[120px] border-t-2 border-ink opacity-40" />
-          <span class="qc-fleuron text-gold text-20 leading-none -my-[3px]">&#10086;</span>
+          <!-- seal: a triangle circle ringed by six glyphs; 34px box, the
+               negative margin keeps the row as tall as the old ❦ glyph -->
+          <svg
+            class="qc-fleuron shrink-0 text-gold w-[34px] h-[34px] -my-[10px] overflow-visible"
+            viewBox="-17 -17 34 34"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle r="11" fill="currentColor" fill-opacity="0.14" stroke-width="1" />
+            <circle r="7.6" stroke-width="0.6" opacity="0.85" />
+            <path :d="SEAL_TRI" stroke-width="0.7" />
+            <circle r="1.9" fill="currentColor" stroke="none" />
+            <g class="qc-seal-ring" stroke-width="0.7">
+              <path v-for="(g, i) in sealGlyphs" :key="i" :d="g.d" :transform="g.transform" />
+            </g>
+          </svg>
           <span class="w-[36px] border-t-2 border-ink opacity-40" />
         </div>
         <p class="qc-fade font-mono text-14 mt-[20px]" style="--d: .4s; --o: .8">
@@ -262,20 +314,44 @@ const rules = [
   { id: 'rb', h: false, style: { bottom: 0, right: 0, transformOrigin: '50% 100%' } },
 ]
 
-// Corner limb: a tick every 5° between two quarter arcs, longer on the 15s.
-const limb = Array.from({ length: 17 }, (_, i) => {
-  const deg = (i + 1) * 5
+// Sigil glyphs (≈5px, centred on 0 0): the corner rings, the spell band
+// along the frame and the seal under the title are all written in them.
+const GLYPH = {
+  circ: 'M1.7 0 A1.7 1.7 0 1 1 -1.7 0 A1.7 1.7 0 1 1 1.7 0',
+  tri: 'M0 -2.3 L2.1 1.5 L-2.1 1.5 Z',
+  wave: 'M-2.8 0 C -2 -1.9 -0.8 -1.9 0 0 C 0.8 1.9 2 1.9 2.8 0',
+  bar: 'M0 -2.4 V0.6 M0 2.3 V2.31',
+  eq: 'M-2.2 -1 H2.2 M-2.2 1 H2.2',
+  cross: 'M-1.7 -1.7 L1.7 1.7 M1.7 -1.7 L-1.7 1.7',
+}
+type Glyph = keyof typeof GLYPH
+const BAND = (['circ', 'tri', 'wave', 'bar', 'eq', 'cross'] as Glyph[]).map((g) => GLYPH[g])
+
+// triangle inscribed in a circle of radius r around (cx, cy), first vertex at deg
+const triangle = (cx: number, cy: number, r: number, deg: number) => `M${[0, 1, 2].map((k) => {
+  const a = ((deg + k * 120) * Math.PI) / 180
+  return `${(cx + Math.cos(a) * r).toFixed(1)} ${(cy + Math.sin(a) * r).toFixed(1)}`
+}).join(' L')} Z`
+
+// Corner sigil: glyphs between two quarter arcs (no ticks, so it never reads
+// as another astrolabe), standing on the ring with their tops outward, and a
+// triangle circle centred in the inner quarter disc (r 61): at 61 / (1 + √2)
+// along both rules it clears the rules and the arc by the same 11.3.
+const cornerGlyphs = ([[9, 'circ'], [22.5, 'tri'], [36, 'wave'], [54, 'wave'], [67.5, 'tri'], [81, 'circ']] as [number, Glyph][]).map(([deg, g]) => {
   const a = (deg * Math.PI) / 180
-  const big = deg % 15 === 0
-  const r0 = big ? 55 : 61
   return {
-    x1: +(Math.cos(a) * r0).toFixed(1),
-    y1: +(Math.sin(a) * r0).toFixed(1),
-    x2: +(Math.cos(a) * 70).toFixed(1),
-    y2: +(Math.sin(a) * 70).toFixed(1),
-    big,
+    d: GLYPH[g],
+    transform: `translate(${(Math.cos(a) * 66.5).toFixed(1)} ${(Math.sin(a) * 66.5).toFixed(1)}) rotate(${deg + 90})`,
   }
 })
+const CORNER_TRI = triangle(25.3, 25.3, 10, 225)
+
+// Seal under the title: the same triangle circle, ringed by six glyphs.
+const SEAL_TRI = triangle(0, 0, 7.6, -90)
+const sealGlyphs = (['circ', 'wave', 'tri', 'wave', 'circ', 'eq'] as Glyph[]).map((g, i) => ({
+  d: GLYPH[g],
+  transform: `rotate(${i * 60}) translate(0 -14.6) scale(0.62)`,
+}))
 
 // Title as two SVG text lines (baselines 88 / 188 in a 680×212 box ≈ the old
 // 96px / 1.04 setting). Each draft letter gets its own delay so the pen writes
@@ -312,14 +388,22 @@ const astroNumerals = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 
 })
 
 // Botanical sprig: a Catmull-Rom stem through 8 hand-placed points, sampled
-// for arc length so leaves can be spaced evenly and delayed in growth order.
-// Pure math (no getPointAtLength) so the finished sprig renders on the server.
+// for arc length so leaves and tendrils can be spaced evenly and delayed in
+// growth order. Pure math (no getPointAtLength) so the finished sprig
+// renders on the server.
+// The root sits on the lower-left corner sigil's outer arc (r 72 around the
+// frame corner, which is (-50, 82) in this box), 14° up from the bottom rule,
+// so the stem leaves the arc almost along its radius instead of crossing it.
+// It starts growing once the arc's draw-in has passed that point.
 const VINE_GROW = 4.4
-const VINE_START = 0.5
+const VINE_START = 1.8
+const ROOT = (14 * Math.PI) / 180
 const vine = (() => {
-  const pts = Array.from({ length: 8 }, (_, i) => [12 + i * 58, 50 + Math.sin(i * 1.25) * 9 - i * 1.2])
+  const pts = Array.from({ length: 8 }, (_, i) => i
+    ? [12 + i * 52, 52 + Math.sin(i * 1.25) * 9 - i * 1.6]
+    : [-50 + Math.cos(ROOT) * 72, 82 - Math.sin(ROOT) * 72])
   const samples = [{ x: pts[0]![0]!, y: pts[0]![1]!, s: 0 }]
-  let d = `M${pts[0]![0]} ${pts[0]![1]!.toFixed(1)}`
+  let d = `M${pts[0]![0]!.toFixed(1)} ${pts[0]![1]!.toFixed(1)}`
   for (let i = 0; i < pts.length - 1; i++) {
     const p0 = pts[Math.max(i - 1, 0)]!
     const p1 = pts[i]!
@@ -349,24 +433,52 @@ const vine = (() => {
       angle: (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI,
     }
   }
+  const delay = (s: number) => `${(VINE_START + VINE_GROW * (s / total)).toFixed(2)}s`
   const leaves = []
-  for (let s = 36, k = 0; s < total - 14; s += 46, k++) {
+  for (let s = 34, k = 0; s < total - 26; s += 44, k++) {
     const p = at(s)
     const side = k % 2 ? 1 : -1
     leaves.push({
       transform: `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${(p.angle + side * 58).toFixed(1)}) scale(${(0.85 + (k % 3) * 0.12).toFixed(2)})`,
-      delay: `${(VINE_START + VINE_GROW * (s / total)).toFixed(2)}s`,
+      delay: delay(s),
     })
   }
-  const tip = at(total - 4)
+  // tendrils leave the stem on alternating sides and curl in ~1.4 turns
+  const tendrils = ([[60, 1], [190, -1], [300, 1]] as const).map(([s, side]) => {
+    const p = at(s)
+    const a = (p.angle * Math.PI) / 180
+    const cx = p.x - Math.sin(a) * side * 6.5 + Math.cos(a) * 3.9
+    const cy = p.y + Math.cos(a) * side * 6.5 + Math.sin(a) * 3.9
+    const a0 = Math.atan2(p.y - cy, p.x - cx)
+    const r0 = Math.hypot(p.x - cx, p.y - cy)
+    let td = ''
+    for (let i = 0; i <= 56; i++) {
+      const t = i / 56
+      const ang = a0 + side * 1.4 * 2 * Math.PI * t
+      const r = r0 * (1 - 0.86 * t)
+      td += `${i ? ' L' : 'M'}${(cx + Math.cos(ang) * r).toFixed(1)} ${(cy + Math.sin(ang) * r).toFixed(1)}`
+    }
+    return { d: td, delay: delay(s) }
+  })
+  // three berries on short stalks, each with a paper highlight
+  const tip = at(total - 2)
+  const end = VINE_START + VINE_GROW
+  const berries = ([[11, -8, 4.4], [19, 1, 3.8], [7, 6, 3.3]] as const).map(([dx, dy, r], i) => ({
+    cx: +(tip.x + dx).toFixed(1),
+    cy: +(tip.y + dy).toFixed(1),
+    r,
+    hx: +(tip.x + dx - r * 0.32).toFixed(1),
+    hy: +(tip.y + dy - r * 0.34).toFixed(1),
+    hr: +(r * 0.24).toFixed(2),
+    delay: `${(end + 0.2 + i * 0.25).toFixed(2)}s`,
+  }))
   return {
     d,
     leaves,
-    berries: [
-      { cx: +(tip.x + 8).toFixed(1), cy: +(tip.y - 6).toFixed(1), r: 2.6 },
-      { cx: +(tip.x + 14).toFixed(1), cy: +(tip.y + 2).toFixed(1), r: 2.1 },
-    ],
-    end: `${(VINE_START + VINE_GROW + 0.2).toFixed(1)}s`,
+    tendrils,
+    stalks: berries.map((b) => `M${tip.x.toFixed(1)} ${tip.y.toFixed(1)} L${b.cx} ${b.cy}`).join(' '),
+    stalkDelay: `${(end - 0.4).toFixed(1)}s`,
+    berries,
   }
 })()
 
@@ -379,7 +491,8 @@ const play = ref(false)
 const MOBILE_STARS = [0, 1, 2, 6, 7]
 
 // The astrolabe hand: SSR renders XII and the client eases to the current
-// time once the page starts playing. Automation (Argos) keeps it at XII so
+// time once the page starts playing, the CSS sweep (.qc-hand-sweep) carrying
+// it round from there. Automation (Argos) keeps it at XII so
 // screenshots never depend on the clock.
 const handDeg = ref(0)
 let handTimer: ReturnType<typeof setInterval> | undefined
@@ -536,7 +649,7 @@ function startConstellations(reduced: boolean) {
   const drawChain = (idx: number[], p: number, alpha: number) => {
     const pts = chainPts(idx)
     ctx.strokeStyle = colors.ink
-    ctx.lineWidth = 0.7
+    ctx.lineWidth = 0.9
     ctx.lineCap = 'round'
     ctx.setLineDash([3, 5])
     ctx.globalAlpha = alpha
@@ -563,7 +676,7 @@ function startConstellations(reduced: boolean) {
 
   const paintStatic = () => {
     ctx.clearRect(0, 0, W, H)
-    for (const c of CHAINS) drawChain(c.idx, c.idx.length - 1, 0.18)
+    for (const c of CHAINS) drawChain(c.idx, c.idx.length - 1, 0.25)
     ctx.globalAlpha = 1
   }
 
@@ -613,7 +726,7 @@ function startConstellations(reduced: boolean) {
         return
       }
       let p = n
-      let alpha = 0.4
+      let alpha = 0.55
       if (phase === 'draw') {
         p = n - Math.max(0, left) / SEG_TIME
         if (left <= 0) {
@@ -626,7 +739,7 @@ function startConstellations(reduced: boolean) {
           left = FADE
         }
       } else {
-        alpha = 0.4 * Math.max(0, left / FADE)
+        alpha = 0.55 * Math.max(0, left / FADE)
         if (left <= 0) {
           phase = 'idle'
           left = 5 + Math.random() * 5
@@ -810,11 +923,12 @@ onMounted(() => {
 }
 
 /* --- sprig: stem draws over 4.4s, each leaf unfurls when the stem reaches it,
-   its vein half a second later, berries once the tip arrives --------------- */
+   its vein and hatching (and each tendril) half a second later, the stalks
+   and berries once the tip arrives ----------------------------------------- */
 .qc-stem {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  animation: qc-draw 4.4s cubic-bezier(0.45, 0, 0.25, 1) 0.5s forwards paused;
+  animation: qc-draw 4.4s cubic-bezier(0.45, 0, 0.25, 1) 1.8s forwards paused;
 }
 .qc-leaf {
   stroke-dasharray: 1;
@@ -841,14 +955,15 @@ onMounted(() => {
 }
 @keyframes qc-berry {
   to {
-    opacity: 0.75;
+    opacity: 1;
   }
 }
 
 /* --- frame draw-in -------------------------------------------------------
-   rules scale out from the corners 0.9s → 3.3s; the limb arcs and ticks are
-   pen-drawn in turn (--i); diamonds, cartouche and lozenges fade in as the
-   rules meet; the degree scales follow once everything has arrived. */
+   rules scale out from the corners 0.9s → 3.3s; the sigil arcs, glyphs and
+   triangle circle are pen-drawn in turn (--i); diamonds, cartouche and the
+   sigils' gold eyes fade in as the rules meet; the spell bands follow once
+   everything has arrived. */
 .qc-rule {
   position: absolute;
   background: var(--ink);
@@ -902,8 +1017,9 @@ onMounted(() => {
   }
 }
 
-/* degree scales: a long tick every 50px over a short tick every 10px,
-   hanging inward from the rule and fading out toward the corners */
+/* spell bands: a glyph every 48px above a hairline (the qc-band-* patterns
+   carry their own alpha), hanging inward from the rule and fading out
+   toward the corners */
 .qc-scale {
   position: absolute;
   opacity: 0;
@@ -911,7 +1027,7 @@ onMounted(() => {
 }
 @keyframes qc-scale-in {
   to {
-    opacity: 0.32;
+    opacity: 1;
   }
 }
 .qc-scale-top,
@@ -919,42 +1035,36 @@ onMounted(() => {
   left: 96px;
   right: 96px;
   height: 9px;
-  background-image:
-    repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 50px),
-    repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 10px);
-  background-size: 100% 9px, 100% 4px;
-  background-repeat: no-repeat;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
 }
 .qc-scale-top {
   top: 1.5px;
-  background-position: 0 0, 0 0;
 }
 .qc-scale-bottom {
   bottom: 1.5px;
-  background-position: 0 100%, 0 100%;
 }
 .qc-scale-left,
 .qc-scale-right {
   top: 96px;
   bottom: 96px;
   width: 9px;
-  background-image:
-    repeating-linear-gradient(180deg, var(--ink) 0 1px, transparent 1px 50px),
-    repeating-linear-gradient(180deg, var(--ink) 0 1px, transparent 1px 10px);
-  background-size: 9px 100%, 4px 100%;
-  background-repeat: no-repeat;
   -webkit-mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
   mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
 }
 .qc-scale-left {
   left: 1.5px;
-  background-position: 0 0, 0 0;
 }
 .qc-scale-right {
   right: 1.5px;
-  background-position: 100% 0, 100% 0;
+}
+/* the tiles are drawn for the top and left rules; mirror them so the
+   hairline sits inside the glyphs on the other two sides as well */
+.qc-scale-bottom svg {
+  transform: scaleY(-1);
+}
+.qc-scale-right svg {
+  transform: scaleX(-1);
 }
 
 .qc-play .qc-glyphs tspan,
@@ -966,16 +1076,22 @@ onMounted(() => {
 .qc-play .qc-rule-v,
 .qc-play .qc-draw-in,
 .qc-play .qc-fill-in,
-.qc-play .qc-scale {
+.qc-play .qc-scale,
+.qc-play .qc-hand-sweep {
   animation-play-state: running;
 }
 
 /* --- ambient: rete turns, hand eases to the hour, candle breathes -------- */
 .qc-astro-rete {
-  animation: qc-spin 160s linear infinite reverse;
+  animation: qc-spin 32s linear infinite reverse;
 }
 .qc-hand {
   transition: transform 3.2s cubic-bezier(0.3, 0.6, 0.2, 1);
+}
+/* released with .qc-play, together with the ease to the hour: the ease
+   settles into the sweep instead of stopping and restarting */
+.qc-hand-sweep {
+  animation: qc-spin 32s linear infinite paused;
 }
 @keyframes qc-spin {
   to {
@@ -990,18 +1106,22 @@ onMounted(() => {
   );
   animation: qc-breath 7s ease-in-out infinite;
 }
-/* the fleuron under the title glows and dims on its own, deeper than the
-   candle (own keyframes, qc-breath is shared with it). The base rule is the
-   lit state, so automation and reduced-motion get a steady soft glow. */
+/* the seal under the title glows and dims on its own, deeper than the
+   candle (own keyframes, qc-breath is shared with it), while its glyph ring
+   turns once a minute. The base rule is the lit state, so automation and
+   reduced-motion get a steady soft glow. */
 .qc-fleuron {
-  text-shadow: 0 0 12px color-mix(in srgb, var(--gold) 70%, transparent);
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--gold) 70%, transparent));
   animation: qc-fleuron 5s ease-in-out infinite;
+}
+.qc-seal-ring {
+  animation: qc-spin 60s linear infinite;
 }
 @keyframes qc-fleuron {
   0%,
   100% {
     opacity: 0.25;
-    text-shadow: 0 0 0 color-mix(in srgb, var(--gold) 0%, transparent);
+    filter: drop-shadow(0 0 0 color-mix(in srgb, var(--gold) 0%, transparent));
   }
   50% {
     opacity: 1;
@@ -1025,8 +1145,10 @@ onMounted(() => {
   .qc-vein,
   .qc-berry,
   .qc-astro-rete,
+  .qc-hand-sweep,
   .qc-candle,
-  .qc-fleuron {
+  .qc-fleuron,
+  .qc-seal-ring {
     animation: none;
   }
   .qc-hand {
@@ -1046,7 +1168,7 @@ onMounted(() => {
     transform: none;
   }
   .qc-berry {
-    opacity: 0.75;
+    opacity: 1;
   }
   .qc-candle {
     opacity: 0.8;
@@ -1070,7 +1192,7 @@ onMounted(() => {
   }
   .qc-scale {
     animation: none;
-    opacity: 0.32;
+    opacity: 1;
   }
 }
 </style>
