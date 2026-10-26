@@ -280,6 +280,7 @@ about、projects、journal、skills、journey、contact、guestbook 的內容下
 - Chrome 擷取比視窗高的整頁截圖時，會重播 SVG 元素上的 CSS 動畫，插畫被截成空白（`animations: 'disabled'` 也一樣）。Argos 是整頁截圖，所以 `navigator.webdriver` 時直接顯示完成狀態（`.ps-still`），與首頁凍結時針同一招。
 - Argos 用 Playwright 預設的 1280×720，這個高度下 about / journal / skills / contact 的插畫是隱藏的，基準圖只會看到 projects、journey、guestbook 的插畫。
 - about 顯示插畫時右欄變高，左欄的「— grayson, somewhere in taipei.」會被 `flex-1` 推到肖像欄底部（原設計意圖），插畫隱藏時則維持原位。
+- projects 的 `@container` 只能用 `invisible`，不能用 `hidden`：hover 換專案讓右欄重新排版時，Chrome 會重算 container 內的樣式。規則裡只要有 `display:none`（就算當下沒命中，或掛在外層 wrapper），插畫的 CSS 動畫就會整組重新開始，每次 hover 都重畫一次。`visibility` 不會。
 
 ---
 
