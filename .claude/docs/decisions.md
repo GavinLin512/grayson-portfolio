@@ -269,6 +269,11 @@ about、projects、journal、skills、journey、contact、guestbook 的內容下
   - projects：寬螢幕的預覽圖（4:3）會變高，標籤下方幾乎沒空間，真正的空白是在內容與 footer 之間。所以只有這頁在 `lg` 以上用 `lg:min-h-[calc(100vh_-_212px)]`（header 56 + main 上下 padding 120 + footer 36，`lg` 以上都是固定高度）讓根節點自己撐到 footer。內容較高時這個值不起作用，所以不會多出捲動。右欄改成 `flex-col`，插畫放在 `flex-1 min-h-0` 的容器裡，`absolute` 加 `max-h-[calc(100%_-_24px)]`，依剩下的高度等比縮小，本身不佔高度。容器設 `container-type: size`，剩不到 110px 時用 `@container` 隱藏，不會只露一截。只改這一頁，不動 `content.vue`：全域修好高度鏈會讓 7 頁的 `flex-1`／`mt-auto` 一起移位。
   - journey、guestbook：右欄本來就比左欄短，直接放在右欄。
 - 每條筆線用 `pathLength=1` 的 dash 動畫依序畫出；虛線（journey 的路線、projects 的未畫弧）用同樣畫出的遮罩顯示。
+- 淡彩照首頁 `BgWatercolor` 的鋼筆淡彩：
+  - 筆線 tuple 的第 4 欄是色票（如 `'cool 0.24'`），直接填該筆的輪廓，開放路徑填色時會自動閉合，不另畫形狀。只有沒有輪廓的顏色（桌面、液面、陰影、水漬點）才放進 `washes`。
+  - 濾鏡是 `wc-bleed` 的縮小版。首頁的物件有幾百 px，這裡只有幾十 px，所以噪訊頻率提高到 0.03、位移降到 9。顏料沉積的對比也調低，否則信封、書頁這類大面積色塊會斑駁得像迷彩。
+  - 色塊整組先淡入（`.ps-fade`），筆線再畫上去；截圖時一樣直接顯示完成狀態。深色模式色塊降到 0.7。
+  - 畫出期間開關色塊，影格時間相同（journey、guestbook 都是 p50 16.7ms、p95 17.6ms）。
 
 ### 陷阱
 
