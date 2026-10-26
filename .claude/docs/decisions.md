@@ -306,3 +306,24 @@ about、projects、journal、skills、journey、contact、guestbook 的內容下
 
 - Vue scoped CSS 的 `:global(.dark) .wc` 會被編譯成只有 `.dark`，等於把整個 `<html>` 設成半透明。深色規則要寫 `.dark .wc`（scoped 屬性只加在最後一段選擇器）。
 - 遠山與天空的色塊落在標題欄後面，所以透明度壓得很低（0.07–0.18）。改構圖時注意 `design · code · craft` 那行的可讀性。
+
+---
+
+## 升級到 pnpm 12 與 Nuxt 4.6 的陷阱
+
+### 問題
+
+依賴升級時 pnpm 從 10 升到 12，Nuxt 4.4 → 4.6（Vite 8）。install、build、prerender 依序壞掉，dev 卻都正常。
+
+### 做法
+
+- **`minimumReleaseAge`**：pnpm 12 預設拒絕發布未滿 24 小時的套件，連 lockfile 裡已鎖定的版本也會擋，CI 的 `pnpm/action-setup` 照 `packageManager` 用 pnpm 12，一樣會擋。被擋時用 `pnpm clean --lockfile && pnpm install` 重新解析，pnpm 會自動改選滿 24 小時的前一版；不放寬政策。
+- **`allowBuilds`**：pnpm 12 用 `allowBuilds` 取代 `onlyBuiltDependencies`，改寫時舊清單被丟掉。被略過的 build script 會讓 install 直接失敗（`ERR_PNPM_IGNORED_BUILDS`）。目前 `esbuild: true`（原本就允許）；`workerd: false`，它的 script 只檢查版本、平台套件缺少時才下載，pnpm 已裝好平台套件，`wrangler types` 與 `wrangler pages dev` 都正常。`better-sqlite3` 13、`sharp` 0.35 改附預編譯 binary，`@parcel/watcher` 只在強制從原始碼編譯時才動作，都不必列。
+- **`@lucide/vue` 放進 `build.transpile`**：1.61 版沒有 `exports`，server build 從外部載入它的 CJS 版，它 `require('vue')` 拿到第二份 Vue（app 的 Vue 已打包進 server bundle），`inject()` 回傳 undefined，每頁 prerender 都 500。
+- **pagefind 路徑在執行時組出**：Vite 8 會把常數變數折成字串，`import(/* @vite-ignore */ modulePath)` 在 server bundle 變成字面路徑，Nitro 去解析、Cloudflare preset 不允許外部模組而失敗。改用 `` `${location.origin}/pagefind/pagefind.js` ``。
+- **blog 相關文章用文章 path 比對**：Cloudflare Pages 把 prerender 頁導向結尾帶 `/` 的網址，`route.path` 對不上 `p.path`，目前這篇會被列進相關文章。升級前的正式站也有這個多出來的連結，但沒有 hydration 警告；升級後的 build 才出現 hydration mismatch。
+
+### 陷阱
+
+- pnpm 12 執行任何 script 前會先自動 install（`verifyDepsBeforeRun`）。install 被政策擋下時會清掉 `node_modules` 最上層，之後所有 script 都 `command not found`。
+- prerender 的 500 不會印錯誤。要看原因，直接 import `node_modules/.cache/nuxt/.nuxt/prerender/index.mjs`，用它的 `localFetch` 請求頁面，錯誤會在 payload 的 `message` 裡。
