@@ -5,6 +5,9 @@
   <!-- Mounted here (not in a layout) so search works on every page regardless
        of whether it uses the default or content layout. -->
   <SearchModal v-model="searchOpen" />
+  <!-- Global fountain-pen cursor + sketch layer; mounted once so drawings
+       survive page navigation. -->
+  <InkPen />
 </template>
 
 <script setup lang="ts">

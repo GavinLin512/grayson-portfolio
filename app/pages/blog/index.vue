@@ -5,7 +5,7 @@
         <button
           v-for="tag in tags"
           :key="tag"
-          class="font-mono text-[12px] leading-none uppercase tracking-wider px-[14px] py-[4px] rounded-full border border-ink transition"
+          class="font-mono text-12 leading-none uppercase tracking-wider px-[14px] py-[4px] rounded-full border border-ink transition"
           :class="activeTag === tag ? 'bg-ink text-bg' : 'opacity-70 hover:opacity-100'"
           @click="activeTag = tag"
         >
@@ -23,11 +23,11 @@
           :to="post.path"
           class="group block border-b border-line py-[28px] transition-opacity hover:opacity-80"
         >
-          <div class="flex justify-between items-center font-mono text-[12px] opacity-55 mb-[10px]">
+          <div class="flex justify-between items-center font-mono text-12 opacity-55 mb-[10px]">
             <span>{{ formatDate(post.date) }}</span>
             <span>{{ useReadingTime(post.body) }} min</span>
           </div>
-          <h2 class="font-mincho text-[24px] leading-[1.25] mb-[12px] group-hover:opacity-70 transition-opacity">
+          <h2 class="font-mincho text-28 leading-[1.25] mb-[12px] group-hover:opacity-70 transition-opacity">
             {{ post.title }}
           </h2>
           <div class="flex items-center gap-[12px] flex-wrap">
@@ -40,7 +40,7 @@
           </div>
         </NuxtLink>
 
-        <p v-if="visiblePosts.length === 0" class="font-mono text-[13px] opacity-50 py-[40px]">
+        <p v-if="visiblePosts.length === 0" class="font-mono text-12 opacity-50 py-[40px]">
           no posts with that tag
         </p>
       </div>
@@ -49,20 +49,20 @@
       <div class="space-y-[48px]">
         <!-- Pinned card: single latest pinned post -->
         <div v-if="featuredPost" class="border border-ink p-[18px]">
-          <div class="font-mono text-[11px] opacity-50 mb-[14px] uppercase tracking-wider">pinned</div>
-          <div class="font-mono text-[12px] opacity-55 mb-[8px]">{{ formatDate(featuredPost.date) }}</div>
-          <h3 class="font-mincho text-[20px] leading-[1.25] mb-[12px]">{{ featuredPost.title }}</h3>
+          <div class="font-mono text-12 opacity-50 mb-[14px] uppercase tracking-wider">pinned</div>
+          <div class="font-mono text-12 opacity-55 mb-[8px]">{{ formatDate(featuredPost.date) }}</div>
+          <h3 class="font-mincho text-20 leading-[1.25] mb-[12px]">{{ featuredPost.title }}</h3>
           <div class="space-y-[4px] mb-[16px]">
             <div aria-hidden="true" class="h-[6px] bg-ink/15 w-full" />
             <div aria-hidden="true" class="h-[6px] bg-ink/15 w-[80%]" />
           </div>
-          <NuxtLink :to="featuredPost.path" class="font-mono text-[12px] hover:opacity-70 transition-opacity">read →</NuxtLink>
+          <NuxtLink :to="featuredPost.path" class="font-mono text-12 hover:opacity-70 transition-opacity">read →</NuxtLink>
         </div>
 
         <!-- Archive inline year counts -->
         <div v-if="yearCounts.length">
-          <div class="font-mono text-[11px] opacity-50 mb-[14px] uppercase tracking-wider">archive · by year</div>
-          <div class="flex gap-[16px] flex-wrap font-mono text-[12px]">
+          <div class="font-mono text-12 opacity-50 mb-[14px] uppercase tracking-wider">archive · by year</div>
+          <div class="flex gap-[16px] flex-wrap font-mono text-12">
             <span v-for="{ year, count } in yearCounts" :key="year" class="opacity-70">
               {{ year }} ({{ count }})
             </span>
@@ -73,12 +73,19 @@
         <div>
           <a
             href="/rss.xml"
-            class="inline-flex items-center gap-[8px] font-mono text-[12px] opacity-50 hover:opacity-80 transition-opacity"
+            class="inline-flex items-center gap-[8px] font-mono text-12 opacity-50 hover:opacity-80 transition-opacity"
           >
             <Rss :size="14" :stroke-width="2" />
             rss · /feed.xml
           </a>
         </div>
+
+        <!-- shrinks to the room left above the footer (the page is ~707px
+             tall without it), so it never adds a scroll; hidden once too small -->
+        <PageSketch
+          kind="journal"
+          class="hidden lg:block [@media(max-height:796px)]:!hidden max-h-[calc(100dvh_-_707px)]"
+        />
       </div>
     </div>
   </div>

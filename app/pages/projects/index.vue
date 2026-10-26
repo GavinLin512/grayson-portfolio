@@ -1,9 +1,12 @@
 <template>
-  <div class="relative min-h-full flex flex-col overflow-hidden">
+  <!-- min-h-full never resolves under the content layout, so on lg the root
+       reaches the footer itself (56 header + 120 main padding + 36 footer):
+       the room under the preview is where the sketch goes -->
+  <div class="relative min-h-full lg:min-h-[calc(100vh_-_212px)] flex flex-col overflow-hidden">
 
     <!-- Header -->
     <PageHeader :label="`— 02 / projects · ${visibleProjects.length} selected`">
-      <div class="flex gap-6 font-mono text-[13px]">
+      <div class="flex gap-6 font-mono text-12">
         <button
           v-for="cat in categories"
           :key="cat"
@@ -33,27 +36,27 @@
         >
           <div class="grid grid-cols-[40px_60px_1fr_120px] gap-4 items-start transition-transform duration-200 ease-in-out group-hover:translate-x-2">
             <!-- Col 1: zero-padded index -->
-            <span class="font-mono text-[13px] opacity-55 pt-[10px]">
+            <span class="font-mono text-12 opacity-55 pt-[10px]">
               {{ String(i + 1).padStart(2, '0') }}
             </span>
 
             <!-- Col 2: year -->
-            <span class="font-mono text-[13px] opacity-55 pt-[10px]">
+            <span class="font-mono text-12 opacity-55 pt-[10px]">
               {{ project.year }}
             </span>
 
             <!-- Col 3: title + subtitle -->
             <div>
-              <div class="font-mincho text-[32px] leading-[1.1]">
+              <div class="font-mincho text-40 leading-[1.1]">
                 {{ project.title }}
               </div>
-              <div class="font-mono text-[13px] opacity-60 mt-[4px]">
+              <div class="font-mono text-12 opacity-60 mt-[4px]">
                 {{ project.subtitle }}
               </div>
             </div>
 
             <!-- Col 4: category label -->
-            <div class="font-mono text-[11px] opacity-60 text-right pt-[10px]">
+            <div class="font-mono text-12 opacity-60 text-right pt-[10px]">
               {{ project.category }}
             </div>
           </div>
@@ -61,9 +64,9 @@
       </div>
 
       <!-- Right: preview panel (lg+ only) -->
-      <div class="hidden lg:block">
+      <div class="hidden lg:flex lg:flex-col">
         <div class="sticky">
-          <p class="font-mono text-[11px] opacity-50 mb-4">preview · hover</p>
+          <p class="font-mono text-12 opacity-50 mb-4">preview · hover</p>
 
           <!-- Stripe placeholder with centered chip -->
           <div class="relative" style="aspect-ratio: 4/3; overflow: hidden;">
@@ -74,7 +77,7 @@
             <div class="absolute inset-0 flex items-center justify-center">
               <div
                 v-if="selectedProject"
-                class="bg-white border border-[var(--ink)] px-3 py-1 font-mono text-[13px]"
+                class="bg-white border border-[var(--ink)] px-3 py-1 font-mono text-12"
               >
                 {{ String(selectedIndex + 1).padStart(2, '0') }} — {{ selectedProject.title }}
               </div>
@@ -83,7 +86,7 @@
 
           <!-- Description -->
           <div v-if="selectedProject" class="mt-4">
-            <p class="font-mono text-[13px] opacity-70 leading-relaxed">
+            <p class="font-mono text-12 opacity-70 leading-relaxed">
               {{ selectedProject.subtitle }}
             </p>
           </div>
@@ -93,11 +96,20 @@
             <span
               v-for="tag in selectedProject.stack"
               :key="tag"
-              class="font-mono text-[11px] border border-[var(--ink)] px-[8px] py-[2px] rounded-full opacity-70"
+              class="font-mono text-12 border border-[var(--ink)] px-[8px] py-[2px] rounded-full opacity-70"
             >
               {{ tag }}
             </span>
           </div>
+        </div>
+
+        <!-- takes whatever height is left under the preview without adding
+             any, the sketch scaled to fit; hidden once that room is too small -->
+        <div class="relative flex-1 min-h-0 [container-type:size]">
+          <PageSketch
+            kind="projects"
+            class="absolute top-6 left-0 w-auto max-h-[calc(100%_-_24px)] [@container(max-height:110px)]:hidden"
+          />
         </div>
       </div>
     </div>

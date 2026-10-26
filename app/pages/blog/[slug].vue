@@ -3,18 +3,18 @@
     <!-- Header -->
     <div class="shrink-0 mb-[48px]">
       <div class="flex items-center justify-between">
-        <span class="font-mono text-[15px] opacity-70">— journal · {{ slug }}</span>
+        <span class="font-mono text-16 opacity-70">— journal · {{ slug }}</span>
       </div>
       <div class="border-t border-line mt-[14px] mb-[32px]" />
 
-      <h1 class="font-mincho text-[52px] leading-[1.1] max-w-[860px] mb-[20px]">
+      <h1 class="font-mincho text-64 leading-[1.1] max-w-[860px] mb-[20px]">
         {{ post.title }}
       </h1>
 
       <div class="flex items-center gap-[20px] flex-wrap">
-        <span class="font-mono text-[12px] opacity-55">{{ formatDate(post.date) }}</span>
-        <span class="font-mono text-[12px] opacity-55">·</span>
-        <span class="font-mono text-[12px] opacity-55">{{ readingTime }} min read</span>
+        <span class="font-mono text-12 opacity-55">{{ formatDate(post.date) }}</span>
+        <span class="font-mono text-12 opacity-55">·</span>
+        <span class="font-mono text-12 opacity-55">{{ readingTime }} min read</span>
         <div class="flex gap-[8px] flex-wrap">
           <TagChip v-for="tag in post.tags" :key="tag">{{ tag }}</TagChip>
         </div>
@@ -29,12 +29,12 @@
           v-if="toc.length"
           class="sticky top-[115px] space-y-[6px]"
         >
-          <div class="font-mono text-[11px] opacity-40 mb-[12px] uppercase tracking-wider">contents</div>
+          <div class="font-mono text-12 opacity-40 mb-[12px] uppercase tracking-wider">contents</div>
           <a
             v-for="link in toc"
             :key="link.id"
             :href="`#${link.id}`"
-            class="block font-mono text-[12px] leading-[1.5] transition-opacity"
+            class="block font-mono text-12 leading-[1.5] transition-opacity"
             :class="[
               link.depth === 3 ? 'pl-[12px]' : '',
               activeId === link.id ? 'opacity-100' : 'opacity-40 hover:opacity-70',
@@ -53,7 +53,7 @@
       <!-- Right: also reading -->
       <aside class="hidden lg:block">
         <div v-if="relatedPosts.length" class="sticky top-[115px]">
-          <div class="font-mono text-[11px] opacity-40 mb-[16px] uppercase tracking-wider">also reading</div>
+          <div class="font-mono text-12 opacity-40 mb-[16px] uppercase tracking-wider">also reading</div>
           <div class="space-y-[20px]">
             <NuxtLink
               v-for="related in relatedPosts"
@@ -61,10 +61,10 @@
               :to="related.path"
               class="block group"
             >
-              <div class="font-mincho text-[14px] leading-[1.35] mb-[4px] group-hover:opacity-70 transition-opacity">
+              <div class="font-mincho text-14 leading-[1.35] mb-[4px] group-hover:opacity-70 transition-opacity">
                 {{ related.title }}
               </div>
-              <div class="font-mono text-[11px] opacity-40">read →</div>
+              <div class="font-mono text-12 opacity-40">read →</div>
             </NuxtLink>
           </div>
         </div>
@@ -73,20 +73,21 @@
 
     <div class="mt-[80px]">
       <div class="border-t border-line mb-[48px]">
-        <span class="font-mono text-[15px] opacity-70">— webmentions</span>
+        <span class="font-mono text-16 opacity-70">— webmentions</span>
       </div>
-      <Webmentions :target="`https://grayson512portfolio.dpdns.org${route.path}`" />
+      <!-- <Webmentions :target="`https://grayson512portfolio.dpdns.org${route.path}`" /> -->
+      <Webmentions target="https://aaronpk.com/" />
     </div>
 
     <div class="mt-[80px]">
       <div class="border-t border-line mb-[48px]">
-        <span class="font-mono text-[15px] opacity-70">— comments</span>
+        <span class="font-mono text-16 opacity-70">— comments</span>
       </div>
       <Comments :slug="slug" />
     </div>
   </div>
 
-  <div v-else class="font-mono text-[13px] opacity-50 py-[60px]">post not found</div>
+  <div v-else class="font-mono text-12 opacity-50 py-[60px]">post not found</div>
 </template>
 
 <script setup lang="ts">
@@ -162,7 +163,7 @@ definePageMeta({ layout: 'content' })
 <style>
 .prose-blog h2 {
   font-family: var(--font-mincho, 'Shippori Mincho', serif);
-  font-size: 1.5rem;
+  font-size: var(--text-28);
   font-weight: 600;
   line-height: 1.25;
   margin-top: 2.5rem;
@@ -171,14 +172,14 @@ definePageMeta({ layout: 'content' })
 
 .prose-blog h3 {
   font-family: var(--font-mincho, 'Shippori Mincho', serif);
-  font-size: 1.125rem;
+  font-size: var(--text-20);
   font-weight: 600;
   margin-top: 2rem;
   margin-bottom: 0.75rem;
 }
 
 .prose-blog p {
-  font-size: 0.9375rem;
+  font-size: var(--text-16);
   line-height: 1.75;
   margin-bottom: 1.25rem;
   opacity: 0.85;
@@ -190,13 +191,13 @@ definePageMeta({ layout: 'content' })
   padding: 1.25rem;
   overflow-x: auto;
   margin: 1.5rem 0;
-  font-size: 0.8125rem;
+  font-size: var(--text-14);
   line-height: 1.6;
 }
 
 .prose-blog code {
   font-family: 'Space Mono', monospace;
-  font-size: 0.8125rem;
+  font-size: var(--text-14);
 }
 
 .prose-blog :not(pre) > code {
@@ -213,7 +214,7 @@ definePageMeta({ layout: 'content' })
 }
 
 .prose-blog li {
-  font-size: 0.9375rem;
+  font-size: var(--text-16);
   line-height: 1.75;
   margin-bottom: 0.25rem;
 }

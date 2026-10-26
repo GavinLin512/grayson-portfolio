@@ -25,17 +25,6 @@
     "zod": "^4.4.3"
   },
   "packageManager": "pnpm@10.32.1",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@parcel/watcher",
-      "esbuild",
-      "better-sqlite3",
-      "sharp"
-    ],
-    "overrides": {
-      "shell-quote": "^1.8.4"
-    }
-  },
   "devDependencies": {
     "@argos-ci/playwright": "^7.0.0",
     "@nuxtjs/color-mode": "^4.0.0",
