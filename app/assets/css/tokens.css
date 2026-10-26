@@ -10,6 +10,44 @@ html {
   --line:  #d0c4b0;
   --cool:  #4a7a94;
   --warm:  #c06040;
+  --gold:  #8c7853;
+  --herb:  #6a745e;
+
+  /* Type scale — single source of truth (rem, master base = html 16px).
+     Change a value here to update it everywhere; change html font-size to
+     scale the whole site proportionally. Tailwind fontSize + prose both
+     reference these. */
+  --text-12:  0.75rem;
+  --text-14:  0.875rem;
+  --text-16:  1rem;
+  --text-20:  1.25rem;
+  --text-28:  1.75rem;
+  --text-40:  2.5rem;
+  --text-64:  4rem;
+  --text-96:  6rem;
+  --text-144: 9rem;
+}
+
+/* slow staggered reveal, used across pages for entrance animations —
+   "動畫像空氣流動" (plan §8). Elements opt in with class="qc-fade" and
+   tune timing via inline --d (delay) / --o (target opacity) vars. */
+.qc-fade {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: qc-fade 0.9s ease var(--d, 0s) forwards;
+}
+@keyframes qc-fade {
+  to {
+    opacity: var(--o, 1);
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qc-fade {
+    animation: none;
+    opacity: var(--o, 1);
+    transform: none;
+  }
 }
 
 .dark {
@@ -20,4 +58,6 @@ html {
   --line:  #3d3830;
   --cool:  #6096b0;
   --warm:  #d06848;
+  --gold:  #a08f73;
+  --herb:  #8c9681;
 }

@@ -65,7 +65,7 @@ function formatDate(ts: number) {
         <a
           v-if="!currentUser"
           :href="loginUrl"
-          class="border border-ink px-4 py-2 inline-block font-mono text-[12px]"
+          class="border border-ink px-4 py-2 inline-block font-mono text-12"
         >
           Sign in with GitHub →
         </a>
@@ -76,10 +76,10 @@ function formatDate(ts: number) {
               :alt="currentUser.login"
               class="w-8 h-8 rounded-full"
             />
-            <span class="font-mono text-[12px] opacity-70">{{ currentUser.login }}</span>
+            <span class="font-mono text-12 opacity-70">{{ currentUser.login }}</span>
             <button
               type="button"
-              class="font-mono text-[11px] opacity-40 hover:opacity-60 transition-opacity"
+              class="font-mono text-12 opacity-40 hover:opacity-60 transition-opacity"
               @click="clearSession"
             >
               sign out
@@ -91,18 +91,18 @@ function formatDate(ts: number) {
               maxlength="500"
               rows="3"
               :placeholder="slug ? 'Leave a comment…' : 'Leave a message…'"
-              class="w-full max-w-[480px] font-mono text-[13px] bg-transparent border border-ink/40 rounded px-3 py-2 resize-none focus:outline-none focus:border-ink"
+              class="w-full max-w-[480px] font-mono text-12 bg-transparent border border-ink/40 rounded px-3 py-2 resize-none focus:outline-none focus:border-ink"
             />
             <div class="flex items-center gap-4">
               <button
                 type="button"
                 :disabled="!msg.trim() || submitting"
-                class="border border-ink px-4 py-2 font-mono text-[12px] disabled:opacity-30"
+                class="border border-ink px-4 py-2 font-mono text-12 disabled:opacity-30"
                 @click="submit"
               >
                 {{ submitting ? 'Sending…' : 'Send →' }}
               </button>
-              <span class="font-mono text-[11px] opacity-30">{{ msg.length }}/500</span>
+              <span class="font-mono text-12 opacity-30">{{ msg.length }}/500</span>
             </div>
           </div>
         </template>
@@ -123,23 +123,23 @@ function formatDate(ts: number) {
         />
         <div
           v-else
-          class="w-8 h-8 rounded-full shrink-0 mt-0.5 bg-ink/10 flex items-center justify-center font-mono text-[11px] opacity-60"
+          class="w-8 h-8 rounded-full shrink-0 mt-0.5 bg-ink/10 flex items-center justify-center font-mono text-12 opacity-60"
         >
           {{ entry.name.charAt(0).toUpperCase() }}
         </div>
         <div class="flex flex-col gap-1">
           <div class="flex items-center gap-3">
-            <span class="font-mono text-[11px]">{{ entry.name }}</span>
-            <span class="font-mono text-[11px] opacity-40">{{ formatDate(entry.created_at) }}</span>
+            <span class="font-mono text-12">{{ entry.name }}</span>
+            <span class="font-mono text-12 opacity-40">{{ formatDate(entry.created_at) }}</span>
           </div>
-          <p class="font-mono text-[12px] opacity-80 whitespace-pre-wrap">{{ entry.message }}</p>
+          <p class="font-mono text-12 opacity-80 whitespace-pre-wrap">{{ entry.message }}</p>
         </div>
       </div>
     </div>
 
     <p
       v-else
-      class="font-mono text-[12px] opacity-40"
+      class="font-mono text-12 opacity-40"
     >
       {{ slug ? 'No comments yet.' : 'No messages yet.' }}
     </p>

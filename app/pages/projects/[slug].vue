@@ -3,18 +3,18 @@
     <template v-if="post">
       <!-- 4.3 Header grid -->
       <div class="grid grid-cols-[70px_1fr_200px] gap-6 items-baseline mb-[24px]">
-        <span class="font-mono text-[15px] opacity-55">
+        <span class="font-mono text-16 opacity-55">
           {{ String(index + 1).padStart(2, '0') }}
         </span>
         <div>
-          <div class="font-mincho font-extrabold text-[56px] leading-[1.05]">
+          <div class="font-mincho font-extrabold text-64 leading-[1.05]">
             {{ post.title }}
           </div>
-          <div class="font-mono text-[22px] opacity-60 mt-[8px]">
+          <div class="font-mono text-28 opacity-60 mt-[8px]">
             {{ post.subtitle }}
           </div>
         </div>
-        <div class="font-mono text-[13px] opacity-55 text-right">
+        <div class="font-mono text-12 opacity-55 text-right">
           {{ post.year }} · case study
         </div>
       </div>
@@ -34,17 +34,17 @@
 
       <!-- 4.6 Role / brief grid -->
       <div class="grid grid-cols-[1fr_2fr] gap-[60px] mb-[60px]">
-        <div class="font-mono text-[13px] space-y-[24px]">
+        <div class="font-mono text-12 space-y-[24px]">
           <div>
-            <div class="opacity-50 uppercase tracking-[0.08em] text-[11px] mb-[6px]">Role</div>
+            <div class="opacity-50 uppercase tracking-[0.08em] text-12 mb-[6px]">Role</div>
             <div>{{ post.role }}</div>
           </div>
           <div>
-            <div class="opacity-50 uppercase tracking-[0.08em] text-[11px] mb-[6px]">Team</div>
+            <div class="opacity-50 uppercase tracking-[0.08em] text-12 mb-[6px]">Team</div>
             <div>{{ post.team }}</div>
           </div>
           <div>
-            <div class="opacity-50 uppercase tracking-[0.08em] text-[11px] mb-[10px]">Stack</div>
+            <div class="opacity-50 uppercase tracking-[0.08em] text-12 mb-[10px]">Stack</div>
             <div class="flex flex-wrap gap-2">
               <span
                 v-for="tag in post.stack"
@@ -57,7 +57,7 @@
           </div>
         </div>
 
-        <div class="font-mono text-[14px] leading-[1.8] opacity-85 space-y-[20px]">
+        <div class="font-mono text-14 leading-[1.8] opacity-85 space-y-[20px]">
           <p v-for="(excerpt, i) in bodyExcerpts" :key="i">{{ excerpt }}</p>
         </div>
       </div>
@@ -87,7 +87,7 @@
       </div>
 
       <!-- 4.9 Prev / Next nav -->
-      <div class="flex justify-between items-center border-t border-[var(--line)] pt-[32px] font-mono text-[14px]">
+      <div class="flex justify-between items-center border-t border-[var(--line)] pt-[32px] font-mono text-14">
         <NuxtLink
           v-if="prevProject"
           :to="prevProject.path"
@@ -98,7 +98,7 @@
         <span v-else />
         <NuxtLink
           to="/projects"
-          class="opacity-50 hover:opacity-100 transition-opacity text-[12px] uppercase tracking-[0.08em]"
+          class="opacity-50 hover:opacity-100 transition-opacity text-12 uppercase tracking-[0.08em]"
         >
           all projects
         </NuxtLink>
