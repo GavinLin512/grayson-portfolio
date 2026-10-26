@@ -275,3 +275,28 @@ about、projects、journal、skills、journey、contact、guestbook 的內容下
 - Chrome 擷取比視窗高的整頁截圖時，會重播 SVG 元素上的 CSS 動畫，插畫被截成空白（`animations: 'disabled'` 也一樣）。Argos 是整頁截圖，所以 `navigator.webdriver` 時直接顯示完成狀態（`.ps-still`），與首頁凍結時針同一招。
 - Argos 用 Playwright 預設的 1280×720，這個高度下 about / journal / skills / contact 的插畫是隱藏的，基準圖只會看到 projects、journey、guestbook 的插畫。
 - about 顯示插畫時右欄變高，左欄的「— grayson, somewhere in taipei.」會被 `flex-1` 推到肖像欄底部（原設計意圖），插畫隱藏時則維持原位。
+
+---
+
+## 首頁水彩背景（`BgWatercolor`）為何用 SVG 濾鏡，描邊動畫為何拆成兩層
+
+### 問題
+
+原版首頁要加一層淡淡的鋼筆淡彩（歐式建築加湖景），顏色跟站上調色盤走，深色模式也要成立。首頁上已經有星盤、星座與光塵 canvas、燭光呼吸等持續動畫。
+
+### 做法
+
+- `app/components/bg/Watercolor.vue`，放在 `index.vue` 根節點的第一個子元素：紙紋與燭光依 DOM 順序疊在它上面，星盤、框線、藤蔓都在前面。
+- **SVG，不用點陣圖**：顏色全是 `var(--gold)` 等 token，深色模式自動換色，不必出兩張圖。AI 生圖會更像真水彩，但顏色要後製、深色要另一張，還要用外部付費服務。
+- 水彩感來自三個濾鏡：`wc-bleed`（低頻噪訊位移出濕邊；同一份噪訊沒用到的藍色通道當顏料濃淡；細噪訊做顆粒）、`wc-pen`（筆線輕微抖動）、`wc-ripple`（只在 x 方向拉長的噪訊做倒影波紋）。每塊顏色另用同色描邊，模擬顏料乾在邊緣。
+- **描邊動畫跟標題同一套**：吃 `index.vue` 的 `play`，動畫一開始暫停，`.wc-play` 才放行。色塊先淡入，筆線再依序一段段畫出（遠山、建築、樹叢與細節、水面、小船與鳥），最後是窗戶、墨點、簽名淡入，約 4.6 秒畫完。Argos 截圖用 `animations: "disabled"`，有限動畫會直接快轉到結束；首頁高度等於視窗，不會有整頁截圖重播的問題，所以不必加 `navigator.webdriver` 分支。
+- **色塊與筆線是兩層 SVG**：色塊層 `will-change: opacity`，濾鏡只算一次，淡入走 compositor；筆線層 `will-change: transform`，逐格重畫時不會連帶重算水彩濾鏡。
+- **每段子路徑拆成一個 `<path>`**：Chrome 對每段子路徑重新起算虛線，整層合成一條再套 `pathLength=1`，每一小段都只畫到全長的一小部分就結束，看起來是整層跳出來。拆開後共 259 段，首頁 HTML 多約 22KB（未壓縮）。
+- 隨機筆觸（樹叢筆圈、石紋、水紋、墨點）用 mulberry32（純整數運算）產生，SSR 與各瀏覽器結果相同，不會 hydration mismatch。
+- 根節點 `will-change: transform` 自成合成層。1440×900 下開關水彩層，影格時間相同：靜態時 p50 16.7ms、p95 18.5ms；描邊動畫期間 p50 16.7ms、p95 17.7ms。
+- `preserveAspectRatio="xMaxYMax meet"`：桌機靠框內右下，寬螢幕左側留白；手機縮在底部。
+
+### 陷阱
+
+- Vue scoped CSS 的 `:global(.dark) .wc` 會被編譯成只有 `.dark`，等於把整個 `<html>` 設成半透明。深色規則要寫 `.dark .wc`（scoped 屬性只加在最後一段選擇器）。
+- 遠山與天空的色塊落在標題欄後面，所以透明度壓得很低（0.07–0.18）。改構圖時注意 `design · code · craft` 那行的可讀性。
