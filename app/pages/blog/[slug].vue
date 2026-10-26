@@ -124,7 +124,9 @@ function flattenToc(links: Array<{ id: string; text: string; depth: number; chil
 
 const relatedPosts = computed(() => {
   if (!allPosts.value) return []
-  return allPosts.value.filter((p) => p.path !== route.path).slice(0, 3)
+  // match on the post, not the URL: Cloudflare Pages serves prerendered pages
+  // at a trailing-slash URL, so route.path never equals p.path there
+  return allPosts.value.filter((p) => p.path !== post.value?.path).slice(0, 3)
 })
 
 const activeId = ref('')
