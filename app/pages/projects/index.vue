@@ -1,5 +1,8 @@
 <template>
-  <div class="relative min-h-full flex flex-col overflow-hidden">
+  <!-- min-h-full never resolves under the content layout, so on lg the root
+       reaches the footer itself (56 header + 120 main padding + 36 footer):
+       the room under the preview is where the sketch goes -->
+  <div class="relative min-h-full lg:min-h-[calc(100vh_-_212px)] flex flex-col overflow-hidden">
 
     <!-- Header -->
     <PageHeader :label="`— 02 / projects · ${visibleProjects.length} selected`">
@@ -61,7 +64,7 @@
       </div>
 
       <!-- Right: preview panel (lg+ only) -->
-      <div class="hidden lg:block">
+      <div class="hidden lg:flex lg:flex-col">
         <div class="sticky">
           <p class="font-mono text-12 opacity-50 mb-4">preview · hover</p>
 
@@ -98,6 +101,15 @@
               {{ tag }}
             </span>
           </div>
+        </div>
+
+        <!-- takes whatever height is left under the preview without adding
+             any, the sketch scaled to fit; hidden once that room is too small -->
+        <div class="relative flex-1 min-h-0 [container-type:size]">
+          <PageSketch
+            kind="projects"
+            class="absolute top-6 left-0 w-auto max-h-[calc(100%_-_24px)] [@container(max-height:110px)]:hidden"
+          />
         </div>
       </div>
     </div>

@@ -79,6 +79,13 @@
             rss · /feed.xml
           </a>
         </div>
+
+        <!-- shrinks to the room left above the footer (the page is ~707px
+             tall without it), so it never adds a scroll; hidden once too small -->
+        <PageSketch
+          kind="journal"
+          class="hidden lg:block [@media(max-height:796px)]:!hidden max-h-[calc(100dvh_-_707px)]"
+        />
       </div>
     </div>
   </div>

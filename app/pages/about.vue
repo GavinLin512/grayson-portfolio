@@ -61,6 +61,13 @@
             </p>
           </div>
         </div>
+
+        <!-- shrinks to the room left above the footer (the page is ~733px
+             tall without it), so it never adds a scroll; hidden once too small -->
+        <PageSketch
+          kind="about"
+          class="hidden xl:block [@media(max-height:822px)]:!hidden max-h-[calc(100dvh_-_733px)] mx-auto mt-6"
+        />
       </div>
     </div>
   </div>

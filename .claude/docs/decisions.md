@@ -252,3 +252,26 @@ CSS 動畫可被 Playwright 的 `animations: 'disabled'` 快轉到終態，但 *
 - 不用 `filter: blur`、`mix-blend-mode`、`background-attachment: fixed`（iOS 效能與相容性），只用 transform / opacity。
 - 手機上唯一持續重繪的是星盤內環（160 秒轉一圈）。若實機發熱，改成靜止即可，其餘都是 opacity。
 - 本案原本做過 `?bg=1~3` 的預覽切換，已移除；選定後不再保留切換機制。
+
+---
+
+## 內頁插畫（PageSketch）為何不能撐高版面
+
+### 問題
+
+about、projects、journal、skills、journey、contact、guestbook 的內容下方或側欄有空白，要各放一張筆線插畫（`app/components/PageSketch.vue`，`kind` 選圖）。但 `content` layout 的頁面根節點 `min-h-full` 實際上解析不到高度，頁面高度＝內容高度，所以空白是在「內容之下」，不是在被撐滿的根節點裡：`absolute bottom-0` 與 `mt-auto` 都只會貼在內容底部。
+
+### 做法
+
+- 插畫只在 `lg` 以上出現（手機有 `BgLayer`），一律不讓頁面變高：
+  - about / journal / skills：放在該欄最後，`max-h-[calc(100dvh_-_Kpx)]` 依視窗剩餘高度縮小（K 是沒有插畫時的頁高加間距），剩不到約 90px 時用 `[@media(max-height:…)]:!hidden` 隱藏。about 另外只在 `xl` 以上出現，因為 `lg` 寬度下文字換行讓頁面變高。
+  - contact：放在零高度的 `relative` 容器裡、`absolute` 往下懸掛。若佔版面，左欄變高會把右欄表單的 `flex-1` textarea 一起拉長。
+  - projects：寬螢幕的預覽圖（4:3）會變高，標籤下方幾乎沒空間，真正的空白是在內容與 footer 之間。所以只有這頁在 `lg` 以上用 `lg:min-h-[calc(100vh_-_212px)]`（header 56 + main 上下 padding 120 + footer 36，`lg` 以上都是固定高度）讓根節點自己撐到 footer。內容較高時這個值不起作用，所以不會多出捲動。右欄改成 `flex-col`，插畫放在 `flex-1 min-h-0` 的容器裡，`absolute` 加 `max-h-[calc(100%_-_24px)]`，依剩下的高度等比縮小，本身不佔高度。容器設 `container-type: size`，剩不到 110px 時用 `@container` 隱藏，不會只露一截。只改這一頁，不動 `content.vue`：全域修好高度鏈會讓 7 頁的 `flex-1`／`mt-auto` 一起移位。
+  - journey、guestbook：右欄本來就比左欄短，直接放在右欄。
+- 每條筆線用 `pathLength=1` 的 dash 動畫依序畫出；虛線（journey 的路線、projects 的未畫弧）用同樣畫出的遮罩顯示。
+
+### 陷阱
+
+- Chrome 擷取比視窗高的整頁截圖時，會重播 SVG 元素上的 CSS 動畫，插畫被截成空白（`animations: 'disabled'` 也一樣）。Argos 是整頁截圖，所以 `navigator.webdriver` 時直接顯示完成狀態（`.ps-still`），與首頁凍結時針同一招。
+- Argos 用 Playwright 預設的 1280×720，這個高度下 about / journal / skills / contact 的插畫是隱藏的，基準圖只會看到 projects、journey、guestbook 的插畫。
+- about 顯示插畫時右欄變高，左欄的「— grayson, somewhere in taipei.」會被 `flex-1` 推到肖像欄底部（原設計意圖），插畫隱藏時則維持原位。

@@ -80,6 +80,8 @@
           also available — JSON resume ↗<br />
           &amp; a one-page edition.
         </p>
+
+        <PageSketch kind="journey" class="mt-12 mx-auto" />
       </div>
     </div>
   </div>

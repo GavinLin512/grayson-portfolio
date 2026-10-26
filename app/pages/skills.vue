@@ -38,6 +38,13 @@
           <p class="font-hand text-20 opacity-80">{{ skills?.notInterested }}</p>
         </div>
       </div>
+
+      <!-- shrinks to the room left above the footer (the page is ~729px
+           tall without it), so it never adds a scroll; hidden once too small -->
+      <PageSketch
+        kind="skills"
+        class="hidden lg:block [@media(max-height:818px)]:!hidden max-h-[calc(100dvh_-_729px)] mx-auto mt-10"
+      />
     </div>
   </div>
 </template>

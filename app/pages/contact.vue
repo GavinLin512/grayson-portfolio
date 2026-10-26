@@ -51,6 +51,13 @@
             <span class="opacity-85">taipei · GMT+8</span>
           </div>
         </div>
+
+        <!-- hangs below the info list without adding height (a taller row
+             would stretch the form's textarea), shrunk to stay clear of the
+             footer; hidden once too small -->
+        <div class="relative hidden lg:block [@media(max-height:776px)]:!hidden">
+          <PageSketch kind="contact" class="absolute top-12 left-0 max-h-[calc(100dvh_-_687px)]" />
+        </div>
       </div>
 
       <!-- Right column: form or success -->
