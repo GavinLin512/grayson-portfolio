@@ -1,8 +1,6 @@
-onlyBuiltDependencies:
-  - "@parcel/watcher"
-  - esbuild
-  - better-sqlite3
-  - sharp
+allowBuilds:
+  esbuild: true
+  workerd: false
 
 overrides:
   shell-quote: "^1.8.4"

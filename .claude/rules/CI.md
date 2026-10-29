@@ -137,10 +137,11 @@ concurrency:
 
 ## Baseline 與 reference branch
 
-- Argos 每個 build 會跟 **reference branch 上最近一次 approved build** 比對。
-- reference branch 預設 = repo 預設分支（`main`）。若 `main` 很久才合併一次，baseline 會卡在很舊的版本，PR 永遠跟舊版比。
-- **設定**：Argos 後台 → Project → Settings → reference branch 設為 `dev`（最新整合狀態）。
-- 配合 `push: [dev, main]` 觸發，每次合併都會產生新 baseline，PR 即與「上一版」比對。
+- PR build 的 baseline 由 Argos 分析 git 歷史決定：取 PR 與 **PR base 分支的共同祖先**（merge base）上的 build，**不是**後台設定的 reference branch（見 Argos 原始碼 `apps/backend/src/build/strategy/strategies/ci`）。
+  - `feature → dev`：跟 dev 上一次合併產生的 baseline 比。
+  - `dev → main`：跟 **main** 上一次的 build 比，所以 `feature → dev` 已核准過的差異會**再出現一次**，需重新核准（例：#32、#33 都是 10 changed）。
+- 後台的分支設定決定**哪些分支的 push build 自動核准**、直接成為 baseline（PR build 一律不自動核准）。目前 dev 的 push build 會自動核准（build #53）。
+- 配合 `push: [dev, main]` 觸發，每次合併都會在該分支產生新 baseline。
 - 此設定須在 Argos 網站手動操作，無法由程式碼控制。
 
 ## 新增測試頁面

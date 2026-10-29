@@ -25,6 +25,17 @@ export default defineNuxtConfig({
     '@nuxtjs/sitemap',
   ],
   css: ['~/assets/css/tokens.css'],
+  // @lucide/vue ships no `exports`, so the server build loads its CJS entry,
+  // which requires a second copy of Vue: inject() then fails during SSR.
+  // Bundling it makes it share the app's Vue.
+  build: { transpile: ['@lucide/vue'] },
+  // @nuxtjs/tailwindcss adds this plugin, but Nuxt 4.6 imports postcss plugins
+  // as ESM and tailwind 3 has no `exports` for the subpath, so it never loads.
+  // No CSS here is nested; turn it off to drop the warning.
+  postcss: { plugins: { 'tailwindcss/nesting': false } },
+  // ProsePre imports mermaid only on mount, so in dev Vite finds it late and
+  // reloads the page; the Playwright pages with diagrams hit that on a cold start.
+  vite: { optimizeDeps: { include: ['mermaid'] } },
   colorMode: {
     classSuffix: '',
     preference: 'system',
