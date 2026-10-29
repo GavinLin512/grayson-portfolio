@@ -104,11 +104,13 @@
         </div>
 
         <!-- takes whatever height is left under the preview without adding
-             any, the sketch scaled to fit; hidden once that room is too small -->
+             any, the sketch scaled to fit; hidden once that room is too small.
+             invisible, not hidden: under a container query, display:none
+             makes Chrome restart the draw-in on every hover re-layout -->
         <div class="relative flex-1 min-h-0 [container-type:size]">
           <PageSketch
             kind="projects"
-            class="absolute top-6 left-0 w-auto max-h-[calc(100%_-_24px)] [@container(max-height:110px)]:hidden"
+            class="absolute top-6 left-0 w-auto max-h-[calc(100%_-_24px)] [@container(max-height:110px)]:invisible"
           />
         </div>
       </div>

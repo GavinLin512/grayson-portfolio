@@ -18,9 +18,10 @@ let cached: PagefindApi | null | undefined
 export async function initPagefind(): Promise<PagefindApi | null> {
   if (cached !== undefined) return cached
   try {
-    // Path in a variable so TS/Vite don't try to statically resolve the
-    // build-time-only module; `@vite-ignore` keeps it out of the bundle.
-    const modulePath = '/pagefind/pagefind.js'
+    // Built at runtime so TS/Vite don't try to statically resolve the
+    // build-time-only module: Vite 8 folds a constant path into a literal,
+    // which Nitro then fails to resolve. `@vite-ignore` keeps it out of the bundle.
+    const modulePath = `${location.origin}/pagefind/pagefind.js`
     const pf = (await import(/* @vite-ignore */ modulePath)) as PagefindApi
     await pf.init()
     cached = pf

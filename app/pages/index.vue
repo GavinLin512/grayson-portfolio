@@ -1,5 +1,8 @@
 <template>
   <div class="relative h-full overflow-hidden" :class="{ 'qc-play': play }">
+    <!-- a faint fountain-pen watercolour of a lakeside town, under everything -->
+    <BgWatercolor :play="play" />
+
     <!-- paper grain (plan §5: opacity 0.03–0.06, barely perceptible) -->
     <div class="qc-grain absolute inset-0 z-0 max-lg:hidden pointer-events-none" aria-hidden="true" />
 

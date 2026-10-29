@@ -269,9 +269,61 @@ about、projects、journal、skills、journey、contact、guestbook 的內容下
   - projects：寬螢幕的預覽圖（4:3）會變高，標籤下方幾乎沒空間，真正的空白是在內容與 footer 之間。所以只有這頁在 `lg` 以上用 `lg:min-h-[calc(100vh_-_212px)]`（header 56 + main 上下 padding 120 + footer 36，`lg` 以上都是固定高度）讓根節點自己撐到 footer。內容較高時這個值不起作用，所以不會多出捲動。右欄改成 `flex-col`，插畫放在 `flex-1 min-h-0` 的容器裡，`absolute` 加 `max-h-[calc(100%_-_24px)]`，依剩下的高度等比縮小，本身不佔高度。容器設 `container-type: size`，剩不到 110px 時用 `@container` 隱藏，不會只露一截。只改這一頁，不動 `content.vue`：全域修好高度鏈會讓 7 頁的 `flex-1`／`mt-auto` 一起移位。
   - journey、guestbook：右欄本來就比左欄短，直接放在右欄。
 - 每條筆線用 `pathLength=1` 的 dash 動畫依序畫出；虛線（journey 的路線、projects 的未畫弧）用同樣畫出的遮罩顯示。
+- 淡彩照首頁 `BgWatercolor` 的鋼筆淡彩：
+  - 筆線 tuple 的第 4 欄是色票（如 `'cool 0.24'`），直接填該筆的輪廓，開放路徑填色時會自動閉合，不另畫形狀。只有沒有輪廓的顏色（桌面、液面、陰影、水漬點）才放進 `washes`。
+  - 濾鏡是 `wc-bleed` 的縮小版。首頁的物件有幾百 px，這裡只有幾十 px，所以噪訊頻率提高到 0.03、位移降到 9。顏料沉積的對比也調低，否則信封、書頁這類大面積色塊會斑駁得像迷彩。
+  - 色塊整組先淡入（`.ps-fade`），筆線再畫上去；截圖時一樣直接顯示完成狀態。深色模式色塊降到 0.7。
+  - 畫出期間開關色塊，影格時間相同（journey、guestbook 都是 p50 16.7ms、p95 17.6ms）。
 
 ### 陷阱
 
 - Chrome 擷取比視窗高的整頁截圖時，會重播 SVG 元素上的 CSS 動畫，插畫被截成空白（`animations: 'disabled'` 也一樣）。Argos 是整頁截圖，所以 `navigator.webdriver` 時直接顯示完成狀態（`.ps-still`），與首頁凍結時針同一招。
 - Argos 用 Playwright 預設的 1280×720，這個高度下 about / journal / skills / contact 的插畫是隱藏的，基準圖只會看到 projects、journey、guestbook 的插畫。
 - about 顯示插畫時右欄變高，左欄的「— grayson, somewhere in taipei.」會被 `flex-1` 推到肖像欄底部（原設計意圖），插畫隱藏時則維持原位。
+- projects 的 `@container` 只能用 `invisible`，不能用 `hidden`：hover 換專案讓右欄重新排版時，Chrome 會重算 container 內的樣式。規則裡只要有 `display:none`（就算當下沒命中，或掛在外層 wrapper），插畫的 CSS 動畫就會整組重新開始，每次 hover 都重畫一次。`visibility` 不會。
+
+---
+
+## 首頁水彩背景（`BgWatercolor`）為何用 SVG 濾鏡，描邊動畫為何拆成兩層
+
+### 問題
+
+原版首頁要加一層淡淡的鋼筆淡彩（歐式建築加湖景），顏色跟站上調色盤走，深色模式也要成立。首頁上已經有星盤、星座與光塵 canvas、燭光呼吸等持續動畫。
+
+### 做法
+
+- `app/components/bg/Watercolor.vue`，放在 `index.vue` 根節點的第一個子元素：紙紋與燭光依 DOM 順序疊在它上面，星盤、框線、藤蔓都在前面。
+- **SVG，不用點陣圖**：顏色全是 `var(--gold)` 等 token，深色模式自動換色，不必出兩張圖。AI 生圖會更像真水彩，但顏色要後製、深色要另一張，還要用外部付費服務。
+- 水彩感來自三個濾鏡：`wc-bleed`（低頻噪訊位移出濕邊；同一份噪訊沒用到的藍色通道當顏料濃淡；細噪訊做顆粒）、`wc-pen`（筆線輕微抖動）、`wc-ripple`（只在 x 方向拉長的噪訊做倒影波紋）。每塊顏色另用同色描邊，模擬顏料乾在邊緣。
+- **描邊動畫跟標題同一套**：吃 `index.vue` 的 `play`，動畫一開始暫停，`.wc-play` 才放行。色塊先淡入，筆線再依序一段段畫出（遠山、建築、樹叢與細節、水面、小船與鳥），最後是窗戶、墨點、簽名淡入，約 4.6 秒畫完。Argos 截圖用 `animations: "disabled"`，有限動畫會直接快轉到結束；首頁高度等於視窗，不會有整頁截圖重播的問題，所以不必加 `navigator.webdriver` 分支。
+- **色塊與筆線是兩層 SVG**：色塊層 `will-change: opacity`，濾鏡只算一次，淡入走 compositor；筆線層 `will-change: transform`，逐格重畫時不會連帶重算水彩濾鏡。
+- **每段子路徑拆成一個 `<path>`**：Chrome 對每段子路徑重新起算虛線，整層合成一條再套 `pathLength=1`，每一小段都只畫到全長的一小部分就結束，看起來是整層跳出來。拆開後共 259 段，首頁 HTML 多約 22KB（未壓縮）。
+- 隨機筆觸（樹叢筆圈、石紋、水紋、墨點）用 mulberry32（純整數運算）產生，SSR 與各瀏覽器結果相同，不會 hydration mismatch。
+- 根節點 `will-change: transform` 自成合成層。1440×900 下開關水彩層，影格時間相同：靜態時 p50 16.7ms、p95 18.5ms；描邊動畫期間 p50 16.7ms、p95 17.7ms。
+- `preserveAspectRatio="xMaxYMax meet"`：桌機靠框內右下，寬螢幕左側留白；手機縮在底部。
+
+### 陷阱
+
+- Vue scoped CSS 的 `:global(.dark) .wc` 會被編譯成只有 `.dark`，等於把整個 `<html>` 設成半透明。深色規則要寫 `.dark .wc`（scoped 屬性只加在最後一段選擇器）。
+- 遠山與天空的色塊落在標題欄後面，所以透明度壓得很低（0.07–0.18）。改構圖時注意 `design · code · craft` 那行的可讀性。
+
+---
+
+## 升級到 pnpm 12 與 Nuxt 4.6 的陷阱
+
+### 問題
+
+依賴升級時 pnpm 從 10 升到 12，Nuxt 4.4 → 4.6（Vite 8）。install、build、prerender 依序壞掉，dev 卻都正常。
+
+### 做法
+
+- **`minimumReleaseAge`**：pnpm 12 預設拒絕發布未滿 24 小時的套件，連 lockfile 裡已鎖定的版本也會擋，CI 的 `pnpm/action-setup` 照 `packageManager` 用 pnpm 12，一樣會擋。被擋時用 `pnpm clean --lockfile && pnpm install` 重新解析，pnpm 會自動改選滿 24 小時的前一版；不放寬政策。
+- **`allowBuilds`**：pnpm 12 用 `allowBuilds` 取代 `onlyBuiltDependencies`，改寫時舊清單被丟掉。被略過的 build script 會讓 install 直接失敗（`ERR_PNPM_IGNORED_BUILDS`）。目前 `esbuild: true`（原本就允許）；`workerd: false`，它的 script 只檢查版本、平台套件缺少時才下載，pnpm 已裝好平台套件，`wrangler types` 與 `wrangler pages dev` 都正常。`better-sqlite3` 13、`sharp` 0.35 改附預編譯 binary，`@parcel/watcher` 只在強制從原始碼編譯時才動作，都不必列。
+- **`@lucide/vue` 放進 `build.transpile`**：1.61 版沒有 `exports`，server build 從外部載入它的 CJS 版，它 `require('vue')` 拿到第二份 Vue（app 的 Vue 已打包進 server bundle），`inject()` 回傳 undefined，每頁 prerender 都 500。
+- **pagefind 路徑在執行時組出**：Vite 8 會把常數變數折成字串，`import(/* @vite-ignore */ modulePath)` 在 server bundle 變成字面路徑，Nitro 去解析、Cloudflare preset 不允許外部模組而失敗。改用 `` `${location.origin}/pagefind/pagefind.js` ``。
+- **blog 相關文章用文章 path 比對**：Cloudflare Pages 把 prerender 頁導向結尾帶 `/` 的網址，`route.path` 對不上 `p.path`，目前這篇會被列進相關文章。升級前的正式站也有這個多出來的連結，但沒有 hydration 警告；升級後的 build 才出現 hydration mismatch。
+
+### 陷阱
+
+- pnpm 12 執行任何 script 前會先自動 install（`verifyDepsBeforeRun`）。install 被政策擋下時會清掉 `node_modules` 最上層，之後所有 script 都 `command not found`。
+- prerender 的 500 不會印錯誤。要看原因，直接 import `node_modules/.cache/nuxt/.nuxt/prerender/index.mjs`，用它的 `localFetch` 請求頁面，錯誤會在 payload 的 `message` 裡。

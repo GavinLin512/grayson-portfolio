@@ -67,7 +67,7 @@ npx wrangler pages dev dist --kv RATE_LIMIT --port 8788 --compatibility-date 202
 
 ### 上線前必做
 
-- [ ] **Cloudflare Pages → Settings → Build command** 設為 `pnpm build`（`build` script 已串 `nuxt build && pagefind --site dist`，**不要**另外加 pagefind 步驟）。
+- [ ] **Cloudflare Pages → Settings → Build command** 照下方「pnpm 版本」一節設定，最後執行的是 `build` script（`build` script 已串 `nuxt build && pagefind --site dist`，**不要**另外加 pagefind 步驟）。
 - 搜尋索引需要 blog/project 詳細頁是靜態 HTML：`nuxt.config.ts` 已設 `nitro.prerender.crawlLinks: true` 讓 prerender 跟著列表頁連結爬出所有詳細頁；少了這行只會索引到 6 個列表頁。
 - **`/pagefind/*` 必須在 `dist/_routes.json` 的 exclude**：pagefind 在 `nuxt build` 之後才產生這些檔 → 不在 exclude 內 → Cloudflare Pages（與本機 `wrangler pages dev`）會把 `/pagefind/*` 路由給 Nitro worker → 404 → 搜尋載入失敗。已在 `nuxt.config.ts` 設 `nitro.cloudflare.pages.routes.exclude: ['/pagefind/*']` 解決（此設定會與 Nitro 自動產生的 exclude **合併**，不必手動維護其餘項目）。
 - 驗證：`pnpm build` 後 `dist/pagefind/pagefind.js` 應存在，`dist/_routes.json` 的 exclude 應含 `/pagefind/*`，pagefind log 顯示已索引 16 頁。
@@ -82,6 +82,28 @@ npx wrangler pages dev dist --kv RATE_LIMIT --port 8788 --compatibility-date 202
 
 - 所以 task 4.6 的 `NODE_VERSION=22` 可略過，也**不需** `.node-version` / `.nvmrc` 檔。
 - 僅在「想鎖更高版本」或「未來預設變動想固定」時，才於 repo 根目錄放 `.node-version`（內容如 `22`）顯式指定——此檔是 build-time 設定，須進 git 才會被讀到。
+
+---
+
+## pnpm 版本（Cloudflare Pages build）
+
+**跳過 Cloudflare 的自動 install，改在 build command 用 `packageManager` 指定的 pnpm 版本。** 版本只寫在 `package.json` 一處，不另外寫死。
+
+- [ ] Cloudflare Pages → Settings → Environment Variables，Production 與 Preview 都加 `SKIP_DEPENDENCY_INSTALL=1`
+- [ ] Settings → Build → Build command 改為：
+  ```sh
+  PM=$(node -p "require('./package.json').packageManager") && npx -y $PM install --frozen-lockfile && npx -y $PM build
+  ```
+
+為什麼：
+
+- v3 build image 預裝 pnpm 10.x，不會從 `pnpm-lock.yaml` 判斷版本。
+- pnpm 10 讀到 `packageManager` 會自動切換版本，但**切不到 pnpm 12**：pnpm 12 的 `bin/pnpm` 是暫時的 shim，要靠它自己的 install script 換成執行檔，pnpm 10 下載時不跑這個 script，於是 `Failed to switch pnpm to v12.15.0 ... ENOEXEC`（本機用 10.11.1、10.32.1 都重現）。
+- 之前 `packageManager` 是 `pnpm@10.32.1` 時能自動切換，因為那還是一般的 JS 套件。
+- 不用 `PNPM_VERSION`：它要寫死版本，升級 pnpm 時得記得同步改 Dashboard。
+- `build` script 內的 `pnpm build:search` 也會用到 pnpm 12：npx 會把自己的 `.bin` 放在 PATH 最前面，排在預裝的 pnpm 10 之前（本機已確認）。
+- 日後升級 pnpm 只要改 `packageManager`。
+- 本專案每個分支（含 `feature`）push 都會觸發 Preview build，可先用 `feature` 的 Preview 驗證，再合併到 `main`。
 
 ---
 
