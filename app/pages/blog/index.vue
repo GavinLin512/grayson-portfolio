@@ -98,9 +98,12 @@ const { data: posts } = await useAsyncData('blog-list', () =>
   queryCollection('blog').order('date', 'DESC').all()
 )
 
-const tags = ['all', 'css', 'type', 'craft', 'motion', 'meta'] as const
-type Tag = (typeof tags)[number]
-const activeTag = ref<Tag>('all')
+// Derive filter chips from the posts themselves so new tags show up without code changes
+const tags = computed(() => [
+  'all',
+  ...new Set((posts.value ?? []).flatMap((p) => p.tags ?? [])),
+])
+const activeTag = ref('all')
 
 const visiblePosts = computed(() => {
   if (!posts.value) return []
