@@ -4,7 +4,7 @@ Personal portfolio site built with Nuxt 4, deployed on Cloudflare Pages.
 
 ## Tech Stack
 
-- **Framework**: Nuxt 4.4.6
+- **Framework**: Nuxt 4.6.2
 - **Styling**: Tailwind CSS
 - **Content**: @nuxt/content (Markdown)
 - **Search**: Pagefind (static index, Cmd+K modal)

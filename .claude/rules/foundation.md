@@ -2,8 +2,8 @@
 
 ## 技術棧
 
-- **Framework**: Nuxt 4.4.6
-- **Package manager**: pnpm
+- **Framework**: Nuxt 4.6.2
+- **Package manager**: pnpm 12（版本只寫在 `package.json` 的 `packageManager`；Cloudflare build 設定見 `deploy.md`「pnpm 版本」）
 - **部署目標**: Cloudflare Pages（Nitro `cloudflare-pages` preset）
 
 ## 目錄結構慣例
