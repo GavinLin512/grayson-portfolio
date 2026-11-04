@@ -7,7 +7,7 @@ description: 第一個在野外被抓到的 coding agent 劫持攻擊，只用�
 
 ## 一個 Markdown 檔，就能讓 agent 倒戈
 
-這個網站大部分的程式碼，是我跟 coding agent 一起寫的。我在終端機打開它，它讀專案裡的 `CLAUDE.md`、`AGENTS.md`，了解這個專案的規矩，然後開始幹活。
+我現在寫程式大量依賴 coding agent。在終端機打開它，它會先讀專案裡的 `AGENTS.md`、`CLAUDE.md` 這類指令檔，了解這個專案的規矩，然後開始幹活。
 
 我從來沒想過一件事：**它怎麼知道那些指令檔是我寫的**？
 
@@ -64,7 +64,7 @@ description: 第一個在野外被抓到的 coding agent 劫持攻擊，只用�
 
 第一類很有意思：很多隱藏指令其實是合法的。專案用隱藏註解跟自家的自動化 agent 溝通。但這也代表一個問題：**agent 怎麼知道誰有權限指揮它**？攻擊者只要模仿合法的格式就好。
 
-而我自己的 repo，就有一個這樣的東西。後面會講到。
+後面掃示範專案時，就會遇到一個這樣的東西。
 
 ## 威脅模型：agent 讀到的一切都是不受信任的輸入
 
@@ -162,7 +162,7 @@ HIGH   invisible-unicode AGENTS.md:19  invisible characters: zero-width x1
 
 ## 三種語言寫同一個工具，我學到的事
 
-完整程式碼在這個網站 repo 的 [`tools/agent-scan/`](https://github.com/GavinLin512/grayson-portfolio/tree/main/tools/agent-scan)：Python 229 行、TypeScript 215 行、Go 359 行（gofmt 之後），三個都**零第三方相依**。這裡挑幾個讓三個版本「逐字相同」最難的地方。
+完整程式碼放在 [`tools/agent-scan/`](https://github.com/GavinLin512/grayson-portfolio/tree/main/tools/agent-scan)：Python 229 行、TypeScript 215 行、Go 359 行（gofmt 之後），三個都**零第三方相依**。這裡挑幾個讓三個版本「逐字相同」最難的地方。
 
 ### 1. 走訪目錄：三種風格
 
@@ -279,40 +279,52 @@ OK    fixtures/edge  (exit 1, 17 findings (4 high, 7 medium, 6 info) in 6 files)
 
 另外三個語言各自用內建的測試框架寫單元測試，都不需要裝任何東西：`python3 -m unittest`、`go test`、`node --test`。
 
-## 掃自己的 repo：抓到兩個東西
+## 掃上一篇的示範專案：抓到兩個東西
 
-工具寫好，第一件事當然是掃這個網站的 repo：
+工具寫好，第一件事當然是拿真的專案來試。我用的是[上一篇](/blog/2026-11-04-github-actions-hardening)開的 `pulse-board`（Vite + React + TS）。我在裡面照常見的做法放了一份 `AGENTS.md`，交代 agent 這個專案的規矩，再用 `.mcp.json` 接上 Playwright 的 MCP server，讓 agent 能自己開瀏覽器檢查畫面：
 
 ```text
-INFO   instruction-file .claude/AGENTS.md  agent instruction file (loaded as trusted context)
-MEDIUM hidden-html-comment .claude/AGENTS.md:1  hidden HTML comment: "code-review-graph MCP tools"
-INFO   instruction-file .claude/CLAUDE.md  agent instruction file (loaded as trusted context)
-INFO   config-file .claude/settings.json  agent config file
-INFO   config-file .claude/settings.local.json  agent config file
 INFO   config-file .mcp.json  agent config file
-MEDIUM mcp-unpinned-package .mcp.json:4  uvx runs "code-review-graph" without an exact version
+MEDIUM mcp-unpinned-package .mcp.json:4  npx runs "@playwright/mcp" without an exact version
+INFO   instruction-file AGENTS.md  agent instruction file (loaded as trusted context)
+MEDIUM hidden-html-comment AGENTS.md:3  hidden HTML comment: "以下規則由 docs/agent-guide.md 同步產生，要修改請改原始檔"
 
-7 findings (0 high, 2 medium, 5 info) in 5 files
+4 findings (0 high, 2 medium, 2 info) in 2 files
 ```
 
-**第一個：隱藏的 HTML 註解**。這是我裝的 code-review-graph 工具在 `AGENTS.md` 裡留下的區段標記。無害，但它完全就是 Radware 分類裡的第一類：「協調 agent 用的隱藏文字」。我確認過後保留。重點不是「有註解就是壞的」，而是**你要知道它在那裡，而且看過內容**。
+**第一個：隱藏的 HTML 註解**。這是我自己寫的備註，提醒人類「這段規則是從另一份文件同步過來的」。無害，但它完全就是 Radware 分類裡的第一類：「協調用的隱藏文字」。而且 agent 一樣讀得到它。我確認過後保留。重點不是「有註解就是壞的」，而是**你要知道它在那裡，而且看過內容**。換成 clone 別人的 repo 時，這一步就特別重要。
 
-**第二個：沒鎖版本的 MCP server**。`.mcp.json` 裡寫的是 `uvx code-review-graph serve`，代表每次 agent 啟動，uvx 都會去 PyPI 抓最新版來執行。這跟前兩篇講的風險一模一樣。修法很簡單：
+**第二個：沒鎖版本的 MCP server**。`.mcp.json` 裡寫的是 `npx -y @playwright/mcp`，這也是很多教學的寫法。它代表每次 agent 啟動，npx 都會去 npm 抓**最新版**來執行。這跟前兩篇講的風險一模一樣。
+
+修法是鎖確切版本，但這裡有個小插曲：`@playwright/mcp` 的最新版 0.0.84 是 10/31 才發布的，還不滿我給自己訂的 7 天。所以我鎖在前一版：
+
+```bash
+npm view @playwright/mcp time --json
+# 0.0.83  2026-09-28
+# 0.0.84  2026-10-31   ← 最新版，但還不滿 7 天
+```
 
 ```json
-"args": [
-  "code-review-graph==2.3.9",
-  "serve"
-]
+"args": ["-y", "@playwright/mcp@0.0.83"]
 ```
 
-2.3.9 剛好是目前的最新版，9 月就發布了，鎖上去行為完全不變，只是以後不會被偷偷換掉。
+再掃一次，MCP 那一筆就消失了，只剩確認過的註解：
+
+```text
+INFO   config-file .mcp.json  agent config file
+INFO   instruction-file AGENTS.md  agent instruction file (loaded as trusted context)
+MEDIUM hidden-html-comment AGENTS.md:3  hidden HTML comment: "以下規則由 docs/agent-guide.md 同步產生，要修改請改原始檔"
+
+3 findings (0 high, 1 medium, 2 info) in 2 files
+```
+
+三種語言的版本掃這個專案，輸出一樣逐字相同。
 
 ## 一個差點自己踩到的坑：fixture 本身就是攻擊
 
 寫這個工具的過程中，有兩件事讓我意識到：**做資安工具時，測試資料本身就是危險物品**。
 
-**第一件：有毒的 fixture 不能 commit**。我的 repo 本身就會被 coding agent 讀取。如果把那個「有毒的 AGENTS.md」放進 repo，任何人（包括我自己）在這個 repo 開 agent，agent 走進那個目錄時都可能讀到它。所以 fixtures 只由產生器寫到**暫存目錄**，產生器裡的注入文字也用 base64 存放，不以明文出現：
+**第一件：有毒的 fixture 不能 commit**。放這個工具的 repo，本身也會被 coding agent 讀取。如果把那個「有毒的 AGENTS.md」放進 repo，任何人（包括我自己）在這個 repo 開 agent，agent 走進那個目錄時都可能讀到它。所以 fixtures 只由產生器寫到**暫存目錄**，產生器裡的注入文字也用 base64 存放，不以明文出現：
 
 ```python
 # 模擬 Forever Security 描述的手法：藏在 HTML 註解裡、要 agent 改設定 / 裝東西 / 別告訴使用者

@@ -1,22 +1,22 @@
 ---
-title: 我用 zizmor 掃了自己的 CI，然後一個一個修掉
+title: 開一個新專案，用 zizmor 把 CI 的洞一個個補起來
 date: 2026-11-04
 tags: [security, devops, ci-cd]
-description: 把 LiteLLM 事件的教訓套到這個網站自己的 GitHub Actions：SHA pin、最小權限、persist-credentials、template injection、pnpm 的 minimumReleaseAge 與 trustPolicy，還有一次被政策攔下來的「疑似套件接管」實際調查。
+description: 把 LiteLLM 事件的教訓套到一個全新的 Vite + React + TypeScript 專案上：照平常習慣配好 CI，再用 zizmor 掃出問題，一個個修掉。SHA pin、最小權限、persist-credentials、template injection，還有 pnpm 的 minimumReleaseAge 與 trustPolicy 實測。
 ---
 
-## 檢討完別人，換檢討自己
+## 檢討完別人，換檢討自己的習慣
 
-[上一篇](/blog/2026-11-03-litellm-unrevoked-key-supply-chain)我拆了 LiteLLM 的攻擊鏈，寫得頭頭是道。寫完之後我心裡有點發毛：**這個網站自己的 CI 呢**？
+[上一篇](/blog/2026-11-03-litellm-unrevoked-key-supply-chain)我拆了 LiteLLM 的攻擊鏈，寫得頭頭是道。寫完之後我心裡有點發毛：**我平常配的 CI，又安全到哪裡去**？
 
-這個作品集網站跑在 Cloudflare Pages 上，GitHub 上有兩條 workflow：
+所以這篇我做了一個實驗：開一個全新的 Vite + React + TypeScript 專案，叫 `pulse-board`（一個假的工程指標儀表板），然後**完全照我平常的習慣**把 CI 配好：
 
-- `argos.yml`：用 Playwright 截圖、丟到 Argos 做視覺回歸測試
-- `bearer.yml`：用 Bearer 做靜態安全掃描
+- **Visual Tests**：一個 gate job 先判斷要不要跑（push 到 `main`、UI 相關檔案有變動，或 PR 掛了 `needs-visual-check` label），要跑的話就 build、啟動 preview server，用 Playwright 截圖丟到 Argos 做視覺回歸測試
+- **Security Scan**：用 Bearer 做靜態安全掃描，PR 只掃 diff，push 到 `main` 掃全部
 
-兩個都是我照官方範例抄來的，能動、沒出過事，所以我從來沒認真看過。剛好 10 月底 GitHub 宣布 Actions workflow lockfile GA，npm 生態也一直有套件被下毒的消息。不如就拿自己的 repo 開刀，把整個過程記錄下來。
+這些都是照官方範例組出來的，能動，看起來也很正常。接下來就用工具掃一次，看看「正常」的 CI 到底有多少洞。
 
-這篇的每個修改都已經 commit 進這個網站的 repo，掃描結果也都是實際跑出來的。
+這篇的每個掃描結果、每個錯誤訊息，都是在這個示範專案上實際跑出來的。
 
 ## 第一步：先掃，別用猜的
 
@@ -34,7 +34,7 @@ zizmor --offline .github/        # 預設模式
 zizmor --offline --persona=pedantic .github/   # 吹毛求疵模式
 ```
 
-actionlint 沒抓到任何問題，這我不意外，因為能跑的 workflow 語法通常都沒錯。但 zizmor 的結果讓我有點臉紅：
+actionlint（加上 shellcheck）沒抓到任何問題，這我不意外，能跑的 workflow 語法通常都沒錯。但 zizmor 的結果就不太好看了：
 
 | 規則 | 數量 | 嚴重度 | 白話文 |
 |---|---|---|---|
@@ -44,11 +44,11 @@ actionlint 沒抓到任何問題，這我不意外，因為能跑的 workflow �
 | `template-injection` | 4 | pedantic | `${{ }}` 直接寫進 shell script |
 | `anonymous-definition` | 3 | pedantic | job 沒有 `name` |
 
-17 個發現。一個一個來。
+一個剛開的專案、兩條照範例寫的 workflow，就有 17 個發現。一個一個來。
 
 ## 問題一：`@v6` 不是你以為的那個 `@v6`
 
-我原本的寫法長這樣：
+原本的寫法長這樣：
 
 ```yaml
 - uses: actions/checkout@v6
@@ -113,9 +113,9 @@ echo "$out" | awk '{print $2}' | sed 's#refs/tags/##; s#\^{}##' | sort -u \
 # .github/dependabot.yml
 version: 2
 updates:
+  # 讓 workflow 裡以 commit SHA 鎖定的 action 自動提 PR 更新（連同 # vX.Y.Z 註解）
   - package-ecosystem: github-actions
     directory: /
-    target-branch: dev
     schedule:
       interval: weekly
     # 新版本發布後至少等 7 天才提 PR，避開「剛發布就被下毒」的時間窗
@@ -147,21 +147,22 @@ runs:
 
 也就是說，我鎖住的只是外殼，裡面真正執行的程式還是浮動的。
 
-install.sh 有做 checksum 驗證，但 checksum 檔和執行檔來自**同一個 release**。這能防傳輸過程中檔案損壞，卻防不了 release 本身被換掉。如果有人能發布惡意的 Bearer release，他當然也能發布一份對應的 checksum。這跟上一篇 LiteLLM「簽章是真的」是同一個道理。
+install.sh 有做 checksum 驗證，但 checksum 檔和執行檔來自**同一個 release**。這能防傳輸過程中檔案損壞，卻防不了 release 本身被換掉：能發布惡意 release 的人，當然也能發布一份對應的 checksum。這跟上一篇 LiteLLM「簽章是真的」是同一個道理。
 
 我能做的是至少把 CLI 版本鎖住：
 
 ```yaml
-- name: Run Bearer security scan
+- name: Run Bearer SAST
   uses: bearer/bearer-action@828eeb928ce2f4a7ca5ed57fb8b59508cb8c79bc # v2
   with:
     # action 本身鎖了 SHA，但它執行時會下載 Bearer CLI；
     # 不指定 version 就會抓「最新版」，所以這裡也要鎖
     version: "2.1.3"
-    config-file: bearer.yml
+    diff: ${{ github.event_name == 'pull_request' }}
+    exit-code: "1"
 ```
 
-`install.sh` 從 `main` 下載這件事我改不了，除非 fork 這個 action 或自己寫下載步驟。這是目前已知、接受的剩餘風險。**SHA pin 之後，記得打開 action 的原始碼看一眼它還會抓什麼**。
+`install.sh` 從 `main` 下載這件事我改不了，除非 fork 這個 action 或自己寫下載步驟。這是已知、接受的剩餘風險。**SHA pin 之後，記得打開 action 的原始碼看一眼它還會抓什麼**。
 
 ## SHA pin 不是萬能（二）：fork 的 commit 也查得到
 
@@ -211,21 +212,21 @@ gh actions-lock --verify     # 放進 CI，確保沒人 commit 壞掉的 lockfil
 - 同 repo 的本地 action（`./...`）不會被追蹤
 - 工具還在 1.0 之前
 
-**我的 repo 目前做到哪**？`gh actions-lock` 需要已登入的 `gh` CLI，我這次是在沒有 GitHub 登入的環境裡做加固，所以先用手動 SHA pin。lockfile 是下一步，在本機跑上面那三行就好。官方文件也說，用了 lockfile 之後，workflow 檔裡就不一定要寫 SHA 了。
+`gh actions-lock` 需要已登入的 `gh` CLI，而且要有 GitHub 上的 repo 才能驗證。我這個示範專案只在本機，所以這篇先用手動 SHA pin。官方文件也說，用了 lockfile 之後，workflow 檔裡就不一定要寫 SHA 了。
 
 ## 問題二：權限給太大
 
-原本的 `argos.yml`：
+原本的 `visual-tests.yml`：
 
 ```yaml
 permissions:
   contents: read
-  id-token: write # Required for Argos CI GitHub OIDC authentication
+  id-token: write # Argos 用 GitHub OIDC 驗證上傳者身分
 ```
 
 `id-token: write` 讓 job 能向 GitHub 要一張 **OIDC token**，證明「我是這個 repo 的這個 workflow」。Argos 用它來驗證上傳者身分，不需要另外設 API key，這是好事。
 
-問題是我把它開在**整個 workflow**，所以只負責判斷「要不要跑」的 `decide` job 也拿得到。OIDC token 可以拿去跟雲端服務交換憑證：如果哪天我設定了 AWS 或 GCP 信任這個 repo，任何一個 job 被打穿，就能拿 OIDC token 去換雲端權限。
+問題是我把它開在**整個 workflow**，所以只負責判斷「要不要跑」的 `changes` job 也拿得到。OIDC token 可以拿去跟雲端服務交換憑證：如果哪天我設定了 AWS 或 GCP 信任這個 repo，任何一個 job 被打穿，就能拿 OIDC token 去換雲端權限。
 
 改成頂層全關、每個 job 自己開：
 
@@ -234,12 +235,12 @@ permissions:
 permissions: {}
 
 jobs:
-  decide:
+  changes:
     permissions:
       contents: read
     # ...
 
-  argos:
+  visual:
     permissions:
       contents: read
       id-token: write # Argos 用 GitHub OIDC 驗證，只有這個 job 需要
@@ -251,9 +252,9 @@ jobs:
 
 `actions/checkout` 預設會把 `GITHUB_TOKEN` 存下來，讓你後面可以直接 `git push`。v6 之後，它改存到 `$RUNNER_TEMP` 底下的獨立檔案，不再直接寫進 `.git/config`，但不管存在哪，**同一個 job 後面的每個 step 都讀得到**。
 
-這為什麼危險？想想 `argos` job 後面做了什麼：`pnpm install`。任何一個相依套件如果帶有惡意的 install script，它就能翻出這個 token。
+這為什麼危險？想想 `visual` job 後面做了什麼：`pnpm install`。任何一個相依套件如果帶有惡意的 install script，它就能翻出這個 token。
 
-我的 workflow 從頭到尾都不需要 push，所以直接關掉：
+這兩條 workflow 從頭到尾都不需要 push，所以直接關掉：
 
 ```yaml
 - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -263,21 +264,21 @@ jobs:
 
 ## 問題四：`${{ }}` 是字串替換，不是變數
 
-`decide` job 原本長這樣：
+gate job 原本長這樣：
 
 ```yaml
-- id: gate
+- id: filter
   run: |
     if [ "${{ github.event_name }}" = "push" ] \
-       || [ "${{ contains(github.event.pull_request.labels.*.name, 'run-argos-ci') }}" = "true" ]; then
-      echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
+       || [ "${{ contains(github.event.pull_request.labels.*.name, 'needs-visual-check') }}" = "true" ]; then
+      echo "ui=true" >> "$GITHUB_OUTPUT"; exit 0
     fi
     changed=$(git diff --name-only \
       "${{ github.event.pull_request.base.sha }}" \
       "${{ github.event.pull_request.head.sha }}")
 ```
 
-很多人以為 `${{ }}` 像 PHP 的 `{$var}` 插值，但其實它更像 Blade 的 `{!! !!}`：**GitHub 會在執行 shell 之前，把值原封不動貼進 script 裡**，沒有任何跳脫。
+很多人以為 `${{ }}` 像 PHP 的 `{$var}` 插值，但它其實更像 Blade 的 `{!! !!}`：**GitHub 會在執行 shell 之前，把值原封不動貼進 script 裡**，沒有任何跳脫。
 
 如果貼進去的是攻擊者能控制的內容，例如 PR 標題、issue 內文、分支名稱，那就是一個 shell injection：
 
@@ -286,19 +287,19 @@ jobs:
 - run: echo "Title: ${{ github.event.pull_request.title }}"
 ```
 
-我的情況其實沒有直接危險：event name、SHA、布林值都不是外部人能任意控制的字串，所以 zizmor 只在 pedantic 模式提醒。但習慣很重要，哪天複製貼上改成 PR 標題就中招了。正確寫法是**先放進 `env:`，script 裡只用 shell 變數**：
+這裡的情況其實沒有直接危險：event name、SHA、布林值都不是外部人能任意控制的字串，所以 zizmor 只在 pedantic 模式提醒。但習慣很重要，哪天複製貼上改成 PR 標題就中招了。正確寫法是**先放進 `env:`，script 裡只用 shell 變數**：
 
 ```yaml
-- id: gate
+- id: filter
   # ${{ }} 一律先放進 env，script 內只用 shell 變數，避免 template injection
   env:
     EVENT_NAME: ${{ github.event_name }}
-    HAS_RUN_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'run-argos-ci') }}
+    HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'needs-visual-check') }}
     BASE_SHA: ${{ github.event.pull_request.base.sha }}
     HEAD_SHA: ${{ github.event.pull_request.head.sha }}
   run: |
-    if [ "$EVENT_NAME" = "push" ] || [ "$HAS_RUN_LABEL" = "true" ]; then
-      echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
+    if [ "$EVENT_NAME" = "push" ] || [ "$HAS_LABEL" = "true" ]; then
+      echo "ui=true" >> "$GITHUB_OUTPUT"; exit 0
     fi
     changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
 ```
@@ -309,7 +310,7 @@ jobs:
 
 pedantic 模式剩下 3 個「job 沒有 `name`」，我刻意不改。
 
-原因是 GitHub 的 status check 名稱是從 job id 或 name 來的。如果哪天在 branch protection 把 `decide`、`argos`、`scan` 設成必要檢查，改名會讓那些規則對不上新名字，PR 可能直接卡住或略過檢查。為了一個 info 等級的提示冒這個險不值得。**工具的建議是參考，不是聖旨**，每一條都要想清楚再改。
+原因是 GitHub 的 status check 名稱是從 job id 或 name 來的。如果你在 branch protection 把某個 check 設成必要檢查，事後再改名，規則就會對不上新名字，PR 可能直接卡住或略過檢查。新專案還沒設 branch protection 的話，一開始就取好名字最好；已經上線的專案，就要連同保護規則一起改。**工具的建議是參考，不是聖旨**，每一條都要想清楚再改。
 
 ## 問題五：相依套件本身
 
@@ -339,38 +340,102 @@ trustPolicy: no-downgrade
 
 `trustPolicy: no-downgrade` 的邏輯是：如果一個套件之前的版本都是透過 CI 的 trusted publishing 發布（有 provenance），突然有一版是用個人 token 從某人電腦上發布的，那很可能是帳號被盜。這在 npm 圈的幾次大規模蠕蟲事件裡都是典型特徵。
 
-在暫存專案實測一下效果：
+## 然後政策馬上就擋下東西了
+
+`pulse-board` 是我用 `pnpm add` 一個個裝起來的，當時用的是 pnpm 的預設設定。加上上面的政策後，跑一次 CI 會用的指令：
 
 ```bash
-# 指定一個 2 天前才發布的版本
-pnpm add seroval@1.7.7
-#   × 1 version does not meet the minimumReleaseAge constraint:
-#       seroval@1.7.7 was published at 2026-11-02T13:24:35.651Z, within the
-#     minimumReleaseAge cutoff (2026-11-01T01:38:09.444Z)
-
-# 用範圍指定：pnpm 會自動挑「夠老」的最新版
-pnpm add 'seroval@^1.7.0'
-# + seroval 1.7.6
+rm -rf node_modules && pnpm install --frozen-lockfile
 ```
-
-## 然後政策真的攔到東西了
-
-設定好之後，我在專案裡跑了一次 `pnpm install --frozen-lockfile`，結果：
 
 ```text
   × installing dependencies
   ╰─▶ 2 lockfile entries failed verification:
-        semver@6.3.1 High-risk trust downgrade for "semver@6.3.1" (possible
-      package takeover)
-        seroval@1.7.2 High-risk trust downgrade for "seroval@1.7.2" (possible
-      package takeover)
+        @vitejs/plugin-react@6.2.1 was published at 2026-11-02T09:15:06.000Z,
+      within the minimumReleaseAge cutoff (2026-11-01T02:13:43.989Z)
+        semver@7.8.6 was published at 2026-11-02T17:05:43.359Z, within the
+      minimumReleaseAge cutoff (2026-11-01T02:13:43.989Z)
 ```
 
-「possible package takeover」，這幾個字看了還是會心跳加速。最簡單的做法是直接加進例外清單讓它過，但這樣設定政策就沒意義了。所以我一個一個查。
+一個新專案，裝完不到兩天，lockfile 裡就有兩個「太新」的套件。
 
-### `seroval@1.7.2`：真的很可疑，所以實際比對內容
+- **`@vitejs/plugin-react@6.2.1`**：直接相依，是 Vite 的 React plugin
+- **`semver@7.8.6`**：間接相依，路徑是 `@argos-ci/playwright` → `@argos-ci/core` → `sharp` → `semver`
 
-`seroval` 是 Nuxt 用來序列化資料的套件，從 `@nuxt/vite-builder` 一路被拉進來。先看發布紀錄：
+查一下 plugin-react 的發布紀錄，很有意思：
+
+```bash
+npm view @vitejs/plugin-react time --json
+```
+
+| 版本 | 發布時間（UTC） |
+|---|---|
+| 6.1.2 | 10/05 |
+| 6.2.0 | 11/02 07:47 |
+| 6.2.1 | 11/02 09:18 |
+
+6.2.0 發布後 **90 分鐘**就跟了一個 6.2.1。新版本出來後馬上補一個 hotfix 是很常見的事，這也是「等幾天再用」的另一個好處：除了避開惡意版本，也避開那種剛發布、還在修 bug 的版本。
+
+### 第一個坑：`pnpm add` 寫進去的版本範圍
+
+我以為照 pnpm 的提示重新解析就好，結果還是失敗。原因在 `package.json`：
+
+```json
+"@vitejs/plugin-react": "^6.2.1"
+```
+
+`pnpm add` 會把**當下裝到的版本**寫成 caret 範圍的下限。`^6.2.1` 代表「至少 6.2.1」，而 6.2.1 本身就太新了，所以在 3 天的限制下根本沒有版本可以選。要先把下限放寬到夠舊的版本：
+
+```json
+"@vitejs/plugin-react": "^6.1.2"
+```
+
+### 第二個坑：一般的 `pnpm install` 會先驗證舊 lockfile
+
+改完 `package.json` 直接跑 `pnpm install`，還是同樣的錯誤。因為 pnpm 會先拿政策去檢查**現有的 lockfile**，檢查不過就停了，根本走不到重新解析。要照錯誤訊息的提示，先清掉 lockfile：
+
+```bash
+pnpm clean --lockfile
+pnpm install
+# + @vitejs/plugin-react 6.1.2
+```
+
+`semver` 是間接相依，不用改 `package.json`，pnpm 自動選了符合政策的 7.8.5。最後 lockfile 只有這兩個版本不同：
+
+```diff
+-  '@vitejs/plugin-react@6.2.1':
++  '@vitejs/plugin-react@6.1.2':
+-  semver@7.8.6:
++  semver@7.8.5:
+```
+
+再跑一次 frozen install，通過：
+
+```bash
+rm -rf node_modules && pnpm install --frozen-lockfile
+# Done in 61ms using pnpm v12.15.0
+```
+
+`pnpm clean --lockfile` 會整份重新解析，在大專案裡可能會順便升級一堆其他套件。這時候更要仔細看 lockfile 的 diff，這也是為什麼**政策最好在專案一開始就設好**。
+
+## `trustPolicy` 被觸發時長什麼樣
+
+`pulse-board` 的相依套件沒有觸發 `trustPolicy`。但我想知道它真的擋東西時是什麼樣子，所以找了一個最近會觸發的真實案例，在一個空的暫存專案裡測：
+
+```bash
+pnpm add seroval@1.7.2
+```
+
+```text
+  ╰─▶ Failed to resolve dependency: High-risk trust downgrade for
+      "seroval@1.7.2" (possible package takeover)
+```
+
+「possible package takeover」，這幾個字看了還是會心跳加速。遇到這種告警，最簡單的做法是直接加進例外清單讓它過，但這樣設定政策就沒意義了。所以我把它當成練習，實際查一次。
+
+### 先看發布紀錄
+
+`seroval` 是一個資料序列化套件，被不少框架間接使用。
 
 ```bash
 npm view seroval@1.7.1 --json   # 看 dist.attestations 和 _npmUser
@@ -384,7 +449,9 @@ npm view seroval@1.7.1 --json   # 看 dist.attestations 和 _npmUser
 
 夾在兩個 CI 發布版本中間，突然冒出一個個人帳號手動發布、沒有 provenance 的版本。這就是帳號被盜時會出現的模式。
 
-所以我把三個版本的 tarball 抓下來比對。**只下載、不安裝**，`--ignore-scripts` 確保不會執行任何東西：
+### 再比對內容
+
+把三個版本的 tarball 抓下來比對。**只下載、不安裝**，`--ignore-scripts` 確保不會執行任何東西：
 
 ```bash
 for v in 1.7.1 1.7.2 1.7.3; do
@@ -424,33 +491,24 @@ diff -r 1.7.2/package/package.json 1.7.3/package/package.json
 
 除了版本號，**一個 byte 都沒差**。合理的推測是：維護者先從自己電腦手動發了一個 hotfix，幾天後再透過 CI 正式發一次。不是接管。
 
-但結論不是「加進例外」，而是**升級**。既然後面的版本有正常的 provenance，就沒理由留在可疑的那一版：
+### 結論不是「放行」，而是「升級」
+
+既然後面的版本有正常的 provenance，就沒理由留在可疑的那一版。如果你的 lockfile 裡有 1.7.2，正確做法是升級：
 
 ```bash
 pnpm update seroval --depth Infinity
 ```
 
-pnpm 在政策限制下選了 1.7.6（夠老、有 provenance 的最新版），lockfile 只改了 4 行。
+pnpm 會在政策限制下，挑一個夠老、而且有 provenance 的版本。
 
-### `semver@6.3.1`：合法的老 backport
-
-`semver@6.3.1` 是 2023 年 7 月，維護者為了修 ReDoS 漏洞（CVE-2022-25883）手動發布的 backport。當時 7.x 已經改用 CI 發布並附 provenance，這個 6.x 的修補版是手動發的，所以被判定為「降級」。這是業界有名的合法案例。
-
-後來 6.3.2 有用 trusted publishing 重新發布，但它是 11/2 才發布的，還沒滿我設定的 3 天，現在升不了。所以這筆加進例外，**並寫清楚理由和移除條件**：
+那什麼時候才該加例外？當你確認它合法、**而且沒有更好的版本可以升**的時候。有名的例子是 `semver@6.3.1`：這是 2023 年維護者為了修 ReDoS 漏洞（CVE-2022-25883）手動發布的 backport，當時 7.x 已經改用 CI 發布並附 provenance，所以它也會被判成「降級」。這種情況就加進例外，**並寫清楚理由和移除條件**：
 
 ```yaml
 # 經人工確認後才放行的例外，每一筆都要寫理由
 trustPolicyExclude:
   # 2023-07 維護者手動發布的 ReDoS 修補 backport（CVE-2022-25883），沒有 provenance。
-  # 後續的 6.3.2 有 trusted publishing，但發布未滿 minimumReleaseAge，之後升級即可移除此行
+  # 之後若有 trusted publishing 的修補版且已滿 minimumReleaseAge，就升級並移除此行
   - semver@6.3.1
-```
-
-處理完再跑一次，通過：
-
-```bash
-rm -rf node_modules && pnpm install --frozen-lockfile
-# Done in 22.9s using pnpm v12.15.0
 ```
 
 這段是我這次最大的收穫：**安全政策會產生需要人判斷的告警**。這時候最危險的不是告警本身，而是為了讓 CI 變綠，不假思索地加例外。
@@ -459,14 +517,14 @@ rm -rf node_modules && pnpm install --frozen-lockfile
 
 ## 讓檢查持續下去：workflow-audit.yml
 
-手動掃一次很爽，但下次有人（通常是三個月後的我）新增 workflow 時，還會記得嗎？所以加一條 workflow，只要 `.github/` 有變動就自動跑：
+手動掃一次很爽，但下次有人（通常是三個月後的自己）新增 workflow 時，還會記得嗎？所以再加一條 workflow，只要 `.github/` 有變動就自動跑：
 
 ```yaml
 name: Workflow Audit
 
 on:
   push:
-    branches: [dev, main]
+    branches: [main]
     paths:
       - ".github/**"
   pull_request:
@@ -530,12 +588,12 @@ zizmor==1.31.1 \
 | actionlint + shellcheck | 0 | 0 |
 | action 版本 | 浮動 tag | commit SHA + Dependabot（7 天 cooldown）|
 | Bearer CLI | 每次抓最新版 | 鎖 2.1.3 |
-| `id-token: write` | 整個 workflow | 只有 `argos` job |
+| `id-token: write` | 整個 workflow | 只有 `visual` job |
 | 套件政策 | pnpm 預設（1 天、寬鬆） | 3 天 strict + trust downgrade 檢查 |
 
 ## 附贈：Laravel + Vite 專案的 CI 範本
 
-最後把同樣的原則套到我們最熟悉的 Laravel 專案。這份範本**通過了 actionlint 和 zizmor 的檢查（0 findings）**，但我沒有在真實的 Laravel 專案上跑過，請當作起點、依你的專案調整：
+最後把同樣的原則套到 PHP 開發者最熟悉的 Laravel 專案。這份範本**通過了 actionlint 和 zizmor 的檢查（0 findings）**，但我沒有在真實的 Laravel 專案上跑過，請當作起點、依你的專案調整：
 
 ```yaml
 name: CI
@@ -598,12 +656,12 @@ jobs:
 - **`npm ci --ignore-scripts`** 會擋掉所有 install script。Vite 生態大多不需要；如果遇到真的需要 build 的套件（例如 `sharp`），再用 `npm rebuild <套件名>` 個別放行。
 - 如果你的前端改用 pnpm，直接沿用上面的 `minimumReleaseAge` 和 `trustPolicy` 設定，pnpm 預設也只允許白名單內的套件執行 build script。
 
-## 還沒做完的事
+## 這次沒驗證到的
 
 老實列出來：
 
-- **Actions lockfile**：需要已登入的 `gh`，下一步在本機跑 `gh actions-lock`
-- **這些修改在 GitHub 上的實際執行**：我在本機用 actionlint、zizmor 驗證過，`pnpm install --frozen-lockfile` 也實際跑過，但 workflow 本身要等 PR 開出去才會在 GitHub 上真正執行
+- **Actions lockfile**：需要已登入的 `gh` 和 GitHub 上的 repo，示範專案只在本機，這次沒做
+- **workflow 在 GitHub 上的實際執行**：這篇的 workflow 都用 actionlint、zizmor 驗證過，pnpm 的政策也實際跑過，但示範專案沒有推上 GitHub，所以 workflow 本身沒有真的在 runner 上執行過
 - **`bearer-action` 從 `main` 下載 install.sh**：已知的剩餘風險
 
 ## 檢查清單
@@ -617,8 +675,8 @@ jobs:
 - [ ] `actions/checkout` 加 `persist-credentials: false`（除非真的要 push）
 - [ ] `run:` 裡沒有直接出現 `${{ }}`，全部改走 `env:`
 - [ ] 套件安裝用 lockfile 嚴格模式（`--frozen-lockfile`、`npm ci`、`composer install`）
-- [ ] 設定最小發布時間（pnpm `minimumReleaseAge`、pip `--uploaded-prior-to`、uv `--exclude-newer`）
-- [ ] 政策擋下套件時，**先調查再放行**，例外要寫理由和移除條件
+- [ ] 設定最小發布時間（pnpm `minimumReleaseAge`、pip `--uploaded-prior-to`、uv `--exclude-newer`），而且**在專案一開始就設**
+- [ ] 政策擋下套件時，**先調查再放行**，能升級就升級，例外要寫理由和移除條件
 - [ ] 有一條 workflow 持續用 zizmor / actionlint 檢查 workflow 本身
 
 [下一篇](/blog/2026-11-04-agents-md-hijack-defense)要談的是另一種「供應鏈」：不是套件，而是你的 AI coding agent 會讀的那些 Markdown 檔案。

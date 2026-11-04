@@ -403,7 +403,7 @@ if __name__ == "__main__":
 3. **鎖版要連內容一起鎖**：hash、digest、最小發布時間，三者疊加使用
 4. **簽章和 provenance 證明的是「從哪裡來」，不是「安全」**
 
-[下一篇](/blog/2026-11-04-github-actions-hardening)會把這些原則套到這個網站自己的 GitHub Actions 上，實際跑一次 zizmor，看看我自己的 CI 有多少洞。
+[下一篇](/blog/2026-11-04-github-actions-hardening)會開一個全新的 Vite + React 專案，照我平常的習慣把 CI 配好，再實際跑一次 zizmor，看看「正常」的 CI 有多少洞。
 
 ## 參考資料
 
