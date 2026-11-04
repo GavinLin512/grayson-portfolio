@@ -1,0 +1,3 @@
+registry.npmjs.org
+api.anthropic.com
+api.openai.com

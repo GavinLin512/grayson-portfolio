@@ -8,7 +8,7 @@
 | `.github/workflows/bearer.yml` | 靜態安全掃描（Bearer CLI SAST） | push dev/main（完整掃描）、所有 PR（diff 掃描） |
 | `.github/workflows/workflow-audit.yml` | workflow 本身的安全與語法檢查（zizmor + actionlint） | push dev/main、PR，且僅限 `.github/**` 有變動 |
 
-Bearer 掃描 PR 時使用 `diff: true` 只掃變更檔案；push 到 `dev`/`main` 時完整掃描。阻擋層級依 `bearer.yml` 的 `fail-on-severity`：`critical`、`high`、`medium`、`low`。
+Bearer 掃描 PR 時使用 `diff: true` 只掃變更檔案；push 到 `dev`/`main` 時完整掃描。阻擋層級依 `bearer.yml` 的 `fail-on-severity`：`critical`、`high`、`medium`、`low`。`tools/agent-scan`（本機 CLI，不部署）列在 `skip-path`，其餘網站程式碼完整掃描。
 
 ## Workflow 安全規範（新增或修改 workflow 時必須遵守）
 

@@ -31,5 +31,8 @@ scan:
     scanner:
         - sast
     skip-git-ignore: false
-    skip-path: []
+    # tools/agent-scan 是本機 CLI（不部署），讀取「操作者指定的路徑」是預期行為，
+    # 會被 SAST 的路徑穿越規則誤判；網站程式碼（app/、server/）仍完整掃描
+    skip-path:
+        - tools/agent-scan
     skip-test: true
