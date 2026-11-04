@@ -69,6 +69,17 @@ A GitHub CLI token is basically "you, having already passed 2FA." An attacker wh
 
 What's even wilder is the next part: the official credentials table shows that the `GH_TOKEN` repo secret on `BerriAI/litellm` **also held a maintainer's GitHub CLI token**. In other words, "stuffing a personal CLI token into a CI secret" didn't happen just once.
 
+### An aside: the first story was "the token leaked from logs"
+
+On the day of the incident, LiteLLM's explanation on the GitHub issue was different. According to the official comment Wiz quoted, they had observed that in certain situations Claude Code would embed a user's GitHub CLI OAuth token in a response body, and **if response bodies were logged, the token would end up in LiteLLM's logs**. Their guess was that the attacker pulled the token out of the logs of an internal LiteLLM deployment that was exposed to the internet.
+
+Plenty of early coverage ran with that explanation, and so did the weekly report I use to track the news. The root cause analysis two days later overturned it: the request logs showed that the first token came from the Agent Platform's API and had nothing to do with logs.
+
+I took two lessons from this:
+
+1. **The first explanation of an incident often gets corrected**. When writing or making decisions, wait for the official RCA where you can, and note the date of whatever you cite
+2. **"Tokens showing up in logs" wasn't the cause this time, but it's still a real risk**. Requests and responses passing through AI gateways and agents can easily carry credentials. In production, don't log whole bodies; if you must log them, mask them first (for example strings starting with `ghp_`, `gho_` or `sk-`), and restrict who can read the logs
+
 To put it in terms we know: it's like deploying from Forge or Envoyer with your own personal account token, and then one day that token leaks. However much power you have, the attacker now has.
 
 ## Link three: CI itself becomes the exfiltration channel
@@ -267,6 +278,38 @@ When I tested it, the latest on PyPI was 1.106.6; with `P7D`, pip picked 1.106.5
 
 The cost is that urgent security fixes reach you a few days late, so when you genuinely need to upgrade right away, you need a way to let a single package through. It's a trade-off, but I think it's well worth it for most teams.
 
+### If you use uv: `uv.lock` plus a relative `exclude-newer`
+
+If your Python project is managed with uv, both of the above are built in. Add this to `pyproject.toml`:
+
+```toml
+[tool.uv]
+# only resolve versions published at least 7 days ago (relative time)
+exclude-newer = "7 days"
+```
+
+After `uv add`, the generated `uv.lock` records a hash and upload time for every file, and the relative window is recorded as `P7D`:
+
+```toml
+exclude-newer-span = "P7D"
+
+[[package]]
+name = "six"
+version = "1.17.0"
+wheels = [
+    { url = "https://files.pythonhosted.org/.../six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
+]
+```
+
+In CI, install with `uv sync --locked`. If someone changed `pyproject.toml` without updating the lockfile, it fails outright instead of quietly re-resolving:
+
+```bash
+uv sync --locked
+# error: The lockfile at `uv.lock` needs to be updated, but `--locked` was provided.
+```
+
+That's the Python version of `composer install` versus `composer update`.
+
 ### Docker: use digests, not tags
 
 The poisoned tags this time included `v1.107.0`, `latest`, `main-latest` and `main-stable`. A tag is just a label that can be repointed, and `latest` changes practically every day. To lock down the contents, use a digest:
@@ -375,6 +418,8 @@ Wiring it into CI is simple: add a step after `pip install` that runs this scrip
 The three defenses above are from the "consumer" point of view. If you publish packages or Docker images yourself, LiteLLM's lessons boil down to a checklist:
 
 - [ ] Automation always uses a **GitHub App** or a fine-grained PAT — never a personal `gh` CLI token, and definitely never stored as a secret
+- [ ] Publish to PyPI / npm with **trusted publishing (OIDC)** so CI holds no long-lived publish token. But remember what it protects against: "a stolen token used to publish from somewhere else." **It does not stop the pipeline itself from being hijacked**, which is what happened here
+- [ ] Keep tokens out of logs: don't log whole request / response bodies, and mask them when you have to
 - [ ] Publishing secrets live in an **Environment**, usable only from `main` or release tags
 - [ ] The Environment requires reviewers, with **Prevent self-review** turned on
 - [ ] Rulesets on release branches have **no bypass** — owners go through PRs too
