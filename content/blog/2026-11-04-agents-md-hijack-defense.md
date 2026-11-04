@@ -93,10 +93,10 @@ description: 第一個在野外被抓到的 coding agent 劫持攻擊，只用�
 
 | 規則 | 嚴重度 | 抓什麼 |
 |---|---|---|
-| `instruction-file` / `config-file` | INFO | 列出 agent 會讀的檔案 |
+| `instruction-file` / `config-file` | INFO | 列出 agent 會讀的檔案（含 Agent Skills 的 `SKILL.md`） |
 | `risky-location` | HIGH | 指令檔在 `Downloads` 資料夾裡 |
 | `invisible-unicode` | HIGH | 零寬字元、bidi 控制字元、Unicode Tag 字元 |
-| `dangerous-command` | HIGH | `curl \| sh`、`base64 -d \| sh`、`npm install -g`、`Invoke-Expression` |
+| `dangerous-command` | HIGH | `curl \| sh`、`bash -c "$(curl …)"`、`base64 -d \| sh`、`npm install -g`、`Invoke-Expression` |
 | `agent-config-tamper` | HIGH | 提到 agent 設定檔或權限繞過（`approval_policy`、`bypassPermissions`…） |
 | `hidden-html-comment` | MEDIUM | 指令檔裡含文字的 HTML 註解 |
 | `instruction-override` | MEDIUM | 「ignore previous instructions」「do not tell the user」這類句子 |
@@ -162,7 +162,7 @@ HIGH   invisible-unicode AGENTS.md:19  invisible characters: zero-width x1
 
 ## 三種語言寫同一個工具，我學到的事
 
-完整程式碼放在 [`tools/agent-scan/`](https://github.com/GavinLin512/grayson-portfolio/tree/main/tools/agent-scan)：Python 229 行、TypeScript 215 行、Go 359 行（gofmt 之後），三個都**零第三方相依**。這裡挑幾個讓三個版本「逐字相同」最難的地方。
+完整程式碼放在 [`tools/agent-scan/`](https://github.com/GavinLin512/grayson-portfolio/tree/main/tools/agent-scan)：Python 230 行、TypeScript 216 行、Go 360 行（gofmt 之後），三個都**零第三方相依**。這裡挑幾個讓三個版本「逐字相同」最難的地方。
 
 ### 1. 走訪目錄：三種風格
 
@@ -274,7 +274,7 @@ Node 22.18 之後，內建 **type stripping** 預設開啟：直接把型別標�
 OK    fixtures/benign  (exit 0, 3 findings (0 high, 0 medium, 3 info) in 3 files)
 OK    fixtures/poisoned  (exit 1, 10 findings (5 high, 3 medium, 2 info) in 2 files)
 OK    fixtures/home  (exit 1, 2 findings (1 high, 0 medium, 1 info) in 1 files)
-OK    fixtures/edge  (exit 1, 17 findings (4 high, 7 medium, 6 info) in 6 files)
+OK    fixtures/edge  (exit 1, 19 findings (5 high, 7 medium, 7 info) in 7 files)
 ```
 
 另外三個語言各自用內建的測試框架寫單元測試，都不需要裝任何東西：`python3 -m unittest`、`go test`、`node --test`。
@@ -319,6 +319,27 @@ MEDIUM hidden-html-comment AGENTS.md:3  hidden HTML comment: "以下規則由 do
 ```
 
 三種語言的版本掃這個專案，輸出一樣逐字相同。
+
+### 連 Laravel 官方 skeleton 都會被標記
+
+再拿一個用 `composer create-project laravel/laravel` 新開的 Laravel 13 專案來掃。[第 2 篇](/blog/2026-10-30-laravel-agent-skills)提過，Laravel 13 的 skeleton 內建 `AGENTS.md` 和 `CLAUDE.md`，內容是叫 agent 在找不到 PHP 時自己去裝：
+
+```text
+INFO   instruction-file AGENTS.md  agent instruction file (loaded as trusted context)
+HIGH   dangerous-command AGENTS.md:20  dangerous command: "bash -c "$(curl"
+HIGH   dangerous-command AGENTS.md:26  dangerous command: "iex ("
+HIGH   dangerous-command AGENTS.md:32  dangerous command: "bash -c "$(curl"
+INFO   instruction-file CLAUDE.md  agent instruction file (loaded as trusted context)
+HIGH   dangerous-command CLAUDE.md:20  dangerous command: "bash -c "$(curl"
+HIGH   dangerous-command CLAUDE.md:26  dangerous command: "iex ("
+HIGH   dangerous-command CLAUDE.md:32  dangerous command: "bash -c "$(curl"
+
+8 findings (6 high, 0 medium, 2 info) in 2 files
+```
+
+這不是攻擊：`php.new` 是 Laravel 官方的安裝腳本。但這是我拿掃描器去掃 Laravel 專案時才發現的漏網之魚：一開始的規則只認得 `curl ... | sh`，`bash -c "$(curl ...)"` 這種寫法直接溜過去，所以才補了這條規則，三種語言同步修改並加上測試。
+
+**掃描器不負責判斷「這是好人還是壞人寫的」**，它負責把「這份 Markdown 會叫 agent 執行遠端程式碼」這件事攤在你眼前，讓你決定要不要信任。
 
 ## 一個差點自己踩到的坑：fixture 本身就是攻擊
 

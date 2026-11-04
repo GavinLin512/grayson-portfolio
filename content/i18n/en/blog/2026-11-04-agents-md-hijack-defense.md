@@ -93,10 +93,10 @@ Since I'm learning TypeScript, Python and Go, I figured I'd just write it once i
 
 | Rule | Severity | What it catches |
 |---|---|---|
-| `instruction-file` / `config-file` | INFO | Lists the files the agent will read |
+| `instruction-file` / `config-file` | INFO | Lists the files the agent will read (including Agent Skills `SKILL.md`) |
 | `risky-location` | HIGH | An instruction file inside a `Downloads` folder |
 | `invisible-unicode` | HIGH | Zero-width characters, bidi control characters, Unicode Tag characters |
-| `dangerous-command` | HIGH | `curl \| sh`, `base64 -d \| sh`, `npm install -g`, `Invoke-Expression` |
+| `dangerous-command` | HIGH | `curl \| sh`, `bash -c "$(curl …)"`, `base64 -d \| sh`, `npm install -g`, `Invoke-Expression` |
 | `agent-config-tamper` | HIGH | Mentions of agent config files or permission bypasses (`approval_policy`, `bypassPermissions`…) |
 | `hidden-html-comment` | MEDIUM | HTML comments containing text in instruction files |
 | `instruction-override` | MEDIUM | Phrases like "ignore previous instructions" and "do not tell the user" |
@@ -162,7 +162,7 @@ The sentence hidden on line 18 got decoded.
 
 ## What I learned writing the same tool in three languages
 
-The full code lives in [`tools/agent-scan/`](https://github.com/GavinLin512/grayson-portfolio/tree/main/tools/agent-scan): 229 lines of Python, 215 of TypeScript and 359 of Go (after gofmt), all three with **zero third-party dependencies**. Here are a few of the spots where keeping the three versions "byte-for-byte identical" was hardest.
+The full code lives in [`tools/agent-scan/`](https://github.com/GavinLin512/grayson-portfolio/tree/main/tools/agent-scan): 230 lines of Python, 216 of TypeScript and 360 of Go (after gofmt), all three with **zero third-party dependencies**. Here are a few of the spots where keeping the three versions "byte-for-byte identical" was hardest.
 
 ### 1. Walking directories: three styles
 
@@ -274,7 +274,7 @@ Since Node 22.18, built-in **type stripping** is on by default: it strips the ty
 OK    fixtures/benign  (exit 0, 3 findings (0 high, 0 medium, 3 info) in 3 files)
 OK    fixtures/poisoned  (exit 1, 10 findings (5 high, 3 medium, 2 info) in 2 files)
 OK    fixtures/home  (exit 1, 2 findings (1 high, 0 medium, 1 info) in 1 files)
-OK    fixtures/edge  (exit 1, 17 findings (4 high, 7 medium, 6 info) in 6 files)
+OK    fixtures/edge  (exit 1, 19 findings (5 high, 7 medium, 7 info) in 7 files)
 ```
 
 On top of that, each language has unit tests written with its built-in test framework, none of which require installing anything: `python3 -m unittest`, `go test`, `node --test`.
@@ -319,6 +319,27 @@ MEDIUM hidden-html-comment AGENTS.md:3  hidden HTML comment: "以下規則由 do
 ```
 
 Scanning this project with all three language versions still gives byte-for-byte identical output.
+
+### Even Laravel's official skeleton gets flagged
+
+Next, a fresh Laravel 13 project created with `composer create-project laravel/laravel`. As [post 2](/blog/2026-10-30-laravel-agent-skills) mentioned, the Laravel 13 skeleton ships with `AGENTS.md` and `CLAUDE.md`, which tell the agent to install PHP by itself if it can't find it:
+
+```text
+INFO   instruction-file AGENTS.md  agent instruction file (loaded as trusted context)
+HIGH   dangerous-command AGENTS.md:20  dangerous command: "bash -c "$(curl"
+HIGH   dangerous-command AGENTS.md:26  dangerous command: "iex ("
+HIGH   dangerous-command AGENTS.md:32  dangerous command: "bash -c "$(curl"
+INFO   instruction-file CLAUDE.md  agent instruction file (loaded as trusted context)
+HIGH   dangerous-command CLAUDE.md:20  dangerous command: "bash -c "$(curl"
+HIGH   dangerous-command CLAUDE.md:26  dangerous command: "iex ("
+HIGH   dangerous-command CLAUDE.md:32  dangerous command: "bash -c "$(curl"
+
+8 findings (6 high, 0 medium, 2 info) in 2 files
+```
+
+This isn't an attack: `php.new` is Laravel's official installer script. But it's something that slipped through until I pointed the scanner at a Laravel project: the original rule only knew `curl ... | sh`, so the `bash -c "$(curl ...)"` form walked right past it. That's why I added this rule, in all three languages, with tests.
+
+**The scanner doesn't decide whether a good or a bad person wrote this.** Its job is to put "this Markdown tells the agent to run remote code" in front of you, so you can decide whether to trust it.
 
 ## A trap I almost walked into: the fixture is the attack
 

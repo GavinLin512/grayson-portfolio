@@ -58,9 +58,9 @@ Cloudflare CEO 的描述很有畫面：公開前 10 小時就看到數千次嘗�
 
 ### 先理解兩件事
 
-**第一，PHP worker 會被重複使用。**PHP-FPM 不是每個請求都開一個新 process，而是一群 worker 輪流處理請求。所以 `pm.max_requests` 這個設定才有意義：同一個 worker 會連續處理很多個請求。
+**第一，PHP worker 會被重複使用**。PHP-FPM 不是每個請求都開一個新 process，而是一群 worker 輪流處理請求。所以 `pm.max_requests` 這個設定才有意義：同一個 worker 會連續處理很多個請求。
 
-**第二，PHP 在你的程式碼跑之前，就會先處理 multipart 上傳。**你在 Laravel 裡拿到 `$request->file('avatar')` 的時候，PHP 早就把整個上傳解析完了。其中有一個叫 **session upload progress** 的功能，是用來做上傳進度條的，它在解析上傳的過程中就會開始運作。
+**第二，PHP 在你的程式碼跑之前，就會先處理 multipart 上傳**。你在 Laravel 裡拿到 `$request->file('avatar')` 的時候，PHP 早就把整個上傳解析完了。其中有一個叫 **session upload progress** 的功能，是用來做上傳進度條的，它在解析上傳的過程中就會開始運作。
 
 ### 攻擊流程
 
@@ -77,11 +77,11 @@ Cloudflare CEO 的描述很有畫面：公開前 10 小時就看到數千次嘗�
 
 ### 對 Laravel 開發者的三個重點
 
-**一、你的程式碼完全插不上手。**整個攻擊發生在 Laravel 的 `public/index.php` 被執行之前。Middleware、FormRequest 驗證、Laravel 的 log，全部都還沒開始運作。Varonis 也提醒：**應用層的 log 可能什麼都沒記到。**
+**一、你的程式碼完全插不上手**。整個攻擊發生在 Laravel 的 `public/index.php` 被執行之前。Middleware、FormRequest 驗證、Laravel 的 log，全部都還沒開始運作。Varonis 也提醒：**應用層的 log 可能什麼都沒記到**。
 
-**二、「Laravel 不用 PHP 原生 session」救不了你。**Laravel 用自己的 session driver，不呼叫 `session_start()`，我第一個反應是「那 upload progress 應該跟我無關吧？」但研究人員明確指出，**連一個 Hello World 的 PHP 程式都可能受影響**。這個功能是 PHP 在解析上傳時自己啟動的，跟你的應用怎麼處理 session 無關。
+**二、「Laravel 不用 PHP 原生 session」救不了你**。Laravel 用自己的 session driver，不呼叫 `session_start()`，我第一個反應是「那 upload progress 應該跟我無關吧？」但研究人員明確指出，**連一個 Hello World 的 PHP 程式都可能受影響**。這個功能是 PHP 在解析上傳時自己啟動的，跟你的應用怎麼處理 session 無關。
 
-**三、worker 記憶體裡有什麼？**想想一個 Laravel 的 FPM worker 記憶體裡有什麼：`.env` 載入的 `DB_PASSWORD`、`APP_KEY`、第三方 API key、處理中的使用者資料。記憶體外洩的漏洞，等於這些東西都可能被讀走。
+**三、worker 記憶體裡有什麼**？想想一個 Laravel 的 FPM worker 記憶體裡有什麼：`.env` 載入的 `DB_PASSWORD`、`APP_KEY`、第三方 API key、處理中的使用者資料。記憶體外洩的漏洞，等於這些東西都可能被讀走。
 
 所以如果你的伺服器在修補前就暴露在網路上，輪替金鑰不是可有可無的建議。Laravel 11 之後有個很實用的功能：`APP_PREVIOUS_KEYS`。你可以換一把新的 `APP_KEY`，把舊的放進 `APP_PREVIOUS_KEYS`，Laravel 會用新 key 加密、但仍能用舊 key 解密既有資料，不會讓所有人瞬間被登出、加密資料也不會壞掉。
 
@@ -123,7 +123,7 @@ apt-cache policy php8.4-fpm
 
 它只是「這個專案需要 PHP 8.3 以上」的**宣告**，Composer 檢查的是「裝套件的那台機器」上的 PHP。如果你還在 `config.platform.php` 寫了假的版本號（很多人為了讓 CI 和正式環境的套件解析一致會這樣做），Composer 連檢查都不檢查真實的 PHP。
 
-你更新了所有套件、`composer audit` 全綠，但跑在正式環境的 PHP 可能還是 8.4.26。**套件更新和 runtime 更新是兩件獨立的事。**
+你更新了所有套件、`composer audit` 全綠，但跑在正式環境的 PHP 可能還是 8.4.26。**套件更新和 runtime 更新是兩件獨立的事**。
 
 ## 第三步：在實際要部署的 image 裡檢查
 
@@ -252,7 +252,7 @@ Total: 132 (HIGH: 129, CRITICAL: 3)
 
 原因是：官方 `php` image 裡的 PHP **是從原始碼編譯的**，不是用 `apt-get install php` 裝的。Trivy 掃的是 Debian 的套件資料庫（log 裡寫著 `Detected OS family="debian"`、`pkg_num=172`），它看得到 `libxml2`、`libbrotli1` 這些系統套件，但**完全看不到 PHP 本身**。
 
-所以如果你的 CI 只有 Trivy，它會很認真地回報 132 個問題，然後讓真正致命的那個從旁邊溜過去。這也是為什麼上面那支檢查腳本是必要的：**掃描工具的盲點，要用明確的 runtime 檢查補起來。**
+所以如果你的 CI 只有 Trivy，它會很認真地回報 132 個問題，然後讓真正致命的那個從旁邊溜過去。這也是為什麼上面那支檢查腳本是必要的：**掃描工具的盲點，要用明確的 runtime 檢查補起來**。
 
 順帶一提，比較 8.4.26 和 8.4.27 兩個 image 的 Trivy 結果，差的那一筆是 `libbrotli1` 的 CVE-2026-111497，也就是同一週 Node.js 那個「Node2Shell」的 Brotli 解碼器漏洞。新版的 PHP image 順便帶進了修好的系統套件。
 
@@ -329,7 +329,7 @@ Total: 1 (CRITICAL: 1)
 CVE-2026-99083 exp:2026-11-30
 ```
 
-我實測了兩種情況：到期日在未來，gate 通過（exit 0）；把日期改成已經過去的 11/1，同一個 CVE 又被擋下來（exit 1）。**例外會自己過期**，不會變成永遠沒人記得的漏洞。
+我實測了兩種情況：到期日在未來，gate 通過（exit 0）；把到期日改成一個已經過去的日期，同一個 CVE 又被擋下來（exit 1）。**例外會自己過期**，不會變成永遠沒人記得的漏洞。
 
 ### 讓 base image 自動更新
 
@@ -357,7 +357,7 @@ updates:
 
 ## 暫時緩解：只能爭取時間
 
-如果真的沒辦法馬上升級，PHP 官方列了一些措施，但開頭就寫明：**這些只能降低特定攻擊路徑的風險，不會讓安裝變安全。**
+如果真的沒辦法馬上升級，PHP 官方列了一些措施，但開頭就寫明：**這些只能降低特定攻擊路徑的風險，不會讓安裝變安全**。
 
 針對 CVE-2026-109618（記憶體耗盡）：
 

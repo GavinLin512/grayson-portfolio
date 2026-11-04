@@ -69,6 +69,17 @@ GitHub CLI token 等於是「已經過了 2FA 的你」。攻擊者拿到它，�
 
 更扯的是後面那段：官方的憑證表顯示，`BerriAI/litellm` 的 repo secret `GH_TOKEN` 裡存的，**也是某位 maintainer 的 GitHub CLI token**。也就是說，「把個人 CLI token 塞進 CI secret」這件事不只發生一次。
 
+### 插曲：一開始的說法是「token 從 log 外洩」
+
+事發當天，LiteLLM 在 GitHub issue 上的說法不是這樣的。根據 Wiz 引用的官方留言，他們當時觀察到 Claude Code 在某些情況下會把使用者的 GitHub CLI OAuth token 放進 response body，**如果 response body 被記錄下來，token 就會出現在 LiteLLM 的 log 裡**；他們推測攻擊者是從一個對外暴露的內部 LiteLLM 部署裡，撈 log 拿到 token 的。
+
+不少早期報導都採用了這個說法，我自己追蹤新聞時拿到的週報也是。兩天後的 root cause analysis 推翻了它：request log 顯示，第一個 token 是從 Agent Platform 的 API 拿到的，跟 log 無關。
+
+我從這裡學到兩件事：
+
+1. **事件剛發生時的說法常常會被修正**。寫文章、做決策，盡量等官方的 RCA，引用時也標清楚日期
+2. **「token 出現在 log 裡」雖然不是這次的主因，本身仍是真實的風險**。AI gateway 和 agent 的 request / response 很容易夾帶憑證，正式環境不要整包記錄 body，要記的話先遮罩（例如 `ghp_`、`gho_`、`sk-` 開頭的字串），並限制誰能讀 log
+
 換到我們熟悉的場景：這就像你在 Forge 或 Envoyer 上用自己的個人帳號 token 做部署，然後某天那個 token 外洩了。你的權限有多大，攻擊者就有多大。
 
 ## 第三環：CI 本身變成竊取管道
@@ -267,6 +278,38 @@ pip install --uploaded-prior-to P7D litellm
 
 代價是緊急的資安修補會晚幾天才拿到，所以遇到需要立刻升級的情況，要能針對單一套件放行。這是取捨，但我認為對大多數團隊來說很划算。
 
+### 用 uv 的話：`uv.lock` 加上相對時間的 `exclude-newer`
+
+如果你的 Python 專案用 uv 管理，上面兩件事它都內建了。在 `pyproject.toml` 加上：
+
+```toml
+[tool.uv]
+# 只解析 7 天前就已發布的版本（相對時間）
+exclude-newer = "7 days"
+```
+
+`uv add` 之後產生的 `uv.lock`，每個檔案都記了 hash 和上傳時間，相對時間也被記成 `P7D`：
+
+```toml
+exclude-newer-span = "P7D"
+
+[[package]]
+name = "six"
+version = "1.17.0"
+wheels = [
+    { url = "https://files.pythonhosted.org/.../six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
+]
+```
+
+CI 裡用 `uv sync --locked` 安裝。如果有人改了 `pyproject.toml` 卻沒更新 lockfile，它會直接失敗，不會偷偷重新解析：
+
+```bash
+uv sync --locked
+# error: The lockfile at `uv.lock` needs to be updated, but `--locked` was provided.
+```
+
+這就是 Python 版的 `composer install` 對上 `composer update`。
+
 ### Docker：用 digest，不要用 tag
 
 這次被污染的 tag 包括 `v1.107.0`、`latest`、`main-latest`、`main-stable`。tag 只是一個可以被改指向的標籤，`latest` 更是天天在變。要鎖住內容，就要用 digest：
@@ -375,6 +418,8 @@ if __name__ == "__main__":
 上面三道防線是「使用者」的視角。如果你自己也有發布套件或 Docker image，LiteLLM 的教訓可以整理成一張檢查表：
 
 - [ ] 自動化一律用 **GitHub App** 或 fine-grained PAT，絕不用個人的 `gh` CLI token，更不要把它存成 secret
+- [ ] 發布到 PyPI / npm 改用 **trusted publishing（OIDC）**，CI 裡不存長期有效的發布 token。但要記得它防的是「token 被偷去別處發布」，**擋不住 pipeline 本身被劫持**，這次就是後者
+- [ ] log 裡不要出現 token：request / response body 不整包記錄，必要時先遮罩
 - [ ] 發布用的 secret 放在 **Environment**，限定只有 `main` 或 release tag 能使用
 - [ ] Environment 設 required reviewers，並開啟 **Prevent self-review**
 - [ ] release 分支的 Rulesets **不留 bypass**，連 owner 都要走 PR
