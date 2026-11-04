@@ -327,3 +327,32 @@ about、projects、journal、skills、journey、contact、guestbook 的內容下
 
 - pnpm 12 執行任何 script 前會先自動 install（`verifyDepsBeforeRun`）。install 被政策擋下時會清掉 `node_modules` 最上層，之後所有 script 都 `command not found`。
 - prerender 的 500 不會印錯誤。要看原因，直接 import `node_modules/.cache/nuxt/.nuxt/prerender/index.mjs`，用它的 `localFetch` 請求頁面，錯誤會在 payload 的 `message` 裡。
+
+---
+
+## 供應鏈加固與 journal 系列文章的取捨（2026-11）
+
+### pnpm：`minimumReleaseAge` 明確設 3 天 + `trustPolicy: no-downgrade`
+
+- pnpm 12 內建 1440 分鐘，但屬「非 strict」；明確設定後 strict 才會預設開啟，太新的版本直接失敗，不會被默默加進例外。
+- 政策擋下套件時**先調查再放行**：`seroval@1.7.2`（維護者手動發布、無 provenance，夾在兩個 trusted publishing 版本之間）以 `npm pack --ignore-scripts` 比對 tarball，與 1.7.1 只差一行 bug fix、與 1.7.3 除版本號外完全相同 → 判定非接管，**升級**到符合政策的 1.7.6 而非加例外。`semver@6.3.1` 是 2023 年合法的 ReDoS backport，6.3.2 未滿 3 天無法升 → 加入 `trustPolicyExclude` 並註明移除條件。
+
+### Actions：先手動 SHA pin，lockfile 之後再做
+
+- Actions workflow lockfile（10/28 GA，Free 方案可用）比 SHA pin 更好（鎖 transitive、記錄 repo id、擋 fork 的 impostor commit），但 `gh actions-lock` 需要已登入的 `gh`，加固時的環境沒有 → 先 SHA pin + Dependabot（cooldown 7 天），lockfile 列為待辦（見 `rules/CI.md`）。
+- `bearer-action` 鎖了 SHA 仍會從 Bearer `main` 抓 install.sh 並下載 CLI → 另外鎖 `version: "2.1.3"`；install.sh 來自 `main` 屬已知剩餘風險。
+
+### `tools/agent-scan` 放進 repo，fixtures 不進 repo
+
+- 三種語言（Python / Go / TS）實作同一 CLI 作為學習素材，`run-all.sh` 交叉比對輸出逐字相同。
+- **模擬 prompt injection 的 fixtures 不 commit**：這個 repo 本身會被 coding agent 讀取，明文注入文字等於自己下毒。產生器內的注入文字以 base64 存放，fixtures 只產生到暫存目錄。
+- **原始碼不得含實體隱形字元**（Trojan Source）：AI 協助寫檔時 `‮` 等跳脫序列曾被寫成實體字元，commit 前需檢查。
+- Bearer `skip-path` 加入 `tools/agent-scan`：本機 CLI、不部署，讀取操作者指定路徑屬預期行為，避免 SAST 路徑穿越規則誤判擋 PR。
+
+### 英文版文章暫存 `content/i18n/en/blog/`
+
+- blog collection 的 source 是 `blog/**/*.md`，`i18n/en/blog/*` 不會被渲染；語系切換功能完成後再改 collection 設定接上。英文版與中文版的章節、程式碼區塊數量一一對應。
+
+### 中文粗體的渲染陷阱
+
+- CommonMark 的收尾 `**` 若前面是全形標點（。？！）、後面緊接文字，不會被當成粗體結尾，星號會原樣顯示。寫法：把句尾標點放到 `**` 外面（`**重點**。`）。
