@@ -621,7 +621,7 @@ jobs:
 - [ ] 政策擋下套件時，**先調查再放行**，例外要寫理由和移除條件
 - [ ] 有一條 workflow 持續用 zizmor / actionlint 檢查 workflow 本身
 
-下一篇要談的是另一種「供應鏈」：不是套件，而是你的 AI coding agent 會讀的那些 Markdown 檔案。
+[下一篇](/blog/2026-11-04-agents-md-hijack-defense)要談的是另一種「供應鏈」：不是套件，而是你的 AI coding agent 會讀的那些 Markdown 檔案。
 
 ## 參考資料
 

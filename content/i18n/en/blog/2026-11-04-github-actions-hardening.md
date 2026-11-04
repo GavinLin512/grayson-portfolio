@@ -621,7 +621,7 @@ Finally, here's all of it as a checklist you can run against your own repo:
 - [ ] When a policy blocks a package, **investigate before allowing it**, and give every exception a reason and a removal condition
 - [ ] A workflow keeps checking the workflows themselves with zizmor / actionlint
 
-The next post covers a different kind of "supply chain": not packages, but the Markdown files your AI coding agent reads.
+[The next post](/blog/2026-11-04-agents-md-hijack-defense) covers a different kind of "supply chain": not packages, but the Markdown files your AI coding agent reads.
 
 ## References
 
