@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # 讓 workflow 裡以 commit SHA 鎖定的 action 自動提 PR 更新（連同 # vX.Y.Z 註解）
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+    # 新版本發布後至少等 7 天才提 PR，避開「剛發布就被下毒」的時間窗
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]

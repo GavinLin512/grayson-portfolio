@@ -108,4 +108,6 @@ CONTACT_FORM_SECRET=sk_live_abc123
 
 - 新增套件前確認維護狀態與下載量
 - 不使用已棄用（deprecated）的套件作為直接依賴
+- **pnpm 供應鏈政策**（`pnpm-workspace.yaml`）：`minimumReleaseAge: 4320`（只裝發布超過 3 天的版本，明確設定即為 strict）、`trustPolicy: no-downgrade`（發布方式降級即拒絕，例如從 trusted publishing 退回一般 token）
+- 政策擋下套件時，**先調查再放行**：比對前後版本的 tarball（`npm pack <pkg>@<ver> --ignore-scripts` 後 diff），能升到符合政策的版本就升級；確定合法但無法升級時才加進 `trustPolicyExclude` / `minimumReleaseAgeExclude`，且**每筆都要寫註解說明理由與移除條件**
 - 手動 escape / sanitize 需求出現時，優先找現有受信任的函式庫，不自行實作

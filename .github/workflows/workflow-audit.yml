@@ -1,0 +1,50 @@
+name: Workflow Audit
+
+# 檢查 workflow 本身的安全性與語法：
+# - zizmor：未鎖 SHA 的 action、過大權限、template injection、credential 外洩…
+# - actionlint：workflow 語法、expression 型別、shell script（shellcheck）錯誤
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - ".github/**"
+  pull_request:
+    paths:
+      - ".github/**"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: zizmor + actionlint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      # 版本 + hash 一起鎖（pip --require-hashes），並刻意選發布超過 7 天的版本
+      # runner 的系統 Python 受 PEP 668 保護，裝進獨立的 venv
+      - name: Install zizmor
+        run: |
+          python3 -m venv "$RUNNER_TEMP/audit-venv"
+          "$RUNNER_TEMP/audit-venv/bin/pip" install --require-hashes -r .github/workflow-audit-requirements.txt
+
+      - name: Run zizmor
+        env:
+          # 給 zizmor 讀公開 repo 的 API（檢查 impostor commit、已知有漏洞的 action）
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          "$RUNNER_TEMP/audit-venv/bin/zizmor" --format=github .github/
+
+      # go install 會用 sum.golang.org 驗證模組內容，等於自帶 hash 鎖定
+      - name: Run actionlint
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+          "$(go env GOPATH)/bin/actionlint" -color

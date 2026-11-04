@@ -4,3 +4,14 @@ allowBuilds:
 
 overrides:
   shell-quote: "^1.8.4"
+
+# 供應鏈防護（pnpm 12）
+# 只安裝發布超過 3 天的版本（單位：分鐘）。明確設定後即為 strict：太新的版本直接失敗
+minimumReleaseAge: 4320
+# 套件的發布方式若比舊版「降級」（例如從 trusted publishing 變成一般 token 發布）就拒絕
+trustPolicy: no-downgrade
+# 經人工確認後才放行的例外，每一筆都要寫理由
+trustPolicyExclude:
+  # 2023-07 維護者手動發布的 ReDoS 修補 backport（CVE-2022-25883），沒有 provenance。
+  # 後續的 6.3.2 有 trusted publishing，但發布未滿 minimumReleaseAge，之後升級即可移除此行
+  - semver@6.3.1

@@ -1,0 +1,6 @@
+# Workflow Audit 使用的工具，以 pip --require-hashes 安裝。
+# 升級時：確認新版本發布已超過 7 天，再到 https://pypi.org/pypi/zizmor/<版本>/json
+# 取得 linux wheel 的 sha256 更新下方兩行。
+zizmor==1.31.1 \
+    --hash=sha256:58e878eb2dbd2c6183c105e1ac28c14f7dd1eca44a783f1fe2a69647d012c410 \
+    --hash=sha256:d9b36840c560a8abe39d9ef3d077239aabf6d572c5c2b629c970592a617dbf6f

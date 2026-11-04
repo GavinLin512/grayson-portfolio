@@ -6,8 +6,26 @@
 |------|------|---------|
 | `.github/workflows/argos.yml` | 視覺回歸測試（Argos + Playwright） | push dev/main、或 PR 帶 `run-argos-ci` label（opt-in） |
 | `.github/workflows/bearer.yml` | 靜態安全掃描（Bearer CLI SAST） | push dev/main（完整掃描）、所有 PR（diff 掃描） |
+| `.github/workflows/workflow-audit.yml` | workflow 本身的安全與語法檢查（zizmor + actionlint） | push dev/main、PR，且僅限 `.github/**` 有變動 |
 
 Bearer 掃描 PR 時使用 `diff: true` 只掃變更檔案；push 到 `dev`/`main` 時完整掃描。阻擋層級依 `bearer.yml` 的 `fail-on-severity`：`critical`、`high`、`medium`、`low`。
+
+## Workflow 安全規範（新增或修改 workflow 時必須遵守）
+
+`workflow-audit.yml` 會在 PR 自動檢查以下規則，本機可先跑 `zizmor .github/` 與 `actionlint`。
+
+| 規則 | 寫法 |
+|------|------|
+| action 一律鎖 commit SHA，後面註明版本 | `uses: actions/checkout@<40 碼 SHA> # v6.1.0`（查 SHA：`git ls-remote --tags https://github.com/<owner>/<repo>.git`，annotated tag 取 `^{}` 那行）|
+| 最小權限 | workflow 頂層 `permissions: {}`，每個 job 只開需要的（例：Argos 的 `id-token: write` 只給 `argos` job）|
+| checkout 不保留 token | `persist-credentials: false` |
+| `${{ }}` 不直接寫進 `run:` | 先放進 step 的 `env:`，script 內用 `"$VAR"`（防 template injection）|
+| action 執行時下載的工具也要鎖版 | 例：`bearer-action` 要指定 `version:`，否則會抓最新版 Bearer CLI |
+| CI 用到的 PyPI 工具鎖版本 + hash | 寫在 `.github/workflow-audit-requirements.txt`，以 `pip install --require-hashes` 安裝；選發布超過 7 天的版本 |
+
+- **SHA 更新**：`.github/dependabot.yml` 每週對 `dev` 提 PR 更新 action SHA，`cooldown` 7 天（新版本發布滿 7 天才提）。
+- **Job 名稱不要隨意改**：status check 名稱來自 job id／name，branch protection 的必要檢查若有設定會失效（zizmor pedantic 的 `anonymous-definition` 提示因此刻意不處理）。
+- **待辦：Actions lockfile**：`gh actions-lock` 需要已登入的 `gh`，請在本機執行 `gh extension install github/gh-actions-lock && gh actions-lock`，產生 `.github/workflows/actions.lock` 後 commit（GitHub 已 GA，Free 方案可用，onboard 後 runner 會強制只跑 lockfile 記錄的 commit）。
 
 ---
 

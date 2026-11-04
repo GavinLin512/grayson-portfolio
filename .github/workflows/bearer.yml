@@ -16,11 +16,16 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: Run Bearer security scan
-        uses: bearer/bearer-action@v2
+        uses: bearer/bearer-action@828eeb928ce2f4a7ca5ed57fb8b59508cb8c79bc # v2
         with:
+          # action 本身鎖了 SHA，但它執行時會下載 Bearer CLI；
+          # 不指定 version 就會抓「最新版」，所以這裡也要鎖
+          version: "2.1.3"
           config-file: bearer.yml
           diff: ${{ github.event_name == 'pull_request' }}
           # bearer.yml 的 exit-code: -1（本地不 crash）在此覆蓋為 1，
