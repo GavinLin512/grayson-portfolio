@@ -9,13 +9,13 @@ description: 第一個在野外被抓到的 coding agent 劫持攻擊，只用�
 
 這個網站大部分的程式碼，是我跟 coding agent 一起寫的。我在終端機打開它，它讀專案裡的 `CLAUDE.md`、`AGENTS.md`，了解這個專案的規矩，然後開始幹活。
 
-我從來沒想過一件事：**它怎麼知道那些指令檔是我寫的？**
+我從來沒想過一件事：**它怎麼知道那些指令檔是我寫的**？
 
 答案是：它不知道，也不需要知道。只要檔案在工作目錄裡，它就當成專案的指示來讀。
 
 10 月 26 日，Dark Reading 報導了 Forever Security 抓到的一個野外攻擊，剛好就是利用這一點。這是**第一個在真實使用者電腦上抓到的 coding agent 劫持攻擊**，不是研究人員做的概念驗證。攻擊者需要的東西少到讓人不安：一個檔名叫 `AGENTS.md` 的 Markdown 檔。
 
-這是這個系列的第三篇。前兩篇談的是[套件供應鏈](/blog/2026-11-03-litellm-unrevoked-key-supply-chain)和 [CI 加固](/blog/2026-11-04-github-actions-hardening)。這篇談的是另一種供應鏈：**你的 AI 助手讀進去的文字。**
+這是這個系列的第三篇。前兩篇談的是[套件供應鏈](/blog/2026-11-03-litellm-unrevoked-key-supply-chain)和 [CI 加固](/blog/2026-11-04-github-actions-hardening)。這篇談的是另一種供應鏈：**你的 AI 助手讀進去的文字**。
 
 ## 攻擊是怎麼發生的
 
@@ -40,13 +40,13 @@ description: 第一個在野外被抓到的 coding agent 劫持攻擊，只用�
 
 > 「OpenAI 和 Anthropic 沒有東西可以修補。一個照著資料夾裡的 AGENTS.md 做事的 agent，就是在做它被設計來做的事，就像一個 render 出釣魚網頁的瀏覽器也是照設計運作。」
 
-**沒有漏洞，所以沒有 patch。**問題出在情境：一個網路可以寫入的資料夾，被當成使用者親手寫的內容來信任。
+**沒有漏洞，所以沒有 patch**。問題出在情境：一個網路可以寫入的資料夾，被當成使用者親手寫的內容來信任。
 
 ## 對 PHP 開發者來說，這個場景很熟悉
 
 讀到這裡我馬上想到一個寫 PHP 的人都踩過的坑：**上傳目錄**。
 
-使用者上傳的檔案放在 `public/uploads/`。如果 web server 允許這個目錄執行 `.php`，或者允許 `.htaccess` 覆寫設定，那攻擊者只要上傳一個檔案，就能讓伺服器執行他的程式碼。所以我們的鐵律是：**可寫入的目錄，絕對不能可執行。**
+使用者上傳的檔案放在 `public/uploads/`。如果 web server 允許這個目錄執行 `.php`，或者允許 `.htaccess` 覆寫設定，那攻擊者只要上傳一個檔案，就能讓伺服器執行他的程式碼。所以我們的鐵律是：**可寫入的目錄，絕對不能可執行**。
 
 `~/Downloads` 就是你電腦的上傳目錄：任何網頁都能把檔案丟進去。而 coding agent 會「執行」它在工作目錄裡讀到的指令檔。在 Downloads 裡啟動 agent，就等於讓 uploads 目錄可以跑 PHP。
 
@@ -62,7 +62,7 @@ description: 第一個在野外被抓到的 coding agent 劫持攻擊，只用�
 - 擴大到約 1.45 億筆的資料集後，找到 **47 起攻擊嘗試**
 - 隱藏指令的用途分成四類：**協調專案自己的 agent**、限制外來的 bot、**growth hacking**（影響 agent 怎麼介紹某個專案），以及**惡意行為**（例如竊取資料）
 
-第一類很有意思：很多隱藏指令其實是合法的。專案用隱藏註解跟自家的自動化 agent 溝通。但這也代表一個問題：**agent 怎麼知道誰有權限指揮它？**攻擊者只要模仿合法的格式就好。
+第一類很有意思：很多隱藏指令其實是合法的。專案用隱藏註解跟自家的自動化 agent 溝通。但這也代表一個問題：**agent 怎麼知道誰有權限指揮它**？攻擊者只要模仿合法的格式就好。
 
 而我自己的 repo，就有一個這樣的東西。後面會講到。
 
@@ -75,7 +75,7 @@ description: 第一個在野外被抓到的 coding agent 劫持攻擊，只用�
 - 它被要求處理的 issue、PR、README
 - 它打開的網頁、MCP 工具回傳的內容
 
-這裡面任何一個，都可能是別人寫的。Radware 研究人員的結論我很認同：**agent 應該能讀不受信任的內容，但不能讓那些內容控制它的工具和決策。**
+這裡面任何一個，都可能是別人寫的。Radware 研究人員的結論我很認同：**agent 應該能讀不受信任的內容，但不能讓那些內容控制它的工具和決策**。
 
 說得容易，做起來呢？我把防線分成三層：
 
@@ -295,9 +295,9 @@ MEDIUM mcp-unpinned-package .mcp.json:4  uvx runs "code-review-graph" without an
 7 findings (0 high, 2 medium, 5 info) in 5 files
 ```
 
-**第一個：隱藏的 HTML 註解。**這是我裝的 code-review-graph 工具在 `AGENTS.md` 裡留下的區段標記。無害，但它完全就是 Radware 分類裡的第一類：「協調 agent 用的隱藏文字」。我確認過後保留。重點不是「有註解就是壞的」，而是**你要知道它在那裡，而且看過內容**。
+**第一個：隱藏的 HTML 註解**。這是我裝的 code-review-graph 工具在 `AGENTS.md` 裡留下的區段標記。無害，但它完全就是 Radware 分類裡的第一類：「協調 agent 用的隱藏文字」。我確認過後保留。重點不是「有註解就是壞的」，而是**你要知道它在那裡，而且看過內容**。
 
-**第二個：沒鎖版本的 MCP server。**`.mcp.json` 裡寫的是 `uvx code-review-graph serve`，代表每次 agent 啟動，uvx 都會去 PyPI 抓最新版來執行。這跟前兩篇講的風險一模一樣。修法很簡單：
+**第二個：沒鎖版本的 MCP server**。`.mcp.json` 裡寫的是 `uvx code-review-graph serve`，代表每次 agent 啟動，uvx 都會去 PyPI 抓最新版來執行。這跟前兩篇講的風險一模一樣。修法很簡單：
 
 ```json
 "args": [
@@ -310,9 +310,9 @@ MEDIUM mcp-unpinned-package .mcp.json:4  uvx runs "code-review-graph" without an
 
 ## 一個差點自己踩到的坑：fixture 本身就是攻擊
 
-寫這個工具的過程中，有兩件事讓我意識到：**做資安工具時，測試資料本身就是危險物品。**
+寫這個工具的過程中，有兩件事讓我意識到：**做資安工具時，測試資料本身就是危險物品**。
 
-**第一件：有毒的 fixture 不能 commit。**我的 repo 本身就會被 coding agent 讀取。如果把那個「有毒的 AGENTS.md」放進 repo，任何人（包括我自己）在這個 repo 開 agent，agent 走進那個目錄時都可能讀到它。所以 fixtures 只由產生器寫到**暫存目錄**，產生器裡的注入文字也用 base64 存放，不以明文出現：
+**第一件：有毒的 fixture 不能 commit**。我的 repo 本身就會被 coding agent 讀取。如果把那個「有毒的 AGENTS.md」放進 repo，任何人（包括我自己）在這個 repo 開 agent，agent 走進那個目錄時都可能讀到它。所以 fixtures 只由產生器寫到**暫存目錄**，產生器裡的注入文字也用 base64 存放，不以明文出現：
 
 ```python
 # 模擬 Forever Security 描述的手法：藏在 HTML 註解裡、要 agent 改設定 / 裝東西 / 別告訴使用者
@@ -322,13 +322,13 @@ POISON_COMMENT = _d(
 )
 ```
 
-**第二件：原始碼裡混進了真正的隱形字元。**我用 AI 協助產生 fixture 產生器時，原本寫的跳脫序列 `\u202e`、`\ufeff`，被寫成了**真正的** bidi 控制字元和 BOM。這種「原始碼裡藏著看不見的 bidi 字元」有個名字，叫 **Trojan Source**：它能讓程式碼在 reviewer 眼中跟實際執行的邏輯不一樣。GitHub 遇到這種檔案也會跳警告。
+**第二件：原始碼裡混進了真正的隱形字元**。我用 AI 協助產生 fixture 產生器時，原本寫的跳脫序列 `\u202e`、`\ufeff`，被寫成了**真正的** bidi 控制字元和 BOM。這種「原始碼裡藏著看不見的 bidi 字元」有個名字，叫 **Trojan Source**：它能讓程式碼在 reviewer 眼中跟實際執行的邏輯不一樣。GitHub 遇到這種檔案也會跳警告。
 
 我是用同一套「找隱形字元」的邏輯檢查自己的原始碼才發現的，然後把它們全部換回跳脫序列。更好笑的是，**寫這篇文章時又發生了一次**：上面那句話裡的跳脫序列，草稿裡也變成了實體字元，被同樣的檢查抓到。這件事讓我更確定，這種掃描應該在**每一次** commit 前自動跑，而不是想到才跑。
 
 ## 第三層：把 agent 關進 Docker 沙箱
 
-前兩層都是「盡量別讓 agent 被騙」。但 prompt injection 沒有完美的偵測方法。Radware 的研究人員自己都說，光靠找可疑句子是不夠的。所以最後一層要假設：**agent 已經被說服了，接下來它能造成多大傷害？**
+前兩層都是「盡量別讓 agent 被騙」。但 prompt injection 沒有完美的偵測方法。Radware 的研究人員自己都說，光靠找可疑句子是不夠的。所以最後一層要假設：**agent 已經被說服了，接下來它能造成多大傷害**？
 
 這就是 Docker 擅長的事。我的目標：
 
@@ -475,15 +475,15 @@ TCP_DENIED/403 3394 CONNECT example.com:443 - HIER_NONE/- text/html
 
 ### 兩個關於 digest 的小插曲
 
-**插曲一：tag 名字不可信。**proxy 用的映像 tag 叫 `ubuntu/squid:6.6-24.04_edge`，我原本以為裡面是 Squid 6.6。實際執行 `squid -v`：
+**插曲一：tag 名字不可信**。proxy 用的映像 tag 叫 `ubuntu/squid:6.6-24.04_edge`，我原本以為裡面是 Squid 6.6。實際執行 `squid -v`：
 
 ```text
 Squid Cache: Version 6.14
 ```
 
-`edge` 代表這個 tag 會持續更新，名字裡的 6.6 只是當初的標記。這再次說明：**tag 只是標籤，digest 才是內容。**
+`edge` 代表這個 tag 會持續更新，名字裡的 6.6 只是當初的標記。這再次說明：**tag 只是標籤，digest 才是內容**。
 
-**插曲二：digest 讓換 registry 變得安全。**我的測試環境從 Docker Hub 拉映像時被 rate limit，所以改從 Google 的鏡像 `mirror.gcr.io` 拉。換來源通常讓人不安：你怎麼知道鏡像站給的是同一個東西？但因為我鎖的是 digest，只要 digest 一樣，內容就保證一樣。**鎖 digest 的好處不只防竄改，也讓你能安心換來源。**
+**插曲二：digest 讓換 registry 變得安全**。我的測試環境從 Docker Hub 拉映像時被 rate limit，所以改從 Google 的鏡像 `mirror.gcr.io` 拉。換來源通常讓人不安：你怎麼知道鏡像站給的是同一個東西？但因為我鎖的是 digest，只要 digest 一樣，內容就保證一樣。**鎖 digest 的好處不只防竄改，也讓你能安心換來源**。
 
 （這個鏡像設定只存在於我的測試環境，不在上面的 compose 檔裡。）
 
@@ -491,8 +491,8 @@ Squid Cache: Version 6.14
 
 老實列出來：
 
-- **agent 本身的 API key 還是在容器裡。**agent 要呼叫 LLM API，就需要 key。建議給它一把**專用、有花費上限**的 key，不要用你主帳號的。
-- **專案目錄是可寫的。**agent 被騙之後還是能改你的程式碼，所以 git 是最後一道防線：commit 前看 diff。
+- **agent 本身的 API key 還是在容器裡**。agent 要呼叫 LLM API，就需要 key。建議給它一把**專用、有花費上限**的 key，不要用你主帳號的。
+- **專案目錄是可寫的**。agent 被騙之後還是能改你的程式碼，所以 git 是最後一道防線：commit 前看 diff。
 - 我沒有在沙箱裡裝真的 agent CLI 實測（需要登入），只驗證了網路、檔案系統和權限的隔離；`api.anthropic.com`、`api.openai.com` 也只寫進了白名單，這次沒有實際連線測試。
 - 很多 agent 本身也有沙箱和權限設定。Forever 的建議之一就是**保留 approval gate 和沙箱，不要為了方便關掉**。Docker 是額外的一層，不是替代品。
 
@@ -515,7 +515,7 @@ Squid Cache: Version 6.14
 - **CI 加固**：你信任了一個 tag，因為它叫 `v6`
 - **AGENTS.md**：你的 agent 信任了一個檔案，因為它在工作目錄裡
 
-三件事的本質都一樣：**信任是因為「位置」或「名字」，而不是因為「內容被驗證過」。**SHA、digest、hash、最小發布時間、出口白名單，都是在把「我覺得它是對的」換成「我能證明它是對的」，或者至少「就算它是錯的，傷害也有限」。
+三件事的本質都一樣：**信任是因為「位置」或「名字」，而不是因為「內容被驗證過」**。SHA、digest、hash、最小發布時間、出口白名單，都是在把「我覺得它是對的」換成「我能證明它是對的」，或者至少「就算它是錯的，傷害也有限」。
 
 身為一個從 Laravel 走向全端和 DevOps 的開發者，我覺得這是這三篇最值得帶走的一句話。
 

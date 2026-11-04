@@ -7,7 +7,7 @@ description: 把 LiteLLM 事件的教訓套到這個網站自己的 GitHub Actio
 
 ## 檢討完別人，換檢討自己
 
-[上一篇](/blog/2026-11-03-litellm-unrevoked-key-supply-chain)我拆了 LiteLLM 的攻擊鏈，寫得頭頭是道。寫完之後我心裡有點發毛：**這個網站自己的 CI 呢？**
+[上一篇](/blog/2026-11-03-litellm-unrevoked-key-supply-chain)我拆了 LiteLLM 的攻擊鏈，寫得頭頭是道。寫完之後我心裡有點發毛：**這個網站自己的 CI 呢**？
 
 這個作品集網站跑在 Cloudflare Pages 上，GitHub 上有兩條 workflow：
 
@@ -161,7 +161,7 @@ install.sh 有做 checksum 驗證，但 checksum 檔和執行檔來自**同一�
     config-file: bearer.yml
 ```
 
-`install.sh` 從 `main` 下載這件事我改不了，除非 fork 這個 action 或自己寫下載步驟。這是目前已知、接受的剩餘風險。**SHA pin 之後，記得打開 action 的原始碼看一眼它還會抓什麼。**
+`install.sh` 從 `main` 下載這件事我改不了，除非 fork 這個 action 或自己寫下載步驟。這是目前已知、接受的剩餘風險。**SHA pin 之後，記得打開 action 的原始碼看一眼它還會抓什麼**。
 
 ## SHA pin 不是萬能（二）：fork 的 commit 也查得到
 
@@ -211,7 +211,7 @@ gh actions-lock --verify     # 放進 CI，確保沒人 commit 壞掉的 lockfil
 - 同 repo 的本地 action（`./...`）不會被追蹤
 - 工具還在 1.0 之前
 
-**我的 repo 目前做到哪？**`gh actions-lock` 需要已登入的 `gh` CLI，我這次是在沒有 GitHub 登入的環境裡做加固，所以先用手動 SHA pin。lockfile 是下一步，在本機跑上面那三行就好。官方文件也說，用了 lockfile 之後，workflow 檔裡就不一定要寫 SHA 了。
+**我的 repo 目前做到哪**？`gh actions-lock` 需要已登入的 `gh` CLI，我這次是在沒有 GitHub 登入的環境裡做加固，所以先用手動 SHA pin。lockfile 是下一步，在本機跑上面那三行就好。官方文件也說，用了 lockfile 之後，workflow 檔裡就不一定要寫 SHA 了。
 
 ## 問題二：權限給太大
 
@@ -453,7 +453,7 @@ rm -rf node_modules && pnpm install --frozen-lockfile
 # Done in 22.9s using pnpm v12.15.0
 ```
 
-這段是我這次最大的收穫：**安全政策會產生需要人判斷的告警。**這時候最危險的不是告警本身，而是為了讓 CI 變綠，不假思索地加例外。
+這段是我這次最大的收穫：**安全政策會產生需要人判斷的告警**。這時候最危險的不是告警本身，而是為了讓 CI 變綠，不假思索地加例外。
 
 順帶一提，GitHub 在 10/20 也推出了 npm 的 **package firewall** 公開預覽，可以在組織層級做類似的 cooldown 和 attestation 降級檢查。不過它目前只開放給 GitHub Enterprise Cloud。個人專案的話，pnpm 這兩個設定就是免費又有效的替代方案。
 
@@ -508,7 +508,7 @@ jobs:
 
 這裡有兩個值得一提的細節。
 
-**第一，連檢查工具本身都要鎖。**zizmor 從 PyPI 安裝，用的是[上一篇](/blog/2026-11-03-litellm-unrevoked-key-supply-chain)的 `--require-hashes`：
+**第一，連檢查工具本身都要鎖**。zizmor 從 PyPI 安裝，用的是[上一篇](/blog/2026-11-03-litellm-unrevoked-key-supply-chain)的 `--require-hashes`：
 
 ```text
 # .github/workflow-audit-requirements.txt
@@ -519,7 +519,7 @@ zizmor==1.31.1 \
 
 我差點自己打臉：一開始我抓的是最新的 zizmor 1.32.0，查 hash 時才發現它是**前一天**才上傳的。我剛在上面講「新版本先等 7 天」，馬上就要違反。所以退回 10/15 發布的 1.31.1。
 
-**第二，Go 的模組系統天生就有防線。**`go install ...@v1.7.12` 下載的模組，會跟 `sum.golang.org` 這個公開的透明日誌（transparency log）比對 hash。就算有人重新發布同一個版本號，內容不同就會被拒絕。這是我在學 Go 時覺得設計得很漂亮的地方：npm、pnpm、Composer 的 lockfile 雖然也記錄 hash，但那是「第一次下載後」才記下來的；Go 連第一次下載都會跟全世界共用的公開紀錄比對，而且預設就開著。
+**第二，Go 的模組系統天生就有防線**。`go install ...@v1.7.12` 下載的模組，會跟 `sum.golang.org` 這個公開的透明日誌（transparency log）比對 hash。就算有人重新發布同一個版本號，內容不同就會被拒絕。這是我在學 Go 時覺得設計得很漂亮的地方：npm、pnpm、Composer 的 lockfile 雖然也記錄 hash，但那是「第一次下載後」才記下來的；Go 連第一次下載都會跟全世界共用的公開紀錄比對，而且預設就開著。
 
 ## 加固前後對照
 
