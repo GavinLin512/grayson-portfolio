@@ -227,6 +227,37 @@ definePageMeta({ layout: 'content' })
   opacity: 0.9;
 }
 
+/* 表格：寬度不夠時（手機）整張表橫向捲動，不撐破版面 */
+.prose-blog table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: var(--text-14);
+  line-height: 1.6;
+}
+
+.prose-blog th,
+.prose-blog td {
+  border-bottom: 1px solid var(--line, currentColor);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose-blog th {
+  font-weight: 600;
+  border-bottom-color: currentColor;
+}
+
+.prose-blog blockquote {
+  border-left: 2px solid var(--line, currentColor);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+}
+
 .prose-blog a {
   text-decoration: underline;
   opacity: 0.75;
