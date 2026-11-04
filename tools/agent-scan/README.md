@@ -19,10 +19,10 @@ node ts/agent-scan.ts [PATH]                # Node 22.18+（內建 type strippin
 
 | 規則 | 嚴重度 | 內容 |
 |------|--------|------|
-| `instruction-file` / `config-file` | INFO | 列出 agent 會讀的檔案 |
+| `instruction-file` / `config-file` | INFO | 列出 agent 會讀的檔案（`AGENTS.md`、`CLAUDE.md`、`SKILL.md`、`.mcp.json`…）|
 | `risky-location` | HIGH | 指令檔位於 `Downloads` 資料夾 |
 | `invisible-unicode` | HIGH | 零寬字元、bidi 控制字元、Unicode Tag 字元（會解碼出藏起來的 ASCII）|
-| `dangerous-command` | HIGH | `curl \| sh`、`base64 -d \| sh`、`npm install -g`、`Invoke-Expression` |
+| `dangerous-command` | HIGH | `curl \| sh`、`bash -c "$(curl …)"`、`base64 -d \| sh`、`npm install -g`、`Invoke-Expression` |
 | `agent-config-tamper` | HIGH | 提到 agent 設定檔或權限繞過（`approval_policy`、`bypassPermissions`…）|
 | `hidden-html-comment` | MEDIUM | 指令檔裡含文字的 HTML 註解（render 後看不到）|
 | `instruction-override` | MEDIUM | 「ignore previous instructions」「do not tell the user」等 |

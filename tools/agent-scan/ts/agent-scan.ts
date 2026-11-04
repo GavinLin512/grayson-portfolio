@@ -10,7 +10,7 @@ type Severity = "HIGH" | "MEDIUM" | "INFO";
 export type Finding = { severity: Severity; rule: string; path: string; line: number; message: string };
 
 const SKIP_DIRS = new Set([".git", "node_modules", "vendor", "dist", ".venv", "__pycache__"]);
-const INSTRUCTION_NAMES = new Set(["AGENTS.md", "CLAUDE.md", "GEMINI.md", ".cursorrules", ".windsurfrules", ".clinerules"]);
+const INSTRUCTION_NAMES = new Set(["AGENTS.md", "CLAUDE.md", "GEMINI.md", "SKILL.md", ".cursorrules", ".windsurfrules", ".clinerules"]);
 const CONFIG_PATHS = [".mcp.json", ".claude/settings.json", ".claude/settings.local.json", ".codex/config.toml", ".vscode/mcp.json", ".cursor/mcp.json"];
 const RUNNERS = new Set(["npx", "bunx", "uvx"]);
 const MAX_SIZE = 1024 * 1024;
@@ -20,7 +20,8 @@ export const DANGEROUS = new RegExp(
   String.raw`\b(?:curl|wget)\b[^|]*\|[ \t]*(?:sudo[ \t]+)?(?:ba|z)?sh\b` +
   String.raw`|\bbase64[ \t]+(?:-d|--decode)\b[^|]*\|[ \t]*(?:sudo[ \t]+)?(?:ba|z)?sh\b` +
   String.raw`|\bnpm[ \t]+(?:i|install)(?:[ \t]+[^ \t]+)*?[ \t]+(?:-g|--global)\b` +
-  String.raw`|\biex[ \t]*\(|\|[ \t]*iex\b|\binvoke-expression\b`);
+  String.raw`|\biex[ \t]*\(|\|[ \t]*iex\b|\binvoke-expression\b` +
+  String.raw`|\b(?:ba|z)?sh[ \t]+-c[ \t]+["']?\$\([ \t]*(?:curl|wget)\b`);
 const OVERRIDE = new RegExp(
   String.raw`\bignore[ \t]+(?:all[ \t]+|the[ \t]+)?(?:previous|prior|above)[ \t]+instructions\b` +
   String.raw`|\b(?:do[ \t]+not|don't)[ \t]+(?:tell|inform|mention[ \t]+(?:this[ \t]+|it[ \t]+)?to)[ \t]+the[ \t]+user\b` +

