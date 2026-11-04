@@ -1,13 +1,13 @@
 ---
 title: I Spun Up a New Project and Used zizmor to Plug Its CI Holes One by One
-date: 2026-11-04
+date: 2026-11-03
 tags: [security, devops, ci-cd]
 description: Applying the lessons of the LiteLLM incident to a brand-new Vite + React + TypeScript project — set up CI the way I usually do, let zizmor find the problems, then fix them one at a time. SHA pinning, least privilege, persist-credentials, template injection, plus hands-on tests of pnpm's minimumReleaseAge and trustPolicy.
 ---
 
 ## Done judging others — time to audit my own habits
 
-In the [last post](/blog/2026-11-03-litellm-unrevoked-key-supply-chain) I took apart the LiteLLM attack chain, and it all sounded very wise. Once I finished, though, I got a little uneasy: **how secure is the CI I usually set up, really?**
+In the [last post](/blog/2026-11-02-litellm-unrevoked-key-supply-chain) I took apart the LiteLLM attack chain, and it all sounded very wise. Once I finished, though, I got a little uneasy: **how secure is the CI I usually set up, really?**
 
 So for this post I ran an experiment. I spun up a brand-new Vite + React + TypeScript project called `pulse-board` (a fake engineering-metrics dashboard) and set up its CI **exactly the way I usually do**:
 
@@ -566,7 +566,7 @@ jobs:
 
 Two details here are worth calling out.
 
-**First, even the checking tools themselves get pinned**. zizmor is installed from PyPI using `--require-hashes` from the [last post](/blog/2026-11-03-litellm-unrevoked-key-supply-chain):
+**First, even the checking tools themselves get pinned**. zizmor is installed from PyPI using `--require-hashes` from the [last post](/blog/2026-11-02-litellm-unrevoked-key-supply-chain):
 
 ```text
 # .github/workflow-audit-requirements.txt

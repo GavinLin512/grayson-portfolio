@@ -1,6 +1,6 @@
 ---
 title: How One Unrevoked Key Got LiteLLM Poisoned
-date: 2026-11-03
+date: 2026-11-02
 tags: [security, devops, python]
 pinned: true
 description: Breaking down the LiteLLM 1.107.0 supply chain attack, from one accidental commit in May to an official release carrying an infostealer in October. Why GitHub CLI tokens are especially dangerous, why signatures didn't stop it, and the defenses I actually ran — gitleaks, hash pinning, and a .pth scanner.
@@ -111,7 +111,7 @@ There's one line in the official post-mortem: the pipeline **signed and publishe
 
 Meaning: this malicious release was built, signed and published through LiteLLM's own official release pipeline. If you were verifying "did this package come out of the official pipeline?", the answer was: yes.
 
-That's also why mechanisms like pnpm's `trustPolicy` and npm provenance — which I'll get into in the [next post](/blog/2026-11-04-github-actions-hardening) — **can't stop this kind of attack**: they check whether the way a package is published has changed, and this time it didn't change at all. The pipeline itself was hijacked.
+That's also why mechanisms like pnpm's `trustPolicy` and npm provenance — which I'll get into in the [next post](/blog/2026-11-03-github-actions-hardening) — **can't stop this kind of attack**: they check whether the way a package is published has changed, and this time it didn't change at all. The pipeline itself was hijacked.
 
 What would have stopped it is the most unglamorous thing: **don't install a version that was published two hours ago.** I'll implement that below.
 
@@ -403,7 +403,7 @@ As a developer making the move from Laravel to DevOps, here are the four things 
 3. **Pin the contents along with the version**: hashes, digests and a minimum release age, stacked together
 4. **Signatures and provenance prove "where it came from," not "that it's safe"**
 
-The [next post](/blog/2026-11-04-github-actions-hardening) spins up a brand-new Vite + React project, sets up CI the way I usually do, and then actually runs zizmor to see how many holes a "normal" CI has.
+The [next post](/blog/2026-11-03-github-actions-hardening) spins up a brand-new Vite + React project, sets up CI the way I usually do, and then actually runs zizmor to see how many holes a "normal" CI has.
 
 ## References
 

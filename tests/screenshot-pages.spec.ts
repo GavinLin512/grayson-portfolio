@@ -10,7 +10,7 @@ const pages = [
   { name: "projects", path: "/projects" },
   { name: "project-detail", path: "/projects/01-field" },
   { name: "blog", path: "/blog" },
-  { name: "blog-detail", path: "/blog/2026-11-03-litellm-unrevoked-key-supply-chain" },
+  { name: "blog-detail", path: "/blog/2026-11-02-litellm-unrevoked-key-supply-chain" },
   { name: "skills", path: "/skills" },
   { name: "journey", path: "/journey" },
   // Turnstile widget renders a non-deterministic iframe — mask it so Argos

@@ -1,6 +1,6 @@
 ---
 title: 一把沒撤銷的金鑰，如何讓 LiteLLM 被下毒
-date: 2026-11-03
+date: 2026-11-02
 tags: [security, devops, python]
 pinned: true
 description: 拆解 LiteLLM 1.107.0 供應鏈攻擊：從 5 月一次誤 commit，到 10 月被植入竊密程式的正式版本。為什麼 GitHub CLI token 特別危險、為什麼簽章擋不住，以及實際跑過的 gitleaks、hash 鎖版與 .pth 掃描防線。
@@ -111,7 +111,7 @@ GitHub CLI token 等於是「已經過了 2FA 的你」。攻擊者拿到它，�
 
 意思是：這個惡意版本是透過 LiteLLM 自己的正式 release pipeline 建置、簽章、發布的。如果你有在驗證「這個套件是不是從官方 pipeline 發出來的」，答案是：是。
 
-這也是為什麼我在[下一篇](/blog/2026-11-04-github-actions-hardening)會談到的 pnpm `trustPolicy`、npm provenance 這類機制，**擋不住這一種攻擊**：它們檢查的是「發布方式有沒有改變」，而這次發布方式完全沒變，只是 pipeline 本身被劫持了。
+這也是為什麼我在[下一篇](/blog/2026-11-03-github-actions-hardening)會談到的 pnpm `trustPolicy`、npm provenance 這類機制，**擋不住這一種攻擊**：它們檢查的是「發布方式有沒有改變」，而這次發布方式完全沒變，只是 pipeline 本身被劫持了。
 
 能擋住它的，反而是最樸素的東西：**不要裝剛發布兩小時的版本**。後面會實作。
 
@@ -403,7 +403,7 @@ if __name__ == "__main__":
 3. **鎖版要連內容一起鎖**：hash、digest、最小發布時間，三者疊加使用
 4. **簽章和 provenance 證明的是「從哪裡來」，不是「安全」**
 
-[下一篇](/blog/2026-11-04-github-actions-hardening)會開一個全新的 Vite + React 專案，照我平常的習慣把 CI 配好，再實際跑一次 zizmor，看看「正常」的 CI 有多少洞。
+[下一篇](/blog/2026-11-03-github-actions-hardening)會開一個全新的 Vite + React 專案，照我平常的習慣把 CI 配好，再實際跑一次 zizmor，看看「正常」的 CI 有多少洞。
 
 ## 參考資料
 

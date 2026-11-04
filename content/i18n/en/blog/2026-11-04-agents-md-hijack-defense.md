@@ -15,7 +15,7 @@ The answer: it doesn't, and it doesn't need to. If the file is in the working di
 
 On October 26, Dark Reading reported on an in-the-wild attack caught by Forever Security that exploits exactly that. It's **the first coding agent hijack caught on a real user's machine**, not a researcher's proof of concept. And what the attacker needed is unsettlingly small: one Markdown file named `AGENTS.md`.
 
-This is the third post in the series. The first two covered the [package supply chain](/blog/2026-11-03-litellm-unrevoked-key-supply-chain) and [CI hardening](/blog/2026-11-04-github-actions-hardening). This one is about a different kind of supply chain: **the text your AI assistant reads.**
+This is the third post in the series. The first two covered the [package supply chain](/blog/2026-11-02-litellm-unrevoked-key-supply-chain) and [CI hardening](/blog/2026-11-03-github-actions-hardening). This one is about a different kind of supply chain: **the text your AI assistant reads.**
 
 ## How the attack played out
 
@@ -281,7 +281,7 @@ On top of that, each language has unit tests written with its built-in test fram
 
 ## Scanning the demo project from the last post: two things turned up
 
-With the tool done, the first thing to do was obviously try it on a real project. I used `pulse-board` (Vite + React + TS), the project I spun up in the [last post](/blog/2026-11-04-github-actions-hardening). Following common practice, I'd added an `AGENTS.md` to spell out the project's house rules for the agent, plus a `.mcp.json` that hooks up Playwright's MCP server so the agent can open a browser and check the UI itself:
+With the tool done, the first thing to do was obviously try it on a real project. I used `pulse-board` (Vite + React + TS), the project I spun up in the [last post](/blog/2026-11-03-github-actions-hardening). Following common practice, I'd added an `AGENTS.md` to spell out the project's house rules for the agent, plus a `.mcp.json` that hooks up Playwright's MCP server so the agent can open a browser and check the UI itself:
 
 ```text
 INFO   config-file .mcp.json  agent config file

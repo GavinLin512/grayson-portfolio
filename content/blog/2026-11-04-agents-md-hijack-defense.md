@@ -15,7 +15,7 @@ description: 第一個在野外被抓到的 coding agent 劫持攻擊，只用�
 
 10 月 26 日，Dark Reading 報導了 Forever Security 抓到的一個野外攻擊，剛好就是利用這一點。這是**第一個在真實使用者電腦上抓到的 coding agent 劫持攻擊**，不是研究人員做的概念驗證。攻擊者需要的東西少到讓人不安：一個檔名叫 `AGENTS.md` 的 Markdown 檔。
 
-這是這個系列的第三篇。前兩篇談的是[套件供應鏈](/blog/2026-11-03-litellm-unrevoked-key-supply-chain)和 [CI 加固](/blog/2026-11-04-github-actions-hardening)。這篇談的是另一種供應鏈：**你的 AI 助手讀進去的文字**。
+這是這個系列的第五篇。[第 3 篇](/blog/2026-11-02-litellm-unrevoked-key-supply-chain)和[第 4 篇](/blog/2026-11-03-github-actions-hardening)談的是套件供應鏈和 CI 加固；[第 2 篇](/blog/2026-10-30-laravel-agent-skills)則是站在寫的那一方，示範怎麼替 agent 寫指令。這篇談的是另一種供應鏈：**你的 AI 助手讀進去的文字**。
 
 ## 攻擊是怎麼發生的
 
@@ -213,7 +213,7 @@ const walk = (dir: string) => {
 
 - **`\s` 的定義不一樣**：Go 的 `\s` 只有 ASCII 空白；Python 3 的 `str` pattern 和 JavaScript 的 `\s` 都包含 Unicode 空白。所以我全部改寫成明確的 `[ \t]`。
 - **忽略大小寫的旗標也不一樣**：Python `re.IGNORECASE`、Go `(?i)`、JS `/i` 對非 ASCII 字元的處理各有差異（例如 Kelvin 符號 U+212A，在某些實作的忽略大小寫比對中會等同於英文字母 `k`）。我的做法是**完全不用旗標**：比對前先把每一行的 **ASCII 字母**轉小寫，pattern 一律寫小寫。只轉 ASCII 還有一個好處：字串長度不變，比對到的位置可以直接套回原本那行。
-- **Go 用的是 RE2**：不支援 lookbehind 和 backreference。這反而是優點，RE2 保證線性時間，不會被惡意輸入搞出 ReDoS（第 2 篇 `semver` 修的就是 ReDoS），但 pattern 要寫成三邊都支援的子集。
+- **Go 用的是 RE2**：不支援 lookbehind 和 backreference。這反而是優點，RE2 保證線性時間，不會被惡意輸入搞出 ReDoS（第 4 篇提到的 `semver` 修補，修的就是 ReDoS），但 pattern 要寫成三邊都支援的子集。
 
 ```python
 # 只轉 ASCII 字母，長度不變，比對到的位置可以直接套回原字串
@@ -281,7 +281,7 @@ OK    fixtures/edge  (exit 1, 17 findings (4 high, 7 medium, 6 info) in 6 files)
 
 ## 掃上一篇的示範專案：抓到兩個東西
 
-工具寫好，第一件事當然是拿真的專案來試。我用的是[上一篇](/blog/2026-11-04-github-actions-hardening)開的 `pulse-board`（Vite + React + TS）。我在裡面照常見的做法放了一份 `AGENTS.md`，交代 agent 這個專案的規矩，再用 `.mcp.json` 接上 Playwright 的 MCP server，讓 agent 能自己開瀏覽器檢查畫面：
+工具寫好，第一件事當然是拿真的專案來試。我用的是[上一篇](/blog/2026-11-03-github-actions-hardening)開的 `pulse-board`（Vite + React + TS）。我在裡面照常見的做法放了一份 `AGENTS.md`，交代 agent 這個專案的規矩，再用 `.mcp.json` 接上 Playwright 的 MCP server，讓 agent 能自己開瀏覽器檢查畫面：
 
 ```text
 INFO   config-file .mcp.json  agent config file
@@ -437,7 +437,7 @@ FROM ${NODE_IMAGE}
 # 在這裡安裝 agent CLI，而且一定要鎖「確切版本」，例如：
 #   RUN npm install -g @openai/codex@<x.y.z>
 #   RUN npm install -g @anthropic-ai/claude-code@<x.y.z>
-# 不帶版本的 npm install -g，正是第 1、2 篇談的供應鏈風險。
+# 不帶版本的 npm install -g，正是第 3、4 篇談的供應鏈風險。
 
 # node image 內建 uid 1000 的 node 使用者，不用 root 跑 agent
 USER node
@@ -519,17 +519,19 @@ Squid Cache: Version 6.14
 - [ ] 高風險的工作（跑陌生的 repo、讓 agent 長時間自主執行），放進有出口白名單的容器
 - [ ] 一旦發現可疑的指令檔，**假設 agent 用到的登入 token 都已外洩**，全部輪替
 
-## 結語：三篇其實在講同一件事
+## 結語：五篇其實在講同一件事
 
-寫完這個系列，回頭看三篇文章：
+寫完這個系列，回頭看五篇文章：
 
+- **PHP2Shell**：你信任了 `composer update` 和掃描工具說「沒問題」，但真正在跑的 PHP 沒人驗證過
+- **Agent Skills**：你信任了一個第三方 skill，因為它看起來只是一份說明文件
 - **LiteLLM**：你信任了一個套件，因為它來自官方 pipeline
 - **CI 加固**：你信任了一個 tag，因為它叫 `v6`
 - **AGENTS.md**：你的 agent 信任了一個檔案，因為它在工作目錄裡
 
-三件事的本質都一樣：**信任是因為「位置」或「名字」，而不是因為「內容被驗證過」**。SHA、digest、hash、最小發布時間、出口白名單，都是在把「我覺得它是對的」換成「我能證明它是對的」，或者至少「就算它是錯的，傷害也有限」。
+五件事的本質都一樣：**信任是因為「位置」或「名字」，而不是因為「內容被驗證過」**。runtime 版本檢查、SHA、digest、hash、最小發布時間、出口白名單，都是在把「我覺得它是對的」換成「我能證明它是對的」，或者至少「就算它是錯的，傷害也有限」。
 
-身為一個從 Laravel 走向全端和 DevOps 的開發者，我覺得這是這三篇最值得帶走的一句話。
+身為一個從 Laravel 走向全端和 DevOps 的開發者，我覺得這是這個系列最值得帶走的一句話。
 
 ## 參考資料
 

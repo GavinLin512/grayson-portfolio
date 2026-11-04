@@ -1,13 +1,13 @@
 ---
 title: 開一個新專案，用 zizmor 把 CI 的洞一個個補起來
-date: 2026-11-04
+date: 2026-11-03
 tags: [security, devops, ci-cd]
 description: 把 LiteLLM 事件的教訓套到一個全新的 Vite + React + TypeScript 專案上：照平常習慣配好 CI，再用 zizmor 掃出問題，一個個修掉。SHA pin、最小權限、persist-credentials、template injection，還有 pnpm 的 minimumReleaseAge 與 trustPolicy 實測。
 ---
 
 ## 檢討完別人，換檢討自己的習慣
 
-[上一篇](/blog/2026-11-03-litellm-unrevoked-key-supply-chain)我拆了 LiteLLM 的攻擊鏈，寫得頭頭是道。寫完之後我心裡有點發毛：**我平常配的 CI，又安全到哪裡去**？
+[上一篇](/blog/2026-11-02-litellm-unrevoked-key-supply-chain)我拆了 LiteLLM 的攻擊鏈，寫得頭頭是道。寫完之後我心裡有點發毛：**我平常配的 CI，又安全到哪裡去**？
 
 所以這篇我做了一個實驗：開一個全新的 Vite + React + TypeScript 專案，叫 `pulse-board`（一個假的工程指標儀表板），然後**完全照我平常的習慣**把 CI 配好：
 
@@ -566,7 +566,7 @@ jobs:
 
 這裡有兩個值得一提的細節。
 
-**第一，連檢查工具本身都要鎖**。zizmor 從 PyPI 安裝，用的是[上一篇](/blog/2026-11-03-litellm-unrevoked-key-supply-chain)的 `--require-hashes`：
+**第一，連檢查工具本身都要鎖**。zizmor 從 PyPI 安裝，用的是[上一篇](/blog/2026-11-02-litellm-unrevoked-key-supply-chain)的 `--require-hashes`：
 
 ```text
 # .github/workflow-audit-requirements.txt
