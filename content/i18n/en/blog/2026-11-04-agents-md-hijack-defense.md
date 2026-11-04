@@ -7,7 +7,7 @@ description: The first coding agent hijack caught in the wild used nothing but a
 
 ## One Markdown file is all it takes to turn your agent
 
-Most of the code on this site, I wrote together with a coding agent. I open it in the terminal, it reads the project's `CLAUDE.md` and `AGENTS.md` to learn the house rules, and then it gets to work.
+These days I lean heavily on coding agents when I write code. I open one in the terminal, it first reads instruction files like `AGENTS.md` and `CLAUDE.md` to learn the project's house rules, and then it gets to work.
 
 There's one thing I never stopped to think about: **how does it know I'm the one who wrote those instruction files?**
 
@@ -64,7 +64,7 @@ What they found:
 
 The first category is the interesting one: a lot of hidden instructions are perfectly legitimate. Projects use hidden comments to talk to their own automation agents. But that raises a question: **how does an agent know who's authorized to give it orders?** An attacker only has to imitate the legitimate format.
 
-And my own repo turned out to have one of these. More on that later.
+You'll run into one of these later, when we scan the demo project.
 
 ## Threat model: everything the agent reads is untrusted input
 
@@ -162,7 +162,7 @@ The sentence hidden on line 18 got decoded.
 
 ## What I learned writing the same tool in three languages
 
-The full code lives in this site's repo under [`tools/agent-scan/`](https://github.com/GavinLin512/grayson-portfolio/tree/main/tools/agent-scan): 229 lines of Python, 215 of TypeScript and 359 of Go (after gofmt), all three with **zero third-party dependencies**. Here are a few of the spots where keeping the three versions "byte-for-byte identical" was hardest.
+The full code lives in [`tools/agent-scan/`](https://github.com/GavinLin512/grayson-portfolio/tree/main/tools/agent-scan): 229 lines of Python, 215 of TypeScript and 359 of Go (after gofmt), all three with **zero third-party dependencies**. Here are a few of the spots where keeping the three versions "byte-for-byte identical" was hardest.
 
 ### 1. Walking directories: three styles
 
@@ -279,40 +279,52 @@ OK    fixtures/edge  (exit 1, 17 findings (4 high, 7 medium, 6 info) in 6 files)
 
 On top of that, each language has unit tests written with its built-in test framework, none of which require installing anything: `python3 -m unittest`, `go test`, `node --test`.
 
-## Scanning my own repo: two things turned up
+## Scanning the demo project from the last post: two things turned up
 
-With the tool done, the first thing to do was obviously scan this site's repo:
+With the tool done, the first thing to do was obviously try it on a real project. I used `pulse-board` (Vite + React + TS), the project I spun up in the [last post](/blog/2026-11-04-github-actions-hardening). Following common practice, I'd added an `AGENTS.md` to spell out the project's house rules for the agent, plus a `.mcp.json` that hooks up Playwright's MCP server so the agent can open a browser and check the UI itself:
 
 ```text
-INFO   instruction-file .claude/AGENTS.md  agent instruction file (loaded as trusted context)
-MEDIUM hidden-html-comment .claude/AGENTS.md:1  hidden HTML comment: "code-review-graph MCP tools"
-INFO   instruction-file .claude/CLAUDE.md  agent instruction file (loaded as trusted context)
-INFO   config-file .claude/settings.json  agent config file
-INFO   config-file .claude/settings.local.json  agent config file
 INFO   config-file .mcp.json  agent config file
-MEDIUM mcp-unpinned-package .mcp.json:4  uvx runs "code-review-graph" without an exact version
+MEDIUM mcp-unpinned-package .mcp.json:4  npx runs "@playwright/mcp" without an exact version
+INFO   instruction-file AGENTS.md  agent instruction file (loaded as trusted context)
+MEDIUM hidden-html-comment AGENTS.md:3  hidden HTML comment: "以下規則由 docs/agent-guide.md 同步產生，要修改請改原始檔"
 
-7 findings (0 high, 2 medium, 5 info) in 5 files
+4 findings (0 high, 2 medium, 2 info) in 2 files
 ```
 
-**First: a hidden HTML comment.** It's a section marker the code-review-graph tool I installed left in `AGENTS.md`. Harmless, but it's a textbook case of Radware's first category: "hidden text for coordinating agents." I checked it and kept it. The point isn't "comments are bad"; it's that **you should know it's there and have read what it says**.
+**First: a hidden HTML comment.** It's a note I wrote myself, reminding humans that "these rules are synced from another document" (that's what the Chinese text says). Harmless, but it's a textbook case of Radware's first category: "hidden text used for coordination." And the agent reads it just the same. I checked it and kept it. The point isn't "comments are bad"; it's that **you should know it's there and have read what it says**. That step matters even more when you clone someone else's repo.
 
-**Second: an MCP server with no pinned version.** `.mcp.json` said `uvx code-review-graph serve`, which means every time the agent starts, uvx goes to PyPI and runs the latest release. That's exactly the risk from the previous two posts. The fix is simple:
+**Second: an MCP server with no pinned version.** `.mcp.json` said `npx -y @playwright/mcp`, which is also how plenty of tutorials write it. It means every time the agent starts, npx goes to npm and runs the **latest** release. That's exactly the risk from the previous two posts.
+
+The fix is to pin an exact version, with one small twist: the latest `@playwright/mcp`, 0.0.84, only came out on 10/31 — not yet past the 7 days I've set for myself. So I pinned the previous one:
+
+```bash
+npm view @playwright/mcp time --json
+# 0.0.83  2026-09-28
+# 0.0.84  2026-10-31   ← latest, but not 7 days old yet
+```
 
 ```json
-"args": [
-  "code-review-graph==2.3.9",
-  "serve"
-]
+"args": ["-y", "@playwright/mcp@0.0.83"]
 ```
 
-2.3.9 happens to be the current latest release, published back in September, so pinning it changes nothing about how it behaves today — it just can't be swapped out from under me later.
+Scan again, and the MCP finding is gone, leaving only the comment I've already reviewed:
+
+```text
+INFO   config-file .mcp.json  agent config file
+INFO   instruction-file AGENTS.md  agent instruction file (loaded as trusted context)
+MEDIUM hidden-html-comment AGENTS.md:3  hidden HTML comment: "以下規則由 docs/agent-guide.md 同步產生，要修改請改原始檔"
+
+3 findings (0 high, 1 medium, 2 info) in 2 files
+```
+
+Scanning this project with all three language versions still gives byte-for-byte identical output.
 
 ## A trap I almost walked into: the fixture is the attack
 
 While building this tool, two things made me realize that **when you build security tooling, the test data itself is hazardous material.**
 
-**First: poisoned fixtures can't be committed.** My repo is itself read by coding agents. If I put that "poisoned AGENTS.md" in the repo, anyone (me included) running an agent in this repo could have it read the file as soon as it wandered into that directory. So the fixtures are only written by a generator into a **temporary directory**, and the injected text inside the generator is stored as base64 rather than in plain text:
+**First: poisoned fixtures can't be committed.** The repo that holds this tool is itself read by coding agents. If I put that "poisoned AGENTS.md" in the repo, anyone (me included) running an agent in this repo could have it read the file as soon as it wandered into that directory. So the fixtures are only written by a generator into a **temporary directory**, and the injected text inside the generator is stored as base64 rather than in plain text:
 
 ```python
 # mimics the technique Forever Security described: hidden in an HTML comment, telling the agent to change settings / install things / not tell the user

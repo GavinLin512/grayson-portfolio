@@ -403,7 +403,7 @@ As a developer making the move from Laravel to DevOps, here are the four things 
 3. **Pin the contents along with the version**: hashes, digests and a minimum release age, stacked together
 4. **Signatures and provenance prove "where it came from," not "that it's safe"**
 
-The [next post](/blog/2026-11-04-github-actions-hardening) applies these principles to this site's own GitHub Actions — I'll actually run zizmor and see how many holes my own CI has.
+The [next post](/blog/2026-11-04-github-actions-hardening) spins up a brand-new Vite + React project, sets up CI the way I usually do, and then actually runs zizmor to see how many holes a "normal" CI has.
 
 ## References
 
