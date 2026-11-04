@@ -356,3 +356,10 @@ about、projects、journal、skills、journey、contact、guestbook 的內容下
 ### 中文粗體的渲染陷阱
 
 - CommonMark 的收尾 `**` 若前面是全形標點（。？！）、後面緊接文字，不會被當成粗體結尾，星號會原樣顯示。寫法：把句尾標點放到 `**` 外面（`**重點**。`）。
+
+### journal 系列文章依「新聞週次」排序
+
+- 文章來自每週的選題週報，依新聞發生的時間排序：10/21–10/28 週報的 PHP2Shell（10/29）、Agent Skills（10/30），接著 11/01 週報的 LiteLLM（11/02）、CI 加固（11/03）、AGENTS.md（11/04）。兩份週報都有 LiteLLM 題目，合併成同一篇。
+- 日期刻意錯開：blog 列表只用 `date` 排序，同日期的先後由資料庫的寫入順序決定，不穩定。
+- 文章日期早於實際撰寫日，所以文中避免寫「前一天」「11/1」這類會跟發文日期矛盾的絕對時間，改用相對描述。
+- 文章內以「第 N 篇」互相引用，調整順序時要一併更新（含 `tools/agent-scan/sandbox/agent/Dockerfile` 的註解與 Argos 的 `blog-detail` slug）。
