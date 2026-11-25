@@ -540,17 +540,19 @@ Being upfront about it:
 - [ ] Put high-risk work (running unfamiliar repos, letting an agent run autonomously for long stretches) in a container with an egress allowlist
 - [ ] The moment you find a suspicious instruction file, **assume every login token the agent used has leaked**, and rotate them all
 
-## Wrapping up: all three posts are about the same thing
+## Wrapping up: all five posts are about the same thing
 
-Now that the series is done, looking back at the three posts:
+Now that the series is done, looking back at the five posts:
 
+- **PHP2Shell**: you trusted `composer update` and a scanner saying "all clear," but nobody verified the PHP that was actually running
+- **Agent Skills**: you trusted a third-party skill because it looked like nothing more than documentation
 - **LiteLLM**: you trusted a package because it came from the official pipeline
 - **CI hardening**: you trusted a tag because it was called `v6`
 - **AGENTS.md**: your agent trusted a file because it was in the working directory
 
-All three come down to the same thing: **trust based on "where it is" or "what it's called," not on "its content has been verified."** SHAs, digests, hashes, minimum release ages and egress allowlists all swap "I think it's right" for "I can prove it's right" — or at least "even if it's wrong, the damage is limited."
+All five come down to the same thing: **trust based on "where it is" or "what it's called," not on "its content has been verified."** Runtime version checks, SHAs, digests, hashes, minimum release ages and egress allowlists all swap "I think it's right" for "I can prove it's right" — or at least "even if it's wrong, the damage is limited."
 
-As a developer moving from Laravel toward full stack and DevOps, I think that's the single most valuable takeaway from these three posts.
+As a developer moving from Laravel toward full stack and DevOps, I think that's the single most valuable takeaway from this series.
 
 ## References
 
