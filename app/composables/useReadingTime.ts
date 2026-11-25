@@ -25,8 +25,18 @@ function extractText(node: unknown): string {
   return ''
 }
 
+// 英文以空白分詞，每分鐘 200 字。中文、日文沒有空白，改算字數：成人默讀常見的估計是
+// 每分鐘 300–500 字（朗讀約 255 字），取 400。中文夾英文、程式碼的文章兩者分開算再相加。
+const WORDS_PER_MINUTE = 200
+const CJK_CHARS_PER_MINUTE = 400
+const CJK_CHAR = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu
+// 全形標點（，。「」：）與中文字一起換成空白，免得被當成英文單字；英文文章的算法因此完全不變
+const CJK_PUNCTUATION = /[\u3000-\u303F\uFF00-\uFFEF]/g
+
 export function useReadingTime(body: string | object): number {
   const text = typeof body === 'string' ? body : extractText(body)
-  const wordCount = text.trim().split(/\s+/).filter(Boolean).length
-  return Math.ceil(wordCount / 200)
+  const cjkCount = text.match(CJK_CHAR)?.length ?? 0
+  const words = text.replace(CJK_CHAR, ' ').replace(CJK_PUNCTUATION, ' ')
+  const wordCount = words.trim().split(/\s+/).filter(Boolean).length
+  return Math.ceil(wordCount / WORDS_PER_MINUTE + cjkCount / CJK_CHARS_PER_MINUTE)
 }
