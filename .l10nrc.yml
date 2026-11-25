@@ -1,0 +1,23 @@
+# l10n-review 的設定（https://github.com/GavinLin512/ai-platform）。
+# 由 .github/workflows/l10n-review.yml 在每個 PR 執行，只檢查 PR 新增的行。
+sourceLocale: zh-TW
+ignore:
+  - app/pages/playground.vue          # 元件展示頁，不是給訪客看的
+rules:
+  no-hardcoded-string:
+    # 品牌名稱與設計用的標籤：中英文版都維持英文
+    ignoreText:
+      - "Grayson's Portfolio."
+      - "grayson"
+      - "grayson / 2026"
+      - "EN"
+      - "github"
+      - "N° 2026 — 04"
+      - "grayson 26.10.26"
+      - "© 2026 — grayson · index 00"
+    ignorePattern: '^— \d+ / '         # 區塊標籤，例如「— 06 / about」
+  content-parity:                     # 中英文章的結構要一致
+    pairs:
+      - source: content/blog
+        translations:
+          en: content/i18n/en/blog
