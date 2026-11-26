@@ -52,12 +52,22 @@ A fenced code block with language `mermaid` SHALL be rendered as a Mermaid diagr
 
 ### Requirement: Reading time SHALL be estimated from word count
 
-The system SHALL compute reading time in minutes by dividing the post's word count by 200, rounded up to the nearest integer.
+The system SHALL compute reading time in minutes as the post's word count divided by 200 plus its Chinese and Japanese character count divided by 400, rounded up to the nearest integer. Words are separated by whitespace; Han, Hiragana and Katakana characters are counted one by one, and full-width punctuation is not counted as a word.
 
 #### Scenario: 6-minute post
 
 - **WHEN** a post body contains approximately 1100 words
 - **THEN** the displayed reading time is "6 min"
+
+#### Scenario: Chinese post
+
+- **WHEN** a post body contains 2000 Chinese characters and their full-width punctuation
+- **THEN** the displayed reading time is "5 min"
+
+#### Scenario: Chinese post with English words
+
+- **WHEN** a post body contains 1600 Chinese characters and 200 English words
+- **THEN** the displayed reading time is "5 min"
 
 ### Requirement: RSS feed SHALL be available at /rss.xml
 
