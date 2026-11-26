@@ -6,6 +6,7 @@
 |------|------|---------|
 | `.github/workflows/argos.yml` | 視覺回歸測試（Argos + Playwright） | push dev/main、或 PR 帶 `run-argos-ci` label（opt-in） |
 | `.github/workflows/bearer.yml` | 靜態安全掃描（Bearer CLI SAST） | push dev/main（完整掃描）、所有 PR（diff 掃描） |
+| `.github/workflows/l10n-review.yml` | 在地化檢查（l10n-review）：寫死的字串、中英文章結構、翻譯檔，設定在 `.l10nrc.yml` | 所有 PR（只看 PR 新增的行） |
 
 Bearer 掃描 PR 時使用 `diff: true` 只掃變更檔案；push 到 `dev`/`main` 時完整掃描。阻擋層級依 `bearer.yml` 的 `fail-on-severity`：`critical`、`high`、`medium`、`low`。
 

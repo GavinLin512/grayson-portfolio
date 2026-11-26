@@ -1,0 +1,29 @@
+name: l10n-review
+
+# 在地化檢查（GavinLin512/ai-platform 的 Action），設定在 .l10nrc.yml：
+# - .vue 裡寫死、還沒搬進翻譯檔的字串
+# - 中英文章的結構是否一致（章節、清單、程式碼、連結、front matter）
+# - 加入 @nuxtjs/i18n 之後：翻譯檔的 key、變數，以及 vue-i18n 無法編譯的訊息
+# 結果標在 PR 的 Files changed 對應的行上，job summary 列出全部。只讀程式碼，不發留言。
+on:
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0 # 要和 PR 的 base commit 比對
+          persist-credentials: false
+      - uses: GavinLin512/ai-platform@e2265c4f76e7354c1ac97d7fef15c4941b1c9359 # main (PR #9)
+        with:
+          fail-on: error # 寫死的字串是 warning，不會擋 PR；翻譯檔寫錯是 error
